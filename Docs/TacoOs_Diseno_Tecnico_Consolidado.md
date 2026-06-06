@@ -145,11 +145,11 @@ El dueño tiene una sección donde ve:
 │  Vence: 31 diciembre 2026       │
 │  Estado: ✅ Activo              │
 │                                 │
-│  Usado:                          │
+│  Usado:                         │
 │  Negocios: 1 de 2               │
 │  Cajeros: 2 de 5                │
 │                                 │
-│  [Mejorar plan]  [Historial]   │
+│  [Mejorar plan]  [Historial]    │
 └─────────────────────────────────┘
 ```
 
@@ -638,14 +638,14 @@ La estructura técnica (Spring Boot + PostgreSQL) permite:
 │            Taco'Os API                  │
 │         (Spring Boot)                   │
 ├─────────────────────────────────────────┤
-│  Middleware: Validación de Licencia      │
+│  Middleware: Validación de Licencia     │
 │  ─ Cada request lleva business_id       │
-│  ─ Verifica plan y límites antes de      │
+│  ─ Verifica plan y límites antes de     │
 │    ejecutar la acción                   │
 ├─────────────────────────────────────────┤
-│  business_id → License → ¿tiene permiso? │
+│ business_id → License → ¿tiene permiso? │
 ├─────────────────────────────────────────┤
-│  PostgreSQL: Todos los datos por         │
+│  PostgreSQL: Todos los datos por        │
 │  business_id (aislamiento lógico)       │
 └─────────────────────────────────────────┘
 ```

@@ -1,0 +1,56 @@
+title,description,status,assignee,labels,milestone
+"FASE I: Diseñar esquema PostgreSQL (entidades principales)",Crear tablas: Business, User, Transaction, Product, Cancellation. Relaciones e índices. Migrations.,To-do,Jesús Medina,backend,db,Fase I - MVP
+"FASE I: API Auth (JWT + Google Login)",Endpoint POST /auth/login con JWT de 24h. Validación con Google token. SecureStorage compatible.,To-do,Jesús Medina,backend,auth,Fase I - MVP
+"FASE I: API CRUD Negocios",Endpoints CRUD para Business con plan Free/Premium. Validación de licencias.,To-do,Jesús Medina,backend,Fase I - MVP
+"FASE I: API CRUD Productos",Endpoints CRUD para productos por negocio. Soporte para creación al vuelo.,To-do,Jesús Medina,backend,Fase I - MVP
+"FASE I: API CRUD Transacciones",Endpoints para registrar ventas, gastos y deudas. Tipo de pago (efectivo/tarjeta con foto baucher).,To-do,Jesús Medina,backend,Fase I - MVP
+"FASE I: API Sync Batch (POST /sync)",Endpoint que recibe batch de transacciones locales. Resolución de conflictos por timestamp + device_id.,To-do,Jesús Medina,backend,sync,Fase I - MVP
+"FASE I: API Reportes básicos",GET /business/{id}/reports con rango de fechas. Respuesta con total_sales, total_expenses, net_cash, top_products.,To-do,Jesús Medina,backend,reportes,Fase I - MVP
+"FASE I: UI Onboarding (Google Login + Rol)",Pantalla de login con Google. Selección de rol (Dueño/Cajero). Redirección a vista correspondiente.,To-do,Fanner,flutter,onboarding,Fase I - MVP
+"FASE I: UI 3 Botones principales",Dashboard con 3 botones: + Venta, - Gasto, ¿Cómo voy?. Diseño limpio y grande.,To-do,Fanner,flutter,ux,Fase I - MVP
+"FASE I: UI Flujo de Venta",Selección rápida de productos. Pop-up de cambio. Opción de cliente (opcional). Foto de baucher si pago tarjeta.,To-do,Fanner,flutter,venta,Fase I - MVP
+"FASE I: UI Registro de Gasto",Pantalla rápida para registrar salida de dinero. Monto, concepto, categoría.,To-do,Fanner,flutter,Fase I - MVP
+"FASE I: Offline-First SQLite/Room",Base de datos local con las mismas entidades. Operaciones en local con latencia cero.,To-do,Fanner,flutter,offline,Fase I - MVP
+"FASE I: Sincronización en segundo plano",Worker cada 5-10 min que envía datos pendientes al backend. Manejo de errores y reintentos.,To-do,Fanner,flutter,sync,Fase I - MVP
+"FASE I: UI Configuración Just-in-Time",Si no hay productos al vender, sugerir creación al vuelo. Sin menús iniciales.,To-do,Fanner,flutter,ux,Fase I - MVP
+"FASE I: UI Dashboard Flujo de Caja",Vista ¿Cómo voy? con total ventas, gastos, balance. Indicador verde/ámbar/rojo. Selector de rango de fechas.,To-do,Fanner,flutter,reportes,Fase I - MVP
+"FASE I: Validar esquema de datos para ML","Revisar que items_json, timestamps y estructura de transacciones permitan análisis futuro. Documentar formato.",To-do,Leandro,data-science,Fase I - MVP
+"FASE II: Integración WhatsApp Business API","Configurar API de WhatsApp Business. Plantillas de recibos aprobadas. Manejo de límites y costos.",To-do,Jesús Medina,backend,whatsapp,Fase II - Lealtad
+"FASE II: API Programa de Lealtad","CRUD de LoyaltyProgram por negocio. Umbral de compras, tipo de premio, producto asociado.",To-do,Jesús Medina,backend,lealtad,Fase II - Lealtad
+"FASE II: API Acumulación de Puntos","Lógica que incrementa purchases_toward_reward por cada venta con cliente registrado. Disparar premio al alcanzar umbral.",To-do,Jesús Medina,backend,lealtad,Fase II - Lealtad
+"FASE II: API Generación QR de Premio","Endpoint que genera QR único por reward. Validación de QR al canjear. Marcar como usado.",To-do,Jesús Medina,backend,qr,Fase II - Lealtad
+"FASE II: API Cancelación con Evidencia","Endpoint POST /transactions/{id}/cancel con foto (base64/URL), motivo, validación de 3 min.",To-do,Jesús Medina,backend,anti-fraude,Fase II - Lealtad
+"FASE II: Push Notifications","Integración Firebase Cloud Messaging. Push al dueño cuando hay cancelación.",To-do,Fanner,backend,push,Fase II - Lealtad
+"FASE II: Envío de Recibo WhatsApp","Integrar API WhatsApp para enviar recibo al cerrar venta con cliente. Mensaje con resumen y QR de premio si aplica.",To-do,Fanner,flutter,whatsapp,Fase II - Lealtad
+"FASE II: UI Campo Cliente en Venta","Campo opcional de teléfono en pantalla de venta. Si se ingresa, activar CRM + recibo + puntos.",To-do,Fanner,flutter,venta,Fase II - Lealtad
+"FASE II: UI Escáner QR para Canje","Pantalla que abre cámara, escanea QR de premio, valida y registra canje. Entrega del producto.",To-do,Fanner,flutter,qr,Fase II - Lealtad
+"FASE II: UI Flujo de Cancelación","Botón cancelar, selector de causa, captura de foto, confirmación. Validar ventana de 3 min.",To-do,Fanner,flutter,anti-fraude,Fase II - Lealtad
+"FASE II: Modelo Customer Behavior","Diseñar métricas: frecuencia de compra, ticket promedio, productos favoritos, hora más frecuente.",To-do,Leandro,data-science,lealtad,Fase II - Lealtad
+"FASE III: Endpoint Reportes Detallados","GET /reports con filtros por cajero, producto, hora del día. Comparativas semanales.",To-do,Jesús Medina,backend,reportes,Fase III - IA
+"FASE III: Endpoint Auditoría","GET /audit con bitácora de cancelaciones, reporte por cajero, alertas de no registro.",To-do,Jesús Medina,backend,auditoria,Fase III - IA
+"FASE III: Infraestructura Batch Processing","Configurar Spring Batch o scheduler nocturno. Pipeline de datos desde PostgreSQL hacia motor de IA.",To-do,Fanner,backend,batch,Fase III - IA
+"FASE III: Vista ¿Cómo voy? con Insights","Dashboard con indicadores de salud. Banner Premium al final (no intrusivo). Insights genéricos para Free.",To-do,Fanner,flutter,insights,Fase III - IA
+"FASE III: UI Reportes Detallados","Pantalla con filtros (cajero, producto, fecha). Gráficos simples. Botón compartir por WhatsApp.",To-do,Fanner,flutter,reportes,Fase III - IA
+"FASE III: Modelo de Predicción Flujo de Caja","ML que proyecta flujo a 7/30 días basado en histórico de ventas, gastos y deudas.",To-do,Leandro,data-science,ml,Fase III - IA
+"FASE III: Alerta Temprana de Quiebra","Algoritmo que detecta incapacidad de pago (proveedores/nómina). Dispara alerta contextual.",To-do,Leandro,data-science,ml,Fase III - IA
+"FASE III: Sistema de Insights Personalizados","Generador de insights diarios para Premium basado en datos del negocio. Clasificador de qué decir y cuándo.",To-do,Leandro,data-science,nlp,Fase III - IA
+"FASE III: Insights Genéricos de Comunidad","Estadísticas anónimas del sector: promedios, tendencias. 'Negocios como el tuyo aumentaron 15%'.",To-do,Leandro,data-science,Fase III - IA
+"FASE III: Segmentación de Clientes por Lealtad","Clusters de clientes: frecuentes, esporádicos, perdidos. Recomendaciones por segmento.",To-do,Leandro,data-science,ml,Fase III - IA
+"FASE IV: API Generación de Menú QR","Endpoint que genera menú digital desde productos registrados. QR único por mesa o negocio.",To-do,Jesús Medina,backend,qr,Fase IV - QR
+"FASE IV: API Gestión de Pedidos","WebSocket o polling para pedidos entrantes desde menú QR. Confirmación y registro como venta.",To-do,Jesús Medina,backend,pedidos,Fase IV - QR
+"FASE IV: API Control de Inventario","Descuento automático de stock al registrar venta. Alertas de stock bajo configurables.",To-do,Jesús Medina,backend,inventario,Fase IV - QR
+"FASE IV: Web Menú para Cliente","Página web liviana que muestra el menú al escanear QR. Sin login. Selección de productos y envío de pedido.",To-do,Fanner,flutter,web,Fase IV - QR
+"FASE IV: UI Cola de Pedidos (Cajero)","Pantalla que muestra pedidos entrantes en tiempo real. Confirmación y preparación.",To-do,Fanner,flutter,pedidos,Fase IV - QR
+"FASE IV: UI Alertas de Stock Bajo","Notificaciones al dueño cuando un producto alcanza el umbral mínimo.",To-do,Fanner,flutter,inventario,Fase IV - QR
+"FASE IV: Análisis de Pedidos QR","Correlación de pedidos por mesa, hora, día, producto. Identificar patrones de consumo.",To-do,Leandro,data-science,Fase IV - QR
+"FASE V: API CRUD de Insumos (Supply)",Endpoints para que el dueño configure lista de materias primas del negocio.,To-do,Jesús Medina,backend,insumos,Fase V - Materias Primas
+"FASE V: API Reporte Diario de Sobrantes","POST /stock-report. Cajero reporta cantidades sobrantes al cierre. Validación por negocio y fecha.",To-do,Jesús Medina,backend,stock,Fase V - Materias Primas
+"FASE V: API Sugerencia de Pedido","GET /purchase-suggestion que devuelve pedido recomendado. Cruza sobrantes + historial + eventos.",To-do,Jesús Medina,backend,ia,Fase V - Materias Primas
+"FASE V: API Eventos Externos","POST /events para marcar partidos, festivales, clima. Endpoint para consultar calendario.",To-do,Jesús Medina,backend,eventos,Fase V - Materias Primas
+"FASE V: UI Reporte de Sobrantes (Cajero)","Pantalla rápida al cierre del turno. Listas predefinidas de insumos, solo ingresar cantidades. < 2 min.",To-do,Fanner,flutter,stock,Fase V - Materias Primas
+"FASE V: UI Sugerencia de Pedido (Dueño)","Vista con la recomendación del día. Ajuste de cantidades. Botón confirmar. Exportar lista de compras.",To-do,Fanner,flutter,pedidos,Fase V - Materias Primas
+"FASE V: Modelo de Predicción de Demanda","ML que predice cantidad necesaria de cada insumo. Variables: ventas históricas, día semana, estacionalidad, eventos.",To-do,Leandro,data-science,ml,Fase V - Materias Primas
+"FASE V: Integración de Eventos Externos","APIs de clima, calendarios deportivos y festivos para México, Colombia, Argentina. Input manual como fallback.",To-do,Leandro,data-science,api,Fase V - Materias Primas
+"GENERAL: Configurar CI/CD Backend",GitHub Actions para Spring Boot. Tests automáticos. Deploy a servidor de pruebas.,To-do,Jesús Medina,devops,infra,GENERAL
+"GENERAL: Configurar CI/CD Flutter",GitHub Actions para Flutter. Build Android APK. Tests en emulador.,To-do,Fanner,devops,infra,GENERAL
+"GENERAL: Documentar API (Swagger/OpenAPI)",Documentación de todos los endpoints con Swagger. Accesible desde /swagger-ui.,To-do,Jesús Medina,backend,doc,GENERAL

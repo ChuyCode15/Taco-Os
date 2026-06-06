@@ -1,0 +1,17 @@
+title,description,status,assignee,labels
+[F1-Jesus] Diseñar esquema PostgreSQL (entidades principales),"Crear tablas: Business, User, Transaction, Product, Cancellation, Customer, Insight. Relaciones, índices, migrations.",To-do,Jesús Medina,backend,db
+[F1-Jesus] API Auth JWT + Google Login,"POST /auth/login con JWT 24h. Validación con Google token. SecureStorage. Renovación automática.",To-do,Jesús Medina,backend,auth
+[F1-Jesus] API CRUD Negocios,"Endpoints CRUD para Business. Plan Free/Premium. Límite de 1 negocio en Free.",To-do,Jesús Medina,backend
+[F1-Jesus] API CRUD Productos,"Endpoints CRUD productos por negocio. Soporte creación al vuelo. Sincronización con tabla local.",To-do,Jesús Medina,backend
+[F1-Jesus] API CRUD Transacciones,"Registrar ventas, gastos y deudas. Tipo de pago (efectivo/tarjeta con foto baucher). Items en JSON.",To-do,Jesús Medina,backend
+[F1-Jesus] API Sync Batch (POST /sync),"Recibe batch de transacciones locales. Resolución conflictos por timestamp + device_id. Logs inmutables.",To-do,Jesús Medina,backend,sync
+[F1-Jesus] API Reportes básicos,"GET /business/{id}/reports?start_date=&end_date=. Respuesta: total_sales, expenses, net_cash, top_products.",To-do,Jesús Medina,backend,reportes
+[F1-Fanner] UI Onboarding Google Login + Rol,"Pantalla login con Google. Selección Dueño/Cajero. Redirección a vista correspondiente. Sin fricción.",To-do,Fanner,flutter,onboarding
+[F1-Fanner] UI 3 Botones principales,"Dashboard: + Venta, - Gasto, ¿Cómo voy?. Botones grandes. Sin opciones extra. Diseño limpio.",To-do,Fanner,flutter,ux
+[F1-Fanner] UI Flujo de Venta,"Selección rápida de productos. Agregar al vuelo. Pop-up cambio. Cliente opcional. Foto baucher tarjeta.",To-do,Fanner,flutter,venta
+[F1-Fanner] UI Registro de Gasto,"Pantalla rápida: monto, concepto, categoría. Mínima fricción.",To-do,Fanner,flutter
+[F1-Fanner] UI Dashboard Flujo de Caja,"Vista ¿Cómo voy? con ventas, gastos, balance. Indicador verde/ámbar/rojo. Selector rango fechas.",To-do,Fanner,flutter,reportes
+[F1-Fanner] Offline-First SQLite/Room,"BD local con mismas entidades que backend. Operaciones en local con latencia cero.",To-do,Fanner,flutter,offline
+[F1-Fanner] Sincronización en segundo plano,"Worker cada 5-10 min. Envía datos pendientes. Reintentos. Indicador de estado de sync.",To-do,Fanner,flutter,sync
+[F1-Fanner] UI Configuración Just-in-Time,"Si no hay productos al vender, sugerir creación. Sin menús de configuración inicial.",To-do,Fanner,flutter,ux
+[F1-Leandro] Validar esquema de datos para ML,"Revisar items_json, timestamps, estructura transacciones. Documentar formato compatible con modelos futuros.",To-do,Leandro,data-science

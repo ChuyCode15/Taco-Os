@@ -1,0 +1,12 @@
+title,description,status,assignee,labels
+[F5-Jesus] API CRUD de Insumos (Supply),"Endpoints para configurar lista de materias primas del negocio. Nombre, unidad (kg, pieza, caja, l), umbral de stock bajo.",To-do,Jesús Medina,backend,insumos
+[F5-Jesus] API Reporte Diario de Sobrantes,"POST /stock-report. Cajero reporta cantidades sobrantes al cierre. Validación por negocio + fecha (solo 1 reporte por día).",To-do,Jesús Medina,backend,stock
+[F5-Jesus] API Sugerencia de Pedido,"GET /purchase-suggestion?date=. Cruza sobrantes actuales + historial ventas + día semana + eventos marcados. Devuelve lista con cantidades y razón.",To-do,Jesús Medina,backend,ia
+[F5-Jesus] API Eventos Externos,"POST /events para marcar partido, festival, clima. GET /events para consultar calendario. Asociar a negocio y fecha.",To-do,Jesús Medina,backend,eventos
+[F5-Jesus] API Confirmación de Pedido,"POST /purchase-suggestion/{id}/confirm. Guarda pedido final del dueño (con ajustes). Histórico de pedidos reales vs sugeridos.",To-do,Jesús Medina,backend
+[F5-Fanner] UI Reporte de Sobrantes (Cajero),"Pantalla al cierre del turno. Listas predefinidas de insumos. Solo ingresar cantidades numéricas. Tiempo meta: < 2 min.",To-do,Fanner,flutter,stock
+[F5-Fanner] UI Sugerencia de Pedido (Dueño),"Vista con recomendación del día. Explicación en texto natural. Ajuste de cantidades con slider/input. Confirmar o ignorar.",To-do,Fanner,flutter,pedidos
+[F5-Fanner] UI Lista de Compras Exportable,"Botón compartir: genera lista formateada para WhatsApp. El dueño la lleva al mercado.",To-do,Fanner,flutter
+[F5-Leandro] Modelo Predicción Demanda de Insumos,"ML que predice cantidad necesaria de cada insumo. Variables: ventas históricas, día semana, estacionalidad, eventos, clima.",To-do,Leandro,data-science,ml
+[F5-Leandro] Sistema de Eventos Externos,"Integrar APIs de clima, calendarios deportivos (MX/CO/AR), festivos. Input manual como fallback. Clasificador de impacto.",To-do,Leandro,data-science,api
+[F5-Leandro] Reglas de Recomendación con Explicación,"Sistema que genera texto natural: 'Compra 40% extra porque hay partido a 2 km'. Reglas progresivas de simple a complejo.",To-do,Leandro,data-science,nlp

@@ -2,31 +2,29 @@ package com.makingcode.taco_os.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
-@Table
 @Entity
-
+@Table(name = "products")
 @Data
-
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false)
-    String name;
+    private String name;
 
-    BigDecimal price;
+    private Double price;
 
-    UUID category_id;
+    private String category;
 
-    UUID business_id;
+    @Column(nullable = false)
+    private UUID businessId;
 
-    String is_synced;
+    private Boolean isSynced = false;
 
-
+    private Instant createdAt = Instant.now();
 }

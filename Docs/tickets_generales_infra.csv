@@ -1,7 +1,0 @@
-title,description,status,assignee,labels
-[GEN-Jesus] Configurar CI/CD Backend (Spring Boot),"GitHub Actions: build, tests automáticos, deploy a servidor de pruebas. Variables de entorno seguras.",To-do,Jesús Medina,devops,infra
-[GEN-Jesus] Documentar API con Swagger/OpenAPI,"Anotaciones Swagger en todos los endpoints. UI accesible desde /swagger-ui.html. Exportar JSON.",To-do,Jesús Medina,backend,doc
-[GEN-Jesus] Configurar Base de Datos en Producción,"PostgreSQL en servidor. Migrations con Flyway. Backups automáticos diarios. Política de restauración.",To-do,Jesús Medina,devops,db
-[GEN-Fanner] Configurar CI/CD Flutter,"GitHub Actions: build Android APK, tests en emulador, lint. Firma de release.",To-do,Fanner,devops,infra
-[GEN-Fanner] Configurar Firebase (Push + Analytics),""Firebase Cloud Messaging para push notifications. Firebase Analytics para métricas de uso. Crashlytics.",To-do,Fanner,backend,firebase
-[GEN-Fanner] Publicar en Play Store (Beta),""Preparar listing, gráficos, política de privacidad. Subir APK a Play Console. Test cerrado con 10 usuarios.",To-do,Fanner,devops,playstore

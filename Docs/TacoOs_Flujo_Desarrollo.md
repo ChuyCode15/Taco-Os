@@ -1,4 +1,4 @@
-# Flujo de Desarrollo — Proyecto Taco'Os
+# Flujo de Desarrollo — Proyecto Taco'Os (Fase I)
 
 > **Equipo:**
 > - **Jesus Medina** — Arquitecto / Backend (Spring Boot)
@@ -9,243 +9,207 @@
 
 ## Fase I — Control Operativo (MVP)
 
-**Objetivo:** El sistema debe permitir registrar ventas, gastos y deudas desde el dispositivo del cajero, con o sin internet, y sincronizar cuando haya conexión.
+**Objetivo:** El sistema debe permitir registrar ventas y gastos desde el dispositivo del cajero, con o sin internet, gestionar cortes de caja, y sincronizar datos cada 5 minutos. Sin CRM, sin WhatsApp, sin IA.
+
+---
 
 ### Criterios de Completitud (Definition of Done)
-- [ ] Cajero puede registrarse con Google y elegir rol.
-- [ ] Dueño puede crear un negocio y enlazar cajeros.
-- [ ] Al crear un negocio, se genera automáticamente una **licencia Free** con sus límites.
-- [ ] El backend valida límites de licencia al agregar cajeros (máx. 2 en Free).
-- [ ] El backend valida límites de licencia al crear negocios (máx. 1 en Free).
-- [ ] El dueño puede ver su licencia actual (plan, vencimiento, límites usados vs totales).
-- [ ] Cajero puede registrar una venta con productos (existentes o creados al vuelo).
-- [ ] Cajero puede registrar un gasto.
-- [ ] Cajero puede registrar una deuda.
-- [ ] La app funciona sin internet (SQLite local).
-- [ ] Los datos se sincronizan automáticamente al detectar red.
-- [ ] El dueño puede ver el flujo de caja en tiempo real.
-- [ ] El dueño puede ver un reporte de ingresos vs egresos por rango de fechas.
 
-### Validaciones de Licencia en Fase I
-- `POST /business`: Si el dueño ya tiene 1 negocio en Free, bloquea con: *"Alcanzaste el límite de negocios. Mejora a Premium para agregar más."*
-- `POST /auth/role` (cajero): Si el negocio ya tiene 2 cajeros en Free, bloquea con: *"Alcanzaste el límite de cajeros (máx. 2). Mejora a Premium."*
-- La licencia Free se crea automáticamente al crear el negocio.
-- No hay fecha de vencimiento para Free (es perpetuo).
+#### Onboarding y Roles
+- [ ] Usuario puede iniciar sesión con Google Sign-In.
+- [ ] Al ser primera vez, el backend crea el usuario automáticamente.
+- [ ] Usuario elige rol: Dueño o Cajero.
+- [ ] Si elige Cajero, la app bloquea la pantalla y abre la cámara QR automáticamente.
+- [ ] Cajero escanea QR de invitación del Patrón y queda enlazado al negocio.
+- [ ] Al enlazar, el backend valida que no se exceda el límite de cajeros del plan.
 
-### Asignación de Tareas
+#### Dashboard Patrón (3+1+1+🔔)
+- [ ] Dashboard con 3 botones principales: Ventas, Reportes, Equipo.
+- [ ] **Ventas**: Toggle a Modo Cajero para cobrar directamente.
+- [ ] **Reportes**: 3 subsecciones (Cajas Abiertas, Cortes, Estadísticas).
+- [ ] **Equipo**: Lista de cajeros, generar QR, desvincular con seguridad.
+- [ ] **⚙️**: Acceso a Productos, Sucursales, Mi Plan.
+- [ ] **☰**: Perfil, Dark Mode, Ayuda.
+- [ ] **🔔**: Campanita con contador de notificaciones no leídas.
 
-| Tarea | Responsable | Descripción |
-|-------|-------------|-------------|
-| **Backend — API** | Jesus | Endpoints REST: auth (JWT), CRUD negocios, CRUD productos, CRUD transacciones, sincronización batch (`POST /sync`), reportes (`GET /reports`). Base de datos PostgreSQL con esquema de Entidades Principales. **Sistema de licencias: tabla License, middleware de validación por plan, endpoints `GET /license`, `GET /plans`.** Seguridad: JWT 24h, logs inmutables. |
-| **Backend — Sincronización** | Fanner + Jesus | Lógica de sincronización diferida. Job Scheduler, resolución de conflictos, validación de integridad (device_id, timestamp). |
-| **Frontend — Flutter** | Fanner | UI de los 3 botones: "+ Venta", "- Gasto", "¿Cómo voy?". Pantalla de venta con selección de productos, Pop-up de cambio. Dashboard de flujo de caja. SQLite/Room local. Onboarding con Google Login y selección de rol. Configuración Just-in-Time. **Dashboard de licencia: plan actual, vencimiento, límites, botón de mejora.** |
-| **Data Science** | Leandro | Definir estructura de datos para transacciones (items_json) que permita análisis futuro. Validar que el esquema local y el de la nube sean compatibles para ML. |
+#### Apertura de Caja (Modo Cajero)
+- [ ] Botón "Abrir Caja" con campo para fondo de cambio.
+- [ ] Al confirmar, se crea una sesión de caja local y remota.
 
-### Endpoints Clave
+#### Catálogo de Productos
+- [ ] 3 categorías fijas: Comida, Bebidas, Postres.
+- [ ] Al seleccionar una categoría, se muestra la lista de productos.
+- [ ] Popup con nombre del producto, caja de cantidad y teclado numérico de 9 dígitos.
+- [ ] Producto se agrega a la lista de venta actual y se suma al total.
+
+#### Productos al Vuelo
+- [ ] Si una categoría está vacía, botón "Registrar Producto".
+- [ ] Popup: nombre, precio, categoría, foto opcional.
+- [ ] Solo disponible si el Cajero tiene permiso del Patrón (campo permissions en User).
+
+#### Pago
+- [ ] Botón "Cobrar" → dos opciones: Efectivo o Tarjeta.
+- [ ] **Efectivo**: Cajero ingresa monto recibido, app calcula cambio. Se registra venta.
+- [ ] **Tarjeta**: Se abre cámara para foto del baucher. Se registra venta (no afecta efectivo).
+
+#### Footer del Cajero
+- [ ] 3 botones fijos: [Ventas] [Gastos] [¿Cómo voy?].
+- [ ] **Ventas**: Registra una nueva venta (acción principal).
+- [ ] **Gastos**: Popup con cantidad, detalle, ¿para qué?, ¿quién?.
+- [ ] **¿Cómo voy?**: Vista previa al corte con totales del turno.
+
+#### Corte Manual
+- [ ] Confirmación antes de generar corte.
+- [ ] Resumen automático: ventas, efectivo, tarjeta, gastos, fondo.
+- [ ] Cajero ingresa conteo manual del efectivo físico.
+- [ ] Sistema calcula diferencia (sobrante/faltante) y genera registro.
+- [ ] Ticket digital imprimible/compartible.
+- [ ] Al finalizar, vuelve a pantalla de "Abrir Caja".
+- [ ] Corte no cierra sesión del usuario.
+
+#### Auto-cierre
+- [ ] Hora de cierre configurable al registrar el negocio (opcional).
+- [ ] Si hay caja abierta a hora config + 180 min → cierre automático.
+- [ ] Se genera reporte de auto-cierre y 🔔 al Patrón.
+
+#### Cancelación (Anti-Fraude)
+- [ ] Ventana de 5 minutos para cancelar desde el timestamp de la venta.
+- [ ] Selección de causa obligatoria.
+- [ ] Foto del producto devuelto obligatoria.
+- [ ] Notificación 🔔 inmediata al Patrón.
+- [ ] Log inmutable: la venta original no se borra, solo cambia status.
+
+#### Autenticación y Sesión
+- [ ] JWT con sesión larga (todo el turno).
+- [ ] Si app en segundo plano > 12 horas → requiere re-login.
+- [ ] SecureStorage en Flutter.
+- [ ] Cerrar sesión manual desde ☰.
+
+#### Offline-First y Sincronización
+- [ ] App funciona 100% sin internet (SQLite local como base maestra).
+- [ ] Todas las transacciones, sesiones, productos y cortes se guardan localmente primero.
+- [ ] Worker en segundo plano sincroniza cada 5 minutos.
+- [ ] Resolución de conflictos: gana timestamp más reciente.
+- [ ] Logs inmutables en el backend.
+
+#### Licencias
+- [ ] Free: 1 negocio, 2 cajeros, sin IA.
+- [ ] Premium: 2 negocios, 5 cajeros, sin IA (trial 14 días disponible).
+- [ ] Business: 5 negocios, 25 empleados, IA completa (trial 14 días disponible).
+- [ ] Validación de límites al generar QR de invitación y al crear negocio.
+- [ ] Dashboard de licencia con plan actual, límites usados vs totales.
+- [ ] Si expira trial, baja automáticamente a Free sin pérdida de datos.
+
+#### Reportes del Patrón
+- [ ] **Cajas Abiertas**: Lista de cajas activas con resumen (transacciones, ventas, gastos).
+- [ ] **Lista de Cortes**: Historial con filtros por sucursal, cajero, fecha.
+- [ ] **Estadísticas**: Comparativa mejor semana vs semana activa.
+
+---
+
+### Asignación de Tareas por Sección
+
+| Sec | Tarea | Responsable | Descripción |
+|-----|-------|-------------|-------------|
+| **8** | Auth Google + JWT | Jesús | Endpoint `POST /auth/login`, `PUT /auth/role`. JWT con sesión larga, expira 12hr en 2do plano. SecureStorage. |
+| **12** | QR Invitación + Enlace | Jesús + Fanner | `POST /invitation` (generar QR), `POST /link-cashier` (enlazar). Validar límites de licencia. Flutter: abrir cámara al seleccionar cajero. |
+| **12.3** | CRUD Cajeros | Jesús | `GET /business/{id}/cashiers`, `DELETE /business/{id}/cashiers/{id}` con confirmación. |
+| **5.2** | CRUD Productos | Jesús + Fanner | `GET/POST/PUT/DELETE /products`. Categorías fijas: comida, bebidas, postres. |
+| **5.1** | Apertura de Caja | Jesús + Fanner | `POST /cashier/open-session`. Flutter: popup con fondo de cambio. |
+| **5.5 - 5.6** | Transacciones | Jesús + Fanner | `POST /transactions` con payment method (cash/card). Flutter: flujo de cobro + cámara para baucher. |
+| **5.7** | Footer Cajero | Fanner | 3 botones fijos en UI. Popup de gastos. Vista previa "¿Cómo voy?". |
+| **6** | Corte Manual | Jesús + Fanner | `POST /cashier/close-session`. Flutter: confirmación → resumen → conteo → ticket. |
+| **6.2** | Auto-cierre | Jesús | Job schedulado que verifica cajas abiertas vs hora config + 180 min. Genera 🔔. |
+| **7** | Cancelación | Jesús + Fanner | `POST /transactions/{id}/cancel`. Validar 5 min. Flutter: selección de causa + cámara. 🔔 al Patrón. |
+| **10** | Sync Batch | Fanner + Jesús | Worker cada 5 min. `POST /sync`. Resolución de conflictos. |
+| **4.2** | Reportes | Jesús | `GET /reports/open-sessions`, `GET /reports/cuts` (con filtros), `GET /reports/stats`. |
+| **4.6** | Notificaciones | Jesús | `GET /notifications`, `DELETE /notifications/{id}`. Tipos: cancelación, diferencia, auto-cierre. |
+| **3.3** | Licencias | Jesús | `GET /plans`, `GET /license`, `POST /upgrade`, `POST /trial`. Middleware de validación. |
+| **9** | Modelo de Datos | Jesús + Leandro | Definir esquemas SQLite y PostgreSQL. Entidades: Business, User, Session, Transaction, Product, Cut, Notification, License. |
+| **4** | UI Dashboard Patrón | Fanner | Layout 3+1+1+🔔. Componentes: botones, engrane, hamburger, campanita. |
+| **5** | UI Modo Cajero | Fanner | Pantalla de cobro, catálogo, teclado numérico, footer. |
+| **11** | Permisos Cajero | Jesús + Fanner | Campo `permissions` en User (JSON). Validar al crear/editar/eliminar productos. Toggle en UI de registro. |
+
+---
+
+### Endpoints Clave por Sección
+
 ```
-POST /api/v1/auth/login
-POST /api/v1/business (crea negocio + licencia Free automática)
-POST /api/v1/business/{id}/products
-POST /api/v1/transactions
-POST /api/v1/sync
-GET  /api/v1/business/{id}/reports?start_date=&end_date=
-GET  /api/v1/business/{id}/license (plan, vencimiento, límites)
-GET  /api/v1/plans (planes disponibles)
+Sec 8:  POST   /api/v1/auth/login
+Sec 8:  PUT    /api/v1/auth/role
+
+Sec 12: POST   /api/v1/business/{id}/cashiers/invitation
+Sec 12: POST   /api/v1/business/link-cashier
+Sec 12: GET    /api/v1/business/{id}/cashiers
+Sec 12: DELETE /api/v1/business/{id}/cashiers/{id}
+
+Sec 5.1: POST  /api/v1/cashier/open-session
+
+Sec 5.2: GET   /api/v1/business/{id}/products?category=
+Sec 5.2: POST  /api/v1/business/{id}/products
+Sec 5.2: PUT   /api/v1/business/{id}/products/{id}
+Sec 5.2: DELETE /api/v1/business/{id}/products/{id}
+
+Sec 5.5: POST  /api/v1/transactions (venta efectivo)
+Sec 5.6: POST  /api/v1/transactions (venta tarjeta)
+Sec 5.7: POST  /api/v1/transactions (gasto)
+
+Sec 6:   POST  /api/v1/cashier/close-session
+
+Sec 7:   POST  /api/v1/transactions/{id}/cancel
+
+Sec 10:  POST  /api/v1/sync
+
+Sec 4.2: GET   /api/v1/business/{id}/reports/open-sessions
+Sec 4.2: GET   /api/v1/business/{id}/reports/cuts?branch=&cashier_id=&dates=
+Sec 4.2: GET   /api/v1/business/{id}/reports/stats
+
+Sec 4.6: GET   /api/v1/business/{id}/notifications
+Sec 4.6: DELETE /api/v1/business/{id}/notifications/{id}
+
+Sec 3.3: GET   /api/v1/plans
+Sec 3.3: GET   /api/v1/business/{id}/license
+Sec 3.3: POST  /api/v1/business/{id}/license/upgrade
+Sec 3.3: POST  /api/v1/business/{id}/license/trial
 ```
 
 ---
 
-## Fase II — Lealtad, Anti-Fraude y CRM WhatsApp
+### Resumen de Responsabilidades
 
-**Objetivo:** El sistema debe eliminar el fraude del cajero mediante presión social (cliente exige recibo para acumular puntos), fidelizar clientes con recompensas, y capturar datos de consumo.
-
-### Criterios de Completitud
-- [ ] Cliente puede registrarse con su número de teléfono al pagar.
-- [ ] Al cerrar venta con cliente registrado, se envía recibo por WhatsApp.
-- [ ] El recibo incluye el mensaje de recompensa acumulada y QR si aplica.
-- [ ] El sistema acumula compras por cliente y dispara premio al alcanzar el umbral.
-- [ ] El premio se canjea mediante código QR escaneable desde la app del cajero.
-- [ ] El dueño puede configurar el programa de lealtad (umbral, premio).
-- [ ] Cancelación con foto de evidencia + push al dueño (ventana de 3 min).
-- [ ] Si el cliente no está registrado, la venta se registra con folio genérico (modo inicial).
-
-### Asignación de Tareas
-
-| Tarea | Responsable | Descripción |
-|-------|-------------|-------------|
-| **WhatsApp API** | Jesus | Integración con API de WhatsApp Business para envío de recibos. Plantillas de mensajes aprobadas. Gestión de límites y costos. |
-| **Backend — Lealtad** | Jesus | CRUD de programa de lealtad, acumulación de puntos, generación de QR para premios, validación de canje. Entidades: LoyaltyProgram, CustomerPoints, RewardRedemption. |
-| **Backend — Anti-Fraude** | Fanner | Lógica de cancelación con ventana de 3 min, almacenamiento de fotos (base64/URL), push notifications al dueño. |
-| **Frontend — Flutter** | Fanner | Pantalla de venta con campo opcional de cliente. Vista de recibo WhatsApp. Escáner de QR para canje de premios. Flujo de cancelación con captura de foto. |
-| **Data Science** | Leandro | Diseñar el modelo de datos de customer behavior. Definir qué métricas de lealtad capturar para análisis futuro (frecuencia, ticket promedio, productos favoritos). |
-
-### Ejemplo de Recibo WhatsApp
-```
-Taquería Bonita
-25 Tacos · 2 Cocas = $355
-¡Gracias por cenar con nosotros!
-🎉 Tienes 1 taco gratis en tu próxima visita
-→ Código QR adjunto
-```
-
-### Endpoints Clave
-```
-POST /api/v1/business/{id}/loyalty-program
-POST /api/v1/customers
-POST /api/v1/transactions (con customer_phone opcional)
-GET  /api/v1/rewards/{customer_id}/current
-POST /api/v1/rewards/{id}/redeem (escanea QR)
-POST /api/v1/transactions/{id}/cancel
-```
+| Área | Jesus (Backend) | Fanner (Flutter + Backend) | Leandro (Data Science) |
+|------|----------------|---------------------------|----------------------|
+| Auth + Sesión | Endpoints JWT, Google Sign-In | SecureStorage, manejo de sesión | — |
+| Onboarding QR | Invitación, enlace, validación licencia | Cámara QR, UI onboarding | — |
+| Catálogo | CRUD productos, categorías fijas | Lista, popup, teclado numérico | Validar esquema items_json |
+| Transacciones | Endpoint universal, validación 5 min | Flujo cobro, cámara baucher | — |
+| Corte | Apertura/cierre sesión, auto-cierre | UI corte, conteo, ticket | — |
+| Sync | Batch endpoint, resolución conflictos | Worker 5 min, SQLite local | Compatibilidad esquemas |
+| Reportes | Cajas abiertas, cortes, estadísticas | UI reportes, filtros, gráficas | — |
+| Notificaciones | CRUD, tipos, push | Campanita 🔔, historial | — |
+| Licencias | Planes, trial, middleware validación | UI dashboard licencia, upsell | — |
+| Permisos | Campo permissions, validación backend | Toggle permisos en registro cajero | — |
 
 ---
 
-## Fase III — Inteligencia Artificial y Reportes Avanzados
+### Notas Técnicas para el Equipo
 
-**Objetivo:** El sistema debe analizar los datos consolidados para generar insights personalizados, proyecciones de flujo, alertas de quiebra, y estrategias de negocio.
+**Jesus — Backend (Spring Boot):**
+- Prioridad: esquema PostgreSQL, endpoints de sincronización y corte.
+- JWT con sesión larga (turno). 12hr en segundo plano → expira.
+- Middleware de licencia: `validateLicense(business_id, action)` verifica plan y límites antes de ejecutar.
+- Logs inmutables: no DELETE, solo status = cancelled o status = deleted (soft delete).
+- Auto-cierre: job schedulado que verifica `business.closing_time + 180 min` contra `session.opened_at`.
 
-### Criterios de Completitud
-- [ ] El motor de IA procesa datos en batch (no en tiempo real).
-- [ ] Free: 1 insight genérico de comunidad por semana.
-- [ ] Premium: Insights personalizados diarios.
-- [ ] Premium: Proyecciones de flujo de caja a 7/30 días.
-- [ ] Premium: Alerta temprana de riesgo de quiebra.
-- [ ] Premium: Análisis de lealtad (clientes frecuentes, pérdida).
-- [ ] Premium: Recomendación de estrategia de compras.
-- [ ] El banner de upgrade aparece en "¿Cómo voy?" con lenguaje aspiracional.
-- [ ] Reportes detallados: por cajero, por producto, por hora, comparativas semanales.
-- [ ] **Sistema de upgrades funcional:** El dueño puede ver planes, elegir Premium, pagar, y recibir la licencia actualizada al instante.
-- [ ] **Vencimiento automático:** Si un Premium vence, el sistema lo baja a Free sin perder datos.
-- [ ] **Dashboard de licencia:** El dueño ve su plan, días restantes (si aplica), límites usados vs totales.
+**Fanner — Flutter:**
+- App 100% offline. SQLite es la base maestra local.
+- Sincronización worker cada 5 min.
+- Teclado numérico de 9 dígitos como widget reutilizable.
+- Cámara QR se abre automáticamente al seleccionar rol Cajero.
+- Footer de 3 botones fijo en la parte inferior del Modo Cajero.
 
-### Asignación de Tareas
-
-| Tarea | Responsable | Descripción |
-|-------|-------------|-------------|
-| **Backend — Reportes** | Jesus | Endpoints de reportes detallados (`GET /reports` con filtros por cajero, producto, hora). Endpoint de auditoría (`GET /audit`). Alertas de "No registro" (comparativa vs promedio histórico). |
-| **Backend — Licencias y Pagos** | Jesus | CRUD de planes (`GET /plans`). Upgrade de licencia (`POST /license/upgrade`). Vencimiento automático (batch nocturno que baja a Free). Integración con pasarela de pago (Stripe). Webhook para confirmar pagos. |
-| **Backend — Batch Processing** | Fanner | Infraestructura de batch jobs (Spring Batch o similar). Programación de ejecución diaria/nocturna. Pipeline de datos desde PostgreSQL hacia el motor de IA. |
-| **Data Science — Modelos** | Leandro | Modelo de predicción de flujo de caja. Algoritmo de alerta temprana de quiebra (basado en capacidad de pago vs ingresos). Clasificador de insights (qué decir y cuándo). Sistema de recomendación de estrategia de compras. Segmentación de clientes por lealtad. |
-| **Data Science — Insights Genéricos** | Leandro | Generar insights de comunidad: promedios del sector, tendencias, comparativas anónimas. "Negocios como el tuyo aumentaron sus ventas 15% este mes usando..." |
-| **Frontend — Flutter** | Fanner | Vista de "¿Cómo voy?" con indicadores de salud (verde/ámbar/rojo). Banner de upgrade no intrusivo al final de la pantalla. Reportes detallados con gráficos simples. **Dashboard de licencia: plan, vencimiento, barras de uso (cajeros usados/total). Botón de mejora que redirige a planes.** |
-
-### Endpoints Clave
-```
-GET  /api/v1/business/{id}/insights (diario o semanal según plan)
-GET  /api/v1/business/{id}/cashflow-projection
-GET  /api/v1/business/{id}/audit
-GET  /api/v1/business/{id}/reports?filter=cashier&value=123
-POST /api/v1/business/{id}/alerts/config
-```
-
----
-
-## Fase IV — Digitalización QR (Menú Interactivo)
-
-**Objetivo:** Digitalizar la experiencia del comensal con menú QR en mesa y gestión de inventario en tiempo real.
-
-### Criterios de Completitud
-- [ ] El dueño puede generar un menú digital desde los productos registrados.
-- [ ] Se genera un código QR único por mesa o por negocio.
-- [ ] El cliente escanea el QR y ve el menú en su celular.
-- [ ] El cliente puede hacer su pedido desde el menú QR.
-- [ ] El pedido llega a la pantalla del cajero.
-- [ ] El cajero confirma el pedido y se registra como venta.
-- [ ] El inventario de productos se descuenta en tiempo real.
-- [ ] El dueño recibe alerta de stock bajo.
-
-### Asignación de Tareas
-
-| Tarea | Responsable | Descripción |
-|-------|-------------|-------------|
-| **Backend — Menú QR** | Jesus | Endpoints para generar y servir menú digital. Asociación QR → negocio/mesa. Gestión de pedidos entrantes. |
-| **Backend — Inventario** | Jesus + Fanner | Lógica de descuento de inventario al registrar venta. Alertas de stock bajo (push al dueño). Umbrales configurables. |
-| **Frontend — Flutter** | Fanner | Interfaz del cajero para ver pedidos entrantes (cola de órdenes). Pantalla de confirmación de pedido. Alertas de stock. |
-| **Frontend — Web/Móvil Cliente** | Fanner | Página web liviana o vista embebida del menú que ve el cliente al escanear el QR. Selección de productos y envío de pedido. Sin necesidad de login para el cliente. |
-| **Data Science** | Leandro | Análisis de datos de pedidos: productos más pedidos por mesa, hora, día. Correlación con clima/eventos. |
-
----
-
-## Fase V — Control de Materias Primas (Abasto Inteligente)
-
-**Objetivo:** El sistema debe ayudar al dueño a saber exactamente qué comprar en el mercado cada mañana, reduciendo merma y evitando faltantes.
-
-### Criterios de Completitud
-- [ ] El dueño configura la lista de insumos del negocio una vez.
-- [ ] Al cierre del día, el cajero reporta los sobrantes en menos de 2 minutos.
-- [ ] El sistema guarda el historial de sobrantes por día.
-- [ ] La IA genera una sugerencia de pedido basada en: sobrantes + historial de ventas + día de la semana.
-- [ ] La IA considera eventos externos (partidos, festivos, temporada) si el dueño los marca.
-- [ ] La sugerencia llega al dueño como notificación o al abrir la app.
-- [ ] El dueño puede ajustar cantidades y confirmar.
-- [ ] El sistema puede exportar la lista de compras.
-
-### Asignación de Tareas
-
-| Tarea | Responsable | Descripción |
-|-------|-------------|-------------|
-| **Backend — Stock Reports** | Jesus | CRUD de insumos (Supply). Endpoint para reporte diario de sobrantes (`POST /stock-report`). Endpoint para sugerencia de pedido (`GET /purchase-suggestion`). Histórico de consumos. |
-| **Frontend — Flutter** | Fanner | Pantalla de reporte rápido de sobrantes al cierre del turno (listas predefinidas, entrada numérica). Vista para el dueño con la sugerencia de pedido y opción de ajuste. |
-| **Data Science — Predicción** | Leandro | Modelo de predicción de demanda de insumos. Variables: ventas históricas del producto, día de la semana, estacionalidad, eventos externos (input del dueño o scraping de calendarios). Algoritmo que recomienda cantidades con mensaje explicativo ("Compra 40% extra porque..."). |
-| **Data Science — Eventos** | Leandro | Sistema de marcado de eventos (partido, festival, lluvia). El dueño puede marcar eventos manualmente al inicio. A futuro: integrar APIs de clima y calendarios deportivos/festivos. |
-
-### Ejemplo de Flujo
-```
-🌙 Cierre (Cajero):
-"Reporta sobrantes → 2 cajas Coca, 20 kg carne, 1 kg cebolla"
-
-🤖 IA procesa:
-"Partido de fútbol a 2 km mañana. Probabilidad 75% de aumento."
-
-☀️ Mañana (Dueño abre app):
-"📋 Sugerencia de pedido: 40% extra de carne y refrescos.
-   Si no se vende hoy, tienes para mañana.
-   ¿Confirmar? [Sí] [Ajustar]"
-```
-
-### Endpoints Clave
-```
-GET  /api/v1/business/{id}/supplies
-POST /api/v1/business/{id}/stock-report
-GET  /api/v1/business/{id}/purchase-suggestion?date=YYYY-MM-DD
-POST /api/v1/business/{id}/purchase-suggestion/{id}/confirm
-POST /api/v1/business/{id}/events (marcar partido, festival, etc.)
-```
-
----
-
-## Resumen de Responsabilidades por Fase
-
-| Fase | Jesus Medina (Backend) | Fanner (Flutter + Backend) | Leandro (Data Science) |
-|------|----------------------|---------------------------|----------------------|
-| **I — Control Operativo** | API REST, Auth JWT, PostgreSQL, Sync, Reportes básicos, **Sistema de licencias (tabla License, middleware, validaciones por plan)** | UI 3 botones, Offline-first SQLite, Onboarding, Flujo de venta, **Dashboard de licencia (plan, límites usados)** | Validar esquema de datos para ML futuro |
-| **II — Lealtad y Anti-Fraude** | WhatsApp API, Lealtad CRUD, QR rewards, Push notifications | Campo cliente en venta, Recibo WhatsApp, Escáner QR, Cancelación con foto | Modelo customer behavior, métricas de lealtad |
-| **III — IA y Reportes** | Reportes detallados, Auditoría, Alertas "No registro", **API de Planes (GET /plans), Upgrade de licencia (POST /upgrade), Vencimiento automático** | Infraestructura Batch, Vista "¿Cómo voy?", Banner upgrade, **Dashboard de licencia con upgrade** | Modelos: proyección flujo, alerta quiebra, insights, segmentación |
-| **IV — QR Digital** | Menú QR API, Gestión de pedidos, Inventario | Cola de pedidos, UI menú cliente (web), Alertas stock bajo | Análisis de pedidos por mesa/hora/día |
-| **V — Materias Primas** | CRUD insumos, Stock report endpoint, Purchase suggestion API | UI reporte sobrantes, Vista sugerencia pedido, Ajuste de cantidades | Predicción demanda insumos, Sistema de eventos externos |
-
----
-
-## Notas Técnicas para el Equipo
-
-### Jesus — Backend (Spring Boot)
-- Prioridad: definir esquema PostgreSQL y endpoints de sincronización primero.
-- JWT con 24h de expiración, almacenado en SecureStorage del lado Flutter.
-- Todos los logs de transacciones son inmutables (no DELETE, solo status = cancelled).
-- La foto del baucher (pago tarjeta) se almacena como referencia, no hay integración bancaria.
-- **Arquitectura de tenants:** Toda consulta lleva `business_id`. Middleware de licencia valida límites antes de cada operación que los afecte.
-- **Middleware de licencia:** `validateLicense(business_id, action)` → verifica plan, vencimiento, y conteo actual vs límite antes de ejecutar. Si excede, responde con error `license_limit_reached`.
-
-### Fanner — Flutter + Backend
-- La app debe funcionar 100% offline. SQLite/Room es la base de datos maestra local.
-- Sincronización en segundo plano cada 5-10 min o al detectar red.
-- Los 3 botones deben ser el centro de la UX. No agregar opciones innecesarias.
-- El QR de premio se genera como imagen desde el backend y se envía incrustado en el mensaje WhatsApp.
-- **Dashboard de licencia:** El dueño debe poder ver su plan actual, cuántos cajeros lleva usados vs su límite, y si tiene fecha de vencimiento. Cuando esté cerca de vencer (< 15 días), mostrar alerta amarilla. Cuando venza, mostrar alerta roja.
-
-### Leandro — Data Science
-- Los modelos de IA son batch, no en tiempo real. Se ejecutan diariamente (procesamiento nocturno).
-- Datos mínimos para entrenar: 30 días de transacciones consistentes.
-- Los insights genéricos de comunidad se generan con datos agregados de todos los negocios (anonimizados).
-- La predicción de materias primas arranca con reglas simples (promedio histórico + día semana) y evoluciona a ML.
-- **Datos de licencia:** El plan del negocio (free/premium) es una variable para los modelos. Los insights premium solo se generan si `plan = premium`.
+**Leandro — Data Science:**
+- Los modelos de IA son batch y comienzan después de Fase I.
+- Definir estructura de `items_json` que permita análisis futuro.
+- Los datos de licencia y permisos deben ser compatibles con ML futuro.
+- Validar que el esquema local (SQLite) y el de la nube (PostgreSQL) sean compatibles.

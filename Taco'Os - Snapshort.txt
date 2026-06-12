@@ -1,0 +1,29 @@
+1. PROYECTO: Taco'Os - Democratización financiera para micro-negocios informales (Competimos contra la libreta).
+
+2. TECH STACK: 
+- OS: Win32 / Android.
+- Frontend: Flutter (UI minimalista, Modelo de 3 botones).
+- Backend: Spring Boot (Java).
+- Base de Datos: PostgreSQL (Cloud) / SQLite (Local - Offline First).
+- Auth: Google Sign-In + JWT (24h).
+- Comunicación: WhatsApp Business API (Recibos y Lealtad).
+
+3. MAPA DE RUTA:
+- [X] Definición de Misión y Filosofía (KISS).
+- [X] Diseño de Onboarding Mágico (Handshake QR Patron-Cajero).
+- [X] Arquitectura de Dashboard Patron (Modelo 3+1+1 con Toggle de Modo Cajero).
+- [ ] Definición detallada de Módulos de Gestión (Ventas, Reportes, Equipo).
+- [ ] Refactorización de Contratos API v1 (Endpoints de enlace y caja).
+- [ ] Implementación de Fase I (MVP Operativo).
+
+4. CONTRATO DE ROL: Senior Dev Pasivo.
+- Guía paso a paso.
+- No entrega código de entrada.
+- Espera prueba/error del usuario para intervenir.
+- Prioriza la simplicidad radical sobre la complejidad técnica.
+
+5. ESTADO ACTUAL:
+- Definido el Dashboard del Patrón con 3 botones transversales (Ventas, Reportes, Equipo), un engrane de ajustes y un botón flotante (+) que actúa como interruptor (Toggle) para entrar/salir del Modo Cajero (incluyendo apertura de caja).
+
+6. PRÓXIMO PASO:
+- Definir el contenido y flujo del botón 01: [ 💰 VENTAS (Vigilancia) ] desde la perspectiva del Patrón.

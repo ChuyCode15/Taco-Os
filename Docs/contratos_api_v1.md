@@ -1,4 +1,4 @@
-# Contratos API — Taco'Os v1
+# Contratos API — Taco'Os v1 (Fase I)
 
 **Filosofía:** Competimos contra la libreta, no contra sistemas contables.  
 Cada JSON debe ser entendible por un cajero, no por un contador.
@@ -11,9 +11,281 @@ Cada JSON debe ser entendible por un cajero, no por un contador.
 
 ---
 
-## 1. Login
+## 5.1 Apertura de Caja
 
-Intercambia el token de Google por un JWT del sistema.
+Inicia una sesión de caja con un fondo de cambio.
+
+### `POST /api/v1/cashier/open-session`
+
+**Request:**
+```json
+{
+  "business_id": "550e8400-e29b-41d4-a716-446655440001",
+  "cashier_id": "550e8400-e29b-41d4-a716-446655440002",
+  "device_id": "dispositivo-caja-01",
+  "opening_balance": 500.00
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440030",
+  "status": "open",
+  "opened_at": "2026-06-05T18:00:00Z",
+  "opening_balance": 500.00,
+  "is_synced": false
+}
+```
+
+> `opening_balance` es el dinero que se deja en caja para dar cambio.  
+> La sesión queda abierta hasta que se haga un corte manual o auto-cierre.
+
+---
+
+## 5.2 Productos
+
+Catálogo de productos con categorías fijas: `comida`, `bebidas`, `postres`.
+
+### `GET /api/v1/business/{id}/products?category=comida`
+
+**Response:**
+```json
+[
+  {
+    "id": "uuid",
+    "name": "Taco al Pastor",
+    "price": 25.00,
+    "category": "comida",
+    "photo_url": null
+  },
+  {
+    "id": "uuid",
+    "name": "Coca-Cola 600ml",
+    "price": 18.00,
+    "category": "bebidas"
+  }
+]
+```
+
+### `POST /api/v1/business/{id}/products`
+
+**Request:**
+```json
+{
+  "name": "Taco de Suadero",
+  "price": 28.00,
+  "category": "comida",
+  "photo_url": "https://storage.tacoos.com/producto-001.jpg"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": "uuid",
+  "name": "Taco de Suadero",
+  "price": 28.00,
+  "category": "comida"
+}
+```
+
+### `PUT /api/v1/business/{id}/products/{id}`
+
+**Request:**
+```json
+{
+  "name": "Taco de Suadero (nuevo precio)",
+  "price": 30.00,
+  "category": "comida"
+}
+```
+
+### `DELETE /api/v1/business/{id}/products/{id}`
+
+**Response:**
+```json
+{
+  "status": "deleted"
+}
+```
+
+> Las categorías son fijas en Fase I: `comida`, `bebidas`, `postres`.  
+> El endpoint de creación al vuelo usa el mismo `POST /products`.
+
+---
+
+## 5.5 Transacciones — Venta en Efectivo
+
+### `POST /api/v1/transactions`
+
+**Request — Venta en efectivo:**
+```json
+{
+  "business_id": "uuid",
+  "session_id": "uuid",
+  "type": "sale",
+  "cashier_id": "uuid",
+  "device_id": "dispositivo-caja-01",
+  "items": [
+    { "product_id": "uuid", "name": "Taco al Pastor", "qty": 3, "unit_price": 25.00 },
+    { "product_id": "uuid", "name": "Coca-Cola", "qty": 2, "unit_price": 18.00 }
+  ],
+  "payment": {
+    "method": "cash",
+    "amount_received": 200.00,
+    "change": 89.00
+  },
+  "total": 111.00,
+  "timestamp": "2026-06-05T20:15:00Z",
+  "is_synced": false
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": "uuid",
+  "status": "completed",
+  "timestamp": "2026-06-05T20:15:00Z"
+}
+```
+
+---
+
+## 5.6 Transacciones — Venta con Tarjeta
+
+### `POST /api/v1/transactions`
+
+**Request — Venta con tarjeta:**
+```json
+{
+  "business_id": "uuid",
+  "session_id": "uuid",
+  "type": "sale",
+  "cashier_id": "uuid",
+  "device_id": "dispositivo-caja-01",
+  "items": [
+    { "product_id": "uuid", "name": "Tacos al Pastor", "qty": 5, "unit_price": 25.00 }
+  ],
+  "payment": {
+    "method": "card",
+    "amount_received": 125.00,
+    "change": 0,
+    "card_photo_url": "https://storage.tacoos.com/baucher-001.jpg"
+  },
+  "total": 125.00,
+  "timestamp": "2026-06-05T20:30:00Z",
+  "is_synced": false
+}
+```
+
+> La foto del baucher se toma desde la cámara de la app, se sube a storage y se guarda la URL.
+> El pago con tarjeta no afecta el efectivo en caja.
+
+---
+
+## 5.7 Transacciones — Gasto
+
+### `POST /api/v1/transactions`
+
+**Request — Gasto:**
+```json
+{
+  "business_id": "uuid",
+  "session_id": "uuid",
+  "type": "expense",
+  "cashier_id": "uuid",
+  "device_id": "dispositivo-caja-01",
+  "items": [
+    { "name": "Servilletas", "qty": 1, "unit_price": 50.00 }
+  ],
+  "total": 50.00,
+  "description": "Compra de servilletas para el turno",
+  "timestamp": "2026-06-05T19:00:00Z",
+  "is_synced": false
+}
+```
+
+> Los gastos son registros de salidas provisionales del turno.
+
+---
+
+## 6 Corte de Caja
+
+Cierra la sesión de caja y genera un corte con conteo manual.
+
+### `POST /api/v1/cashier/close-session`
+
+**Request:**
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440030",
+  "cashier_id": "uuid",
+  "device_id": "dispositivo-caja-01",
+  "actual_cash": 3500.00,
+  "notes": "Corte normal, sin novedades"
+}
+```
+
+**Response:**
+```json
+{
+  "cut_id": "uuid",
+  "session_id": "uuid",
+  "opened_at": "2026-06-05T18:00:00Z",
+  "closed_at": "2026-06-05T23:00:00Z",
+  "summary": {
+    "total_sales": 7000.00,
+    "total_expenses": 1500.00,
+    "cash_sales": 4500.00,
+    "card_sales": 2500.00,
+    "opening_balance": 500.00,
+    "expected_cash": 3500.00,
+    "actual_cash": 3500.00,
+    "difference": 0.00
+  },
+  "status": "ok",
+  "ticket_url": "https://storage.tacoos.com/cuts/cut-001.pdf"
+}
+```
+
+> `actual_cash` es lo que el cajero cuenta físicamente en la caja.
+> `difference` = `actual_cash - expected_cash`. Si es positiva → sobrante, negativa → faltante.
+> `status` puede ser: `ok`, `over` (sobrante), `short` (faltante), `auto-closed`.
+
+---
+
+## 7 Cancelación
+
+### `POST /api/v1/transactions/{id}/cancel`
+
+**Request:**
+```json
+{
+  "reason": "cliente_se_arrepintio",
+  "photo": "data:image/jpeg;base64,/9j/4AAQ...",
+  "cashier_id": "uuid"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "cancelled",
+  "original_total": 111.00,
+  "cancelled_at": "2026-06-05T20:17:30Z",
+  "owner_notified": true
+}
+```
+
+> **Ventana de cancelación: 5 minutos** desde el timestamp de la venta.
+> Motivos posibles: `cliente_se_arrepintio`, `producto_equivocado`, `error_cajero`, `otro`.
+> La foto es **obligatoria**. El dueño recibe una notificación 🔔 al instante.
+
+---
+
+## 8 Autenticación y Sesión
 
 ### `POST /api/v1/auth/login`
 
@@ -29,7 +301,7 @@ Intercambia el token de Google por un JWT del sistema.
 {
   "jwt": "eyJhbGciOiJIUzI1...",
   "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "id": "uuid",
     "name": "Juan Ramos",
     "email": "juan@email.com",
     "role": null,
@@ -38,14 +310,9 @@ Intercambia el token de Google por un JWT del sistema.
 }
 ```
 
-> Si es primera vez que el usuario inicia sesión, se crea automáticamente.  
-> El campo `role` viene `null` porque aún no lo ha elegido.
-
----
-
-## 2. Asignar Rol
-
-Después del login, el usuario elige si es Dueño o Cajero.
+> Si es primera vez, se crea automáticamente.  
+> `role` viene `null` porque aún no lo ha elegido.  
+> JWT con sesión larga (turno). Si la app pasa a segundo plano > 12hrs, requiere re-login.
 
 ### `PUT /api/v1/auth/role`
 
@@ -67,220 +334,113 @@ Después del login, el usuario elige si es Dueño o Cajero.
 **Request — Cajero:**
 ```json
 {
-  "role": "cashier",
-  "business_code": "TACO-AB12"  
+  "role": "cashier"
 }
 ```
 
-**Response — Cajero:**
-```json
-{
-  "redirect_to": "pantalla_venta",
-  "business_id": "550e8400-e29b-41d4-a716-446655440001"
-}
-```
-
-> El `business_code` lo obtiene el cajero del código QR del negocio.  
-> No hay formularios ni configuraciones. Elige y ya está dentro.
+> Al seleccionar "cashier", la app abre la cámara para escanear QR.
+> El enlace se completa mediante `POST /business/link-cashier`.
 
 ---
 
-## 3. Crear Negocio
+## 12 Onboarding QR
 
-El dueño crea su negocio. Solo datos esenciales.
+### 12.1 Generar Invitación (Patrón)
 
-### `POST /api/v1/business`
+### `POST /api/v1/business/{id}/cashiers/invitation`
+
+**Request:** Vacío (se valida el JWT del dueño).
+
+**Response (201 Created):**
+```json
+{
+  "invitation_token": "INV-550e8400-e29b-a716-999999",
+  "expires_at": "2026-06-09T20:45:00Z",
+  "qr_payload": "tacoos://link?token=INV-550e8400-e29b-a716-999999"
+}
+```
+
+> El backend valida que no se exceda `max_cashiers` del plan antes de generar el token.
+> El token expira en 15 minutos por seguridad.
+
+### 12.2 Enlazar Cajero (Cajero escanea QR)
+
+### `POST /api/v1/business/link-cashier`
 
 **Request:**
 ```json
 {
-  "name": "Taquería Bonita",
-  "plan": "free",
-  "base_cash": 500.00,
-  "currency": "MXN"
+  "invitation_token": "INV-550e8400-e29b-a716-999999",
+  "name": "Pedro Páramo",
+  "email": "pedro@email.com",
+  "phone": "+525598765432",
+  "device_id": "android-device-9988"
 }
 ```
 
-**Response:**
+**Response (200 OK):**
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440001",
-  "name": "Taquería Bonita",
-  "plan": "free",
-  "base_cash": 500.00,
-  "currency": "MXN",
-  "cashiers_count": 0,
-  "max_cashiers": 2,
-  "max_businesses": 1,
-  "created_at": "2026-06-05T10:00:00Z"
+  "status": "linked",
+  "business": {
+    "id": "uuid",
+    "name": "Taquería Bonita",
+    "currency": "MXN",
+    "base_cash": 500.00
+  },
+  "owner": {
+    "name": "Juan Ramos",
+    "phone": "+525512345678"
+  }
 }
 ```
 
-> `base_cash` es el dinero que se deja siempre en caja para dar cambio.  
-> `max_cashiers` y `max_businesses` dependen del plan.
+### 12.3 Lista de Cajeros
 
----
-
-## 4. Productos
-
-Listar y crear productos del negocio.
-
-### `GET /api/v1/business/{id}/products`
+### `GET /api/v1/business/{id}/cashiers`
 
 **Response:**
 ```json
 [
   {
-    "id": "550e8400-e29b-41d4-a716-446655440010",
-    "name": "Taco al Pastor",
-    "price": 25.00,
-    "category": "Tacos"
-  },
-  {
-    "id": "550e8400-e29b-41d4-a716-446655440011",
-    "name": "Coca-Cola",
-    "price": 18.00,
-    "category": "Bebidas"
+    "id": "uuid",
+    "name": "Pedro Páramo",
+    "email": "pedro@email.com",
+    "phone": "+525598765432",
+    "permissions": {
+      "products": { "create": true, "edit": false, "delete": false }
+    },
+    "has_open_session": true,
+    "linked_at": "2026-06-05T18:00:00Z"
   }
 ]
 ```
 
-### `POST /api/v1/business/{id}/products`
+### 12.4 Desvincular Cajero
+
+### `DELETE /api/v1/business/{id}/cashiers/{cashier_id}`
 
 **Request:**
 ```json
 {
-  "name": "Taco de Suadero",
-  "price": 28.00,
-  "category": "Tacos"
+  "reason": "despido",
+  "confirmed": true
 }
 ```
 
 **Response:**
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440012",
-  "name": "Taco de Suadero",
-  "price": 28.00,
-  "category": "Tacos"
+  "status": "unlinked",
+  "message": "Cajero desvinculado exitosamente."
 }
 ```
 
-> Este endpoint también se usa para la **creación al vuelo**:  
-> el cajero escribe "Taco de Suadero, $28" y la app lo crea ahí mismo.
+> La desvinculación requiere confirmación con motivo para evitar accidentes.
 
 ---
 
-## 5. Registrar Transacción
-
-**El endpoint más importante del sistema.**  
-Con uno solo manejamos ventas, gastos y deudas.  
-Todo cabe aquí, nada de endpoints separados.
-
-### `POST /api/v1/transactions`
-
-**Ejemplo — Venta en efectivo:**
-```json
-{
-  "business_id": "550e8400-e29b-41d4-a716-446655440001",
-  "type": "sale",
-  "cashier_id": "550e8400-e29b-41d4-a716-446655440002",
-  "device_id": "dispositivo-caja-01",
-  "customer_phone": "525512345678",
-  "items": [
-    { "product_id": "uuid-1", "name": "Taco al Pastor", "qty": 3, "unit_price": 25.00 },
-    { "product_id": "uuid-2", "name": "Coca-Cola", "qty": 2, "unit_price": 18.00 }
-  ],
-  "payment": {
-    "method": "cash",
-    "amount_received": 200.00,
-    "change": 89.00
-  },
-  "total": 111.00,
-  "ticket_folio": "V-00042",
-  "timestamp": "2026-06-05T20:15:00Z",
-  "is_synced": false
-}
-```
-
-**Ejemplo — Venta con tarjeta (solo foto del baucher):**
-```json
-{
-  "business_id": "uuid",
-  "type": "sale",
-  "cashier_id": "uuid",
-  "device_id": "dispositivo-caja-01",
-  "items": [
-    { "product_id": "uuid", "name": "Tacos al Pastor", "qty": 5, "unit_price": 25.00 }
-  ],
-  "payment": {
-    "method": "card",
-    "amount_received": 125.00,
-    "change": 0,
-    "card_photo_url": "https://storage.tacoos.com/baucher-001.jpg"
-  },
-  "total": 125.00,
-  "ticket_folio": "V-00043",
-  "timestamp": "2026-06-05T20:30:00Z",
-  "is_synced": false
-}
-```
-
-**Ejemplo — Gasto:**
-```json
-{
-  "business_id": "uuid",
-  "type": "expense",
-  "cashier_id": "uuid",
-  "device_id": "dispositivo-caja-01",
-  "items": [
-    { "name": "Compra de carne en mercado", "qty": 1, "unit_price": 850.00 }
-  ],
-  "total": 850.00,
-  "category": "insumos",
-  "timestamp": "2026-06-05T07:00:00Z",
-  "is_synced": false
-}
-```
-
-**Ejemplo — Deuda:**
-```json
-{
-  "business_id": "uuid",
-  "type": "debt",
-  "cashier_id": "uuid",
-  "items": [
-    { "name": "Proveedor de pasteles", "qty": 1, "unit_price": 10000.00 }
-  ],
-  "total": 10000.00,
-  "due_date": "2026-06-30",
-  "creditor": "Pastelería La Mejor",
-  "timestamp": "2026-06-05T10:00:00Z",
-  "is_synced": false
-}
-```
-
-**Response (para todos los casos):**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440020",
-  "ticket_folio": "V-00042",
-  "status": "completed",
-  "timestamp": "2026-06-05T20:15:00Z"
-}
-```
-
-> **Notas técnicas:**
-> - `customer_phone` es **opcional**. Si está vacío, es venta sin cliente (sin recibo, sin puntos).
-> - `items` siempre es un array. Para gastos simples, un solo item con `qty: 1`.
-> - `is_synced: false` cuando se crea offline. El backend lo cambia a `true` al recibirlo en `/sync`.
-> - La foto del baucher se toma desde la cámara de la app, se sube a storage y se guarda la URL.
-
----
-
-## 6. Sincronización Batch
-
-El dispositivo envía todo lo que tiene pendiente.
+## 10 Sincronización Batch
 
 ### `POST /api/v1/sync`
 
@@ -288,7 +448,7 @@ El dispositivo envía todo lo que tiene pendiente.
 ```json
 {
   "device_id": "dispositivo-caja-01",
-  "business_id": "550e8400-e29b-41d4-a716-446655440001",
+  "business_id": "uuid",
   "transactions": [
     {
       "local_id": "uuid-local-01",
@@ -296,8 +456,15 @@ El dispositivo envía todo lo que tiene pendiente.
       "items": [],
       "total": 111.00,
       "payment": { "method": "cash" },
-      "customer_phone": "525512345678",
       "timestamp": "2026-06-05T20:15:00Z"
+    }
+  ],
+  "sessions": [
+    {
+      "local_id": "uuid-local-s01",
+      "opened_at": "2026-06-05T18:00:00Z",
+      "opening_balance": 500.00,
+      "status": "open"
     }
   ],
   "products": [
@@ -305,8 +472,16 @@ El dispositivo envía todo lo que tiene pendiente.
       "local_id": "uuid-local-p01",
       "name": "Taco de Suadero",
       "price": 28.00,
-      "category": "Tacos",
+      "category": "comida",
       "created_at": "2026-06-05T19:00:00Z"
+    }
+  ],
+  "cuts": [
+    {
+      "local_id": "uuid-local-c01",
+      "closed_at": "2026-06-05T23:00:00Z",
+      "total_sales": 7000.00,
+      "actual_cash": 3500.00
     }
   ]
 }
@@ -322,80 +497,113 @@ El dispositivo envía todo lo que tiene pendiente.
 }
 ```
 
-> **Regla de conflictos:** Si dos dispositivos enviaron la misma transacción, gana la de timestamp más reciente.  
+> **Regla de conflictos:** Si dos dispositivos enviaron la misma transacción, gana la de timestamp más reciente.
 > **Logs inmutables:** Nunca se borra nada. Las cancelaciones solo cambian el status.
 
 ---
 
-## 7. Reporte Simple
+## 4.2 Reportes
 
-Ingresos vs egresos en un rango de fechas. Nada de Excel.
+### `GET /api/v1/business/{id}/reports/open-sessions`
 
-### `GET /api/v1/business/{id}/reports?start_date=2026-06-01&end_date=2026-06-05`
+Lista de cajas abiertas con resumen.
+
+**Response:**
+```json
+[
+  {
+    "session_id": "uuid",
+    "cashier_name": "Pedro Páramo",
+    "branch": "Taquería Bonita",
+    "opened_at": "2026-06-05T18:00:00Z",
+    "summary": {
+      "transaction_count": 28,
+      "total_sales": 6500.00,
+      "total_expenses": 1200.00
+    }
+  }
+]
+```
+
+### `GET /api/v1/business/{id}/reports/cuts?branch=&cashier_id=&start_date=2026-06-01&end_date=2026-06-05`
+
+**Response:**
+```json
+[
+  {
+    "cut_id": "uuid",
+    "cashier_name": "Pedro Páramo",
+    "branch": "Taquería Bonita",
+    "opened_at": "2026-06-05T18:00:00Z",
+    "closed_at": "2026-06-05T23:00:00Z",
+    "total_sales": 7000.00,
+    "total_expenses": 1500.00,
+    "difference": 0.00,
+    "status": "ok"
+  }
+]
+```
+
+### `GET /api/v1/business/{id}/reports/stats`
+
+Comparativa de semanas.
 
 **Response:**
 ```json
 {
-  "period": "2026-06-01 to 2026-06-05",
-  "cash_balance": {
-    "total_sales": 15450.00,
-    "total_expenses": 3200.00,
-    "total_debts": 10000.00,
-    "net_cash": 12250.00,
-    "cash_in_register": 4500.00,
-    "base_cash": 500.00,
-    "withdrawable": 4000.00
+  "current_week": {
+    "total_sales": 45000.00,
+    "total_expenses": 8500.00,
+    "transaction_count": 320,
+    "avg_ticket": 140.63
   },
-  "sales_count": 84,
-  "top_products": [
-    { "name": "Tacos al Pastor", "quantity": 120, "revenue": 3000.00 },
-    { "name": "Coca-Cola", "quantity": 45, "revenue": 810.00 }
-  ],
-  "payment_methods": {
-    "cash": 12000.00,
-    "card": 3450.00
+  "best_week": {
+    "week_of": "2026-05-25",
+    "total_sales": 52000.00,
+    "total_expenses": 9200.00,
+    "transaction_count": 380,
+    "avg_ticket": 136.84
+  },
+  "comparison": {
+    "sales_vs_best": -13.46,
+    "transactions_vs_best": -15.79
   }
 }
 ```
 
-> `withdrawable` es lo que el dueño puede sacar de caja:  
-> `cash_in_register - base_cash` (siempre se deja cambio).
-
 ---
 
-## 8. Licencia del Negocio
+## 4.6 Notificaciones
 
-Cada negocio tiene una licencia que controla su plan, vencimiento y límites.
-
-### `GET /api/v1/business/{id}/license`
-
-Muestra el estado actual de la licencia.
+### `GET /api/v1/business/{id}/notifications`
 
 **Response:**
 ```json
-{
-  "plan": "premium",
-  "status": "active",
-  "start_date": "2026-06-01",
-  "end_date": "2026-12-31",
-  "days_remaining": 120,
-  "max_cashiers": 5,
-  "current_cashiers": 2,
-  "max_businesses": 2,
-  "current_businesses": 1,
-  "features": [
-    "whatsapp_receipts",
-    "loyalty_program",
-    "detailed_reports",
-    "ai_insights",
-    "ai_purchase_prediction"
-  ]
-}
+[
+  {
+    "id": "uuid",
+    "type": "cancellation",
+    "message": "Cancelación en Taquería Bonita - Pedro. Motivo: cliente se arrepintió.",
+    "data": {
+      "transaction_id": "uuid",
+      "cashier_name": "Pedro",
+      "amount": 111.00
+    },
+    "is_read": false,
+    "created_at": "2026-06-05T20:17:30Z"
+  }
+]
 ```
 
-### `GET /api/v1/plans`
+### `DELETE /api/v1/business/{id}/notifications/{id}`
 
-Lista los planes disponibles.
+Marca una notificación como eliminada (soft delete).
+
+---
+
+## 3.3 Licencias
+
+### `GET /api/v1/plans`
 
 **Response:**
 ```json
@@ -403,20 +611,53 @@ Lista los planes disponibles.
   {
     "name": "free",
     "price": 0,
-    "max_cashiers": 2,
     "max_businesses": 1,
-    "features": ["whatsapp_receipts", "loyalty_program", "basic_reports"]
+    "max_cashiers": 2,
+    "features": ["basic_reports", "cashier_management"],
+    "has_trial": false
   },
   {
     "name": "premium",
     "price": 199.00,
     "currency": "MXN",
     "interval": "month",
-    "max_cashiers": 5,
     "max_businesses": 2,
-    "features": ["whatsapp_receipts", "loyalty_program", "detailed_reports", "ai_insights", "ai_purchase_prediction"]
+    "max_cashiers": 5,
+    "features": ["basic_reports", "detailed_reports", "cashier_management", "multiple_branches"],
+    "has_trial": true,
+    "trial_days": 14
+  },
+  {
+    "name": "business",
+    "price": 499.00,
+    "currency": "MXN",
+    "interval": "month",
+    "max_businesses": 5,
+    "max_cashiers": 25,
+    "features": ["basic_reports", "detailed_reports", "cashier_management", "multiple_branches", "ai_insights"],
+    "has_trial": true,
+    "trial_days": 14
   }
 ]
+```
+
+### `GET /api/v1/business/{id}/license`
+
+**Response:**
+```json
+{
+  "plan": "free",
+  "status": "active",
+  "start_date": "2026-06-01",
+  "end_date": null,
+  "trial_end_date": null,
+  "days_remaining": null,
+  "max_cashiers": 2,
+  "current_cashiers": 1,
+  "max_businesses": 1,
+  "current_businesses": 1,
+  "features": ["basic_reports", "cashier_management"]
+}
 ```
 
 ### `POST /api/v1/business/{id}/license/upgrade`
@@ -439,60 +680,55 @@ Lista los planes disponibles.
 }
 ```
 
-> **Validaciones automáticas del backend:**
-> - `POST /business` → verifica que no se exceda `max_businesses`
-> - `POST /auth/role` (cajero) → verifica que no se exceda `max_cashiers`
-> - Si un Premium vence → baja a Free automáticamente. Los datos no se pierden.
+### `POST /api/v1/business/{id}/license/trial`
 
----
-
-## 9. Cancelar Venta
-
-Solo dentro de los primeros 3 minutos.
-
-### `POST /api/v1/transactions/{id}/cancel`
+Activa el período de prueba de 14 días para un plan.
 
 **Request:**
 ```json
 {
-  "reason": "cliente_se_arrepintio",
-  "photo": "data:image/jpeg;base64,/9j/4AAQ...",
-  "cashier_id": "550e8400-e29b-41d4-a716-446655440002"
+  "plan": "premium"
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "cancelled",
-  "original_total": 111.00,
-  "cancelled_at": "2026-06-05T20:17:30Z",
-  "owner_notified": true
+  "status": "trial",
+  "plan": "premium",
+  "trial_end_date": "2026-06-19",
+  "message": "¡14 días de prueba activados! Disfruta de Premium sin costo."
 }
 ```
 
-> Motivos posibles: `cliente_se_arrepintio`, `producto_equivocado`, `error_cajero`, `otro`.  
-> La foto es **obligatoria**. El dueño recibe un push al instante.
-
 ---
 
-## Resumen para el equipo
+## Resumen de Endpoints Fase I
 
-| Endpoint | Método | Jesús (Backend) | Fanner (Flutter) |
-|----------|--------|-----------------|------------------|
-| `/auth/login` | POST | Validar Google token, generar JWT, crear usuario si nuevo | Google Sign-In, enviar token, guardar JWT en SecureStorage |
-| `/auth/role` | PUT | Asignar rol, validar business_code si es cajero | UI de selección Dueño/Cajero |
-| `/business` | POST | Crear negocio + licencia Free automática | Formulario mínimo (solo nombre) |
-| `/plans` | GET | Listar planes disponibles | Mostrar en pantalla de upgrade |
-| `/business/{id}/license` | GET | Devolver licencia actual con límites | Dashboard de licencias para el dueño |
-| `/business/{id}/license/upgrade` | POST | Validar pago, activar Premium, actualizar límites | Integrar con pasarela de pago |
-| `/products` | GET/POST | CRUD básico | Lista en pantalla de venta, crear al vuelo |
-| `/transactions` | POST | **Endpoint universal.** Un solo método para todo | Capturar venta/gasto/deuda, enviar |
-| `/sync` | POST | Recibir batch, resolver conflictos (timestamp gana) | Worker cada 5-10 min, enviar pendientes |
-| `/reports` | GET | Agregar ventas/gastos/deudas del período | Mostrar en "¿Cómo voy?" |
-| `/transactions/{id}/cancel` | POST | Validar 3 min, guardar foto, push al dueño | UI de cancelación con cámara |
-
----
-
-*Documento de contratos API v1 — Taco'Os*  
-*Competimos contra la libreta. Cada JSON, simple.*
+| Sec | Endpoint | Método | Descripción |
+|-----|----------|--------|-------------|
+| 5.1 | `/cashier/open-session` | POST | Abrir caja con fondo de cambio |
+| 5.2 | `/business/{id}/products` | GET | Listar productos (filtro por categoría) |
+| 5.2 | `/business/{id}/products` | POST | Crear producto |
+| 5.2 | `/business/{id}/products/{id}` | PUT | Editar producto |
+| 5.2 | `/business/{id}/products/{id}` | DELETE | Eliminar producto |
+| 5.5 | `/transactions` | POST | Registrar venta/gasto |
+| 5.6 | `/transactions` | POST | Venta con tarjeta (foto baucher) |
+| 6 | `/cashier/close-session` | POST | Corte con conteo manual |
+| 7 | `/transactions/{id}/cancel` | POST | Cancelar venta (5 min, con foto) |
+| 8 | `/auth/login` | POST | Login con Google |
+| 8 | `/auth/role` | PUT | Asignar rol (dueño/cajero) |
+| 10 | `/sync` | POST | Sincronización batch |
+| 12.1 | `/business/{id}/cashiers/invitation` | POST | Generar QR de invitación |
+| 12.2 | `/business/link-cashier` | POST | Enlazar cajero por QR |
+| 12.3 | `/business/{id}/cashiers` | GET | Lista de cajeros |
+| 12.4 | `/business/{id}/cashiers/{id}` | DELETE | Desvincular cajero |
+| 4.2 | `/business/{id}/reports/open-sessions` | GET | Cajas abiertas |
+| 4.2 | `/business/{id}/reports/cuts` | GET | Lista de cortes (con filtros) |
+| 4.2 | `/business/{id}/reports/stats` | GET | Estadísticas comparativas |
+| 4.6 | `/business/{id}/notifications` | GET | Historial de notificaciones |
+| 4.6 | `/business/{id}/notifications/{id}` | DELETE | Eliminar notificación |
+| 3.3 | `/plans` | GET | Listar planes |
+| 3.3 | `/business/{id}/license` | GET | Ver licencia actual |
+| 3.3 | `/business/{id}/license/upgrade` | POST | Mejorar plan |
+| 3.3 | `/business/{id}/license/trial` | POST | Activar 14 días prueba |

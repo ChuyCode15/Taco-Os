@@ -1,8 +1,0 @@
-title,description,status,assignee,labels
-[F4-Jesus] API Generación de Menú QR,"Endpoint genera menú digital desde productos registrados. QR por mesa y QR general del negocio. Hosteado como página pública.",To-do,Jesús Medina,backend,qr
-[F4-Jesus] API Gestión de Pedidos (WebSocket),"Conexión en tiempo real para pedidos entrantes desde menú QR. Confirmación del cajero. Registro como venta.",To-do,Jesús Medina,backend,pedidos
-[F4-Jesus] API Control de Inventario,"Descuento automático de stock al confirmar venta. Alertas configurables de stock bajo. Historial de movimientos.",To-do,Jesús Medina,backend,inventario
-[F4-Fanner] Web Menú para Cliente (sin login),"Página web liviana (HTML/CSS/JS o Flutter web). Muestra el menú al escanear QR. Selección de productos y envío de pedido sin registro.",To-do,Fanner,flutter,web
-[F4-Fanner] UI Cola de Pedidos (Cajero),"Pantalla con pedidos entrantes en tiempo real. Notificación sonora. Confirmación y pase a preparación.",To-do,Fanner,flutter,pedidos
-[F4-Fanner] UI Alertas de Stock Bajo,"Notificación al dueño cuando producto alcanza umbral mínimo. Vista de niveles de inventario.",To-do,Fanner,flutter,inventario
-[F4-Leandro] Análisis de Pedidos QR,"Correlacionar pedidos por mesa, hora, día, producto. Identificar patrones de consumo. Recomendar ajustes en menú.",To-do,Leandro,data-science

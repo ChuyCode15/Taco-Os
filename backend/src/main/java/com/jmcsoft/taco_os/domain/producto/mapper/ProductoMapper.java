@@ -11,8 +11,10 @@ public interface ProductoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "activo", ignore = true)
+    @Mapping(target = "registro", ignore = true)
+    @Mapping(target = "negocio", ignore = true)
     Producto nuevaProducto(DatosRegistroProducto datos);
 
+    @Mapping(target = "id", expression = "java(producto.getId() != null ? producto.getId().toString() : null)")
     DatosDetalleProducto productoADetalle(Producto producto);
-
 }

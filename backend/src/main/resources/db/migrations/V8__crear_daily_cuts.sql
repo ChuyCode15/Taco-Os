@@ -1,0 +1,23 @@
+CREATE TABLE daily_cuts (
+    id             UUID PRIMARY KEY,
+    session_id     UUID           NOT NULL,
+    business_id    UUID           NOT NULL,
+    cashier_id     UUID           NOT NULL,
+    total_sales    DECIMAL(19,2)  NOT NULL,
+    total_expenses DECIMAL(19,2)  NOT NULL,
+    cash_sales     DECIMAL(19,2)  NOT NULL,
+    card_sales     DECIMAL(19,2)  NOT NULL,
+    opening_balance DECIMAL(19,2) NOT NULL,
+    expected_cash  DECIMAL(19,2)  NOT NULL,
+    actual_cash    DECIMAL(19,2),
+    difference     DECIMAL(19,2),
+    status         VARCHAR(50)    NOT NULL,
+    notes          VARCHAR(500),
+    ticket_url     VARCHAR(500),
+    opened_at      TIMESTAMP      NOT NULL,
+    closed_at      TIMESTAMP      NOT NULL,
+    is_synced      BOOLEAN        NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (session_id) REFERENCES cashier_sessions(id),
+    FOREIGN KEY (business_id) REFERENCES negocios(id),
+    FOREIGN KEY (cashier_id) REFERENCES cajeros(id)
+);

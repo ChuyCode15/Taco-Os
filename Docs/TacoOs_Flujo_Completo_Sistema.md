@@ -13,19 +13,19 @@
 │                                                                             │
 │  USUARIO NUEVO                                                              │
 │  ─────────────                                                              │
-│  1. Descarga la app                                                          │
+│  1. Descarga la app                                                         │
 │  2. Pulsa "Iniciar sesión con Google"                                       │
 │  3. Google Sign-In → id_token → Backend                                     │
 │  4. Backend crea usuario (role = null)                                      │
-│  5. Usuario elige: "Soy Dueño" o "Soy Cajero"                              │
+│  5. Usuario elige: "Soy Dueño" o "Soy Cajero"                               │
 │                                                                             │
 │  ┌─────────────────────────┐       ┌─────────────────────────────────────┐  │
 │  │    ELIGE DUEÑO          │       │    ELIGE CAJERO                     │  │
 │  │    ──────────           │       │    ──────────                       │  │
-│  │    → Crea negocio       │       │    → Cámara QR se abre             │  │
-│  │    → Nombre, ubicación  │       │    → Escanea QR del Patrón         │  │
-│  │    → Horario cierre     │       │    → Se enlaza al negocio          │  │
-│  │    → Licencia Free auto │       │    → Va directo a cobrar           │  │
+│  │    → Crea negocio       │       │    → Cámara QR se abre              │  │
+│  │    → Nombre, ubicación  │       │    → Escanea QR del Patrón          │  │
+│  │    → Horario cierre     │       │    → Se enlaza al negocio           │  │
+│  │    → Licencia Free auto │       │    → Va directo a cobrar            │  │
 │  │    → Dashboard 3+1+1+🔔 │       │                                     │  │
 │  └─────────────────────────┘       └─────────────────────────────────────┘  │
 │                                                                             │
@@ -42,8 +42,8 @@
 │                                                                             │
 │  Backend crea:                                                              │
 │  - Business (con datos)                                                     │
-│  - User (role=OWNER, business_id)                                          │
-│  - License (plan=FREE, status=ACTIVE)                                      │
+│  - User (role=OWNER, business_id)                                           │
+│  - License (plan=FREE, status=ACTIVE)                                       │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -96,7 +96,7 @@
 │    "session_id": "...",                                                     │
 │    "type": "SALE",                                                          │
 │    "items": [                                                               │
-│      { "product_id": "...", "name": "Taco al Pastor", "qty": 3,            │
+│      { "product_id": "...", "name": "Taco al Pastor", "qty": 3,             │
 │        "unit_price": 25.00 }                                                │
 │    ],                                                                       │
 │    "payment": {                                                             │
@@ -112,7 +112,7 @@
 │    ...                                                                      │
 │    "payment": {                                                             │
 │      "method": "CARD",                                                      │
-│      "card_photo_url": "https://storage.tacoos.com/baucher-001.jpg"        │
+│      "card_photo_url": "https://storage.tacoos.com/baucher-001.jpg"         │
 │    }                                                                        │
 │  }                                                                          │
 │  → La foto se toma con la cámara de la app                                  │
@@ -129,15 +129,15 @@
 │                        FLUJO DE CORTE DE CAJA                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  1. CAJERO PRESIONA "CORTE" EN FOOTER                                      │
+│  1. CAJERO PRESIONA "CORTE" EN FOOTER                                       │
 │  ─────────────────────────────────────                                      │
-│  → Popup: "¿Estás seguro de generar el corte?"                             │
+│  → Popup: "¿Estás seguro de generar el corte?"                              │
 │  → [OK] [Cancelar]                                                          │
 │                                                                             │
 │  2. SISTEMA MUESTRA RESUMEN AUTOMÁTICO                                      │
 │  ─────────────────────────────────────                                      │
 │  GET /api/v1/cashier/current-session                                        │
-│  → Resumen:                                                                │
+│  → Resumen:                                                                 │
 │     Ventas:           $7,000                                                │
 │     Efectivo:         $4,500                                                │
 │     Tarjeta:          $2,500                                                │
@@ -147,7 +147,7 @@
 │                                                                             │
 │  3. CONTEO MANUAL                                                           │
 │  ─────────────────                                                          │
-│  "¿Cuánto dinero hay en caja?" → Cajero ingresa monto                      │
+│  "¿Cuánto dinero hay en caja?" → Cajero ingresa monto                       │
 │                                                                             │
 │  4. CIERRE Y RESULTADO                                                      │
 │  ────────────────────                                                       │
@@ -158,18 +158,18 @@
 │  }                                                                          │
 │                                                                             │
 │  → Si coincide: status = OK                                                 │
-│  → Si falta:   status = SHORT → 🔔 al Patrón                              │
-│  → Si sobra:   status = OVER  → 🔔 al Patrón                              │
+│  → Si falta:   status = SHORT → 🔔 al Patrón                                │
+│  → Si sobra:   status = OVER  → 🔔 al Patrón                                │
 │                                                                             │
 │  5. TICKET DIGITAL                                                          │
 │  ────────────────                                                           │
-│  → Se genera ticket imprimible/compartible (PDF)                           │
-│  → Al guardar/compartir, vuelve a pantalla "Abrir Caja"                    │
+│  → Se genera ticket imprimible/compartible (PDF)                            │
+│  → Al guardar/compartir, vuelve a pantalla "Abrir Caja"                     │
 │                                                                             │
 │  AUTO-CIERRE:                                                               │
-│  Si hay caja abierta a hora_config + 180 min:                              │
+│  Si hay caja abierta a hora_config + 180 min:                               │
 │  → Cierre automático                                                        │
-│  → 🔔 al Patrón: "Sucursal X - Turno auto-cerrado"                        │
+│  → 🔔 al Patrón: "Sucursal X - Turno auto-cerrado"                          │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -183,37 +183,37 @@
 │                     FLUJO DE CANCELACIÓN (5 MIN)                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  1. CAJERO SELECCIONA VENTA DESDE "VENTAS DEL DÍA"                        │
+│  1. CAJERO SELECCIONA VENTA DESDE "VENTAS DEL DÍA"                          │
 │  ─────────────────────────────────────────────────────                      │
 │  → Presiona "Cancelar"                                                      │
 │                                                                             │
 │  2. SISTEMA VERIFICA VENTANA DE 5 MINUTOS                                   │
 │  ─────────────────────────────────────────                                  │
 │  CancelWindowValidator.validate(transaction)                                │
-│  → Si pasaron > 5 min: "Fuera de la ventana de cancelación"                │
-│  → Si están dentro: procede                                                │
+│  → Si pasaron > 5 min: "Fuera de la ventana de cancelación"                 │
+│  → Si están dentro: procede                                                 │
 │                                                                             │
-│  3. CAJERO SELECCIONA CAUSA Y TOMA FOTO                                    │
+│  3. CAJERO SELECCIONA CAUSA Y TOMA FOTO                                     │
 │  ──────────────────────────────────────                                     │
 │  POST /api/v1/transactions/{id}/cancel                                      │
 │  {                                                                          │
 │    "reason": "cliente_se_arrepintio",                                       │
-│    "photo": "data:image/jpeg;base64,/9j/4AAQ...",                          │
+│    "photo": "data:image/jpeg;base64,/9j/4AAQ...",                           │
 │    "cashier_id": "..."                                                      │
 │  }                                                                          │
 │                                                                             │
 │  4. SISTEMA PROCESA                                                         │
 │  ────────────────                                                           │
-│  → Transaction.status = CANCELLED (soft delete)                            │
-│  → Se crea registro en tabla Cancellation (con foto)                       │
-│  → 🔔 inmediata al Patrón                                                  │
+│  → Transaction.status = CANCELLED (soft delete)                             │
+│  → Se crea registro en tabla Cancellation (con foto)                        │
+│  → 🔔 inmediata al Patrón                                                   │
 │                                                                             │
 │  5. NOTIFICACIÓN AL PATRÓN                                                  │
 │  ────────────────────────                                                   │
 │  Notification:                                                              │
 │  {                                                                          │
 │    "type": "CANCELLATION",                                                  │
-│    "message": "Cancelación en Taquería Bonita - Pedro.                    │
+│    "message": "Cancelación en Taquería Bonita - Pedro.                      │
 │               Motivo: cliente se arrepintió.",                              │
 │    "data": {                                                                │
 │      "transaction_id": "...",                                               │
@@ -257,9 +257,9 @@
 │  Filtros: sucursal | cajero | fecha (día/semana/mes/personalizado)          │
 │  ┌────────────────────────────────────────────────────┐                     │
 │  │  10 Jun - Pedro - OK                               │                     │
-│  │    Ventas: $7,000 | Gastos: $1,500 | Dif: $0      │                     │
+│  │    Ventas: $7,000 | Gastos: $1,500 | Dif: $0       │                     │
 │  │  10 Jun - María - OK                               │                     │
-│  │    Ventas: $5,200 | Gastos: $800 | Dif: +$50      │                     │
+│  │    Ventas: $5,200 | Gastos: $800 | Dif: +$50       │                     │
 │  └────────────────────────────────────────────────────┘                     │
 │                                                                             │
 │  5.3 ESTADÍSTICAS                                                           │
@@ -269,9 +269,9 @@
 │  ┌────────────────────────────────────────────────────┐                     │
 │  │  Comparativa de semanas:                           │                     │
 │  │  ────────────────────────────────────────────────  │                     │
-│  │  Semana ACTUAL:  $45,000 vendidos, 320 ventas     │                     │
-│  │  Mejor SEMANA:   $52,000 vendidos, 380 ventas     │                     │
-│  │  Diferencia:     -13.5% vs mejor semana           │                     │
+│  │  Semana ACTUAL:  $45,000 vendidos, 320 ventas      │                     │
+│  │  Mejor SEMANA:   $52,000 vendidos, 380 ventas      │                     │
+│  │  Diferencia:     -13.5% vs mejor semana            │                     │
 │  └────────────────────────────────────────────────────┘                     │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -289,12 +289,12 @@
 │  WORKER (cada 5 minutos en segundo plano):                                  │
 │  ──────────────────────────────────────────                                 │
 │                                                                             │
-│  ┌─────────────────┐         POST /api/v1/sync         ┌─────────────────┐  │
-│  │   SQLite Local   │ ──────────────────────────────> │   PostgreSQL    │  │
-│  │   (Maestra)      │ <────────────────────────────── │   (Consolida)   │  │
-│  └─────────────────┘     Respuesta con server_time    └─────────────────┘  │
+│  ┌─────────────────┐         POST /api/v1/sync        ┌─────────────────┐   │
+│  │   SQLite Local  │ ──────────────────────────────>  │   PostgreSQL    │   │
+│  │   (Maestra)     │ <──────────────────────────────  │   (Consolida)   │   │
+│  └─────────────────┘     Respuesta con server_time    └─────────────────┘   │
 │                                                                             │
-│  Payload enviado:                                                            │
+│  Payload enviado:                                                           │
 │  {                                                                          │
 │    "device_id": "...",                                                      │
 │    "business_id": "...",                                                    │
@@ -305,12 +305,12 @@
 │  }                                                                          │
 │                                                                             │
 │  Resolución de conflictos:                                                  │
-│  - Misma transacción desde 2 dispositivos → gana timestamp más reciente    │
+│  - Misma transacción desde 2 dispositivos → gana timestamp más reciente     │
 │  - Logs inmutables: no se borra nada                                        │
 │                                                                             │
 │  Offline:                                                                   │
-│  - Si no hay conexión → worker reintenta en el próximo ciclo               │
-│  - El usuario nunca se entera → todo funciona sin internet                 │
+│  - Si no hay conexión → worker reintenta en el próximo ciclo                │
+│  - El usuario nunca se entera → todo funciona sin internet                  │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -327,24 +327,24 @@
 │  TIPOS DE NOTIFICACIÓN EN FASE I:                                           │
 │  ─────────────────────────────────                                          │
 │                                                                             │
-│  ⚠️ CANCELLATION                                                            │
-│  Disparador: Cajero cancela una venta (5 min + foto)                       │
-│  Datos: transaction_id, cashier_name, amount, motivo                       │
+│  ⚠️ CANCELLATION                                                             │
+│  Disparador: Cajero cancela una venta (5 min + foto)                        │
+│  Datos: transaction_id, cashier_name, amount, motivo                        │
 │                                                                             │
 │  📊 CUT_DIFFERENCE                                                          │
 │  Disparador: Corte con sobrante o faltante                                  │
-│  Datos: cut_id, cashier_name, expected, actual, difference                 │
+│  Datos: cut_id, cashier_name, expected, actual, difference                  │
 │                                                                             │
 │  🕐 AUTO_CLOSE                                                              │
-│  Disparador: Caja cerrada por timeout (hora_config + 180 min)              │
-│  Datos: session_id, business_name, closed_at                               │
+│  Disparador: Caja cerrada por timeout (hora_config + 180 min)               │
+│  Datos: session_id, business_name, closed_at                                │
 │                                                                             │
 │  FLUJO:                                                                     │
-│  1. Evento ocurre en el sistema                                            │
-│  2. Service crea registro en tabla notifications                           │
-│  3. Patrón ve 🔔 con contador de no leídas                                │
-│  4. Patrón toca 🔔 → historial de notificaciones                          │
-│  5. Patrón puede borrar notificaciones individuales                        │
+│  1. Evento ocurre en el sistema                                             │
+│  2. Service crea registro en tabla notifications                            │
+│  3. Patrón ve 🔔 con contador de no leídas                                  │
+│  4. Patrón toca 🔔 → historial de notificaciones                            │
+│  5. Patrón puede borrar notificaciones individuales                         │
 │                                                                             │
 │  GET /api/v1/business/{id}/notifications                                    │
 │  DELETE /api/v1/business/{id}/notifications/{id}                            │
@@ -374,21 +374,21 @@
 │  TRIAL:                                                                     │
 │  ──────                                                                     │
 │  POST /api/v1/business/{id}/license/trial                                   │
-│  → 14 días de prueba gratis para Premium o Business                        │
-│  → Al vencimiento, baja a Free (sin pérdida de datos)                      │
+│  → 14 días de prueba gratis para Premium o Business                         │
+│  → Al vencimiento, baja a Free (sin pérdida de datos)                       │
 │  → Solo un trial por negocio                                                │
 │                                                                             │
 │  UPSELL (Sucursales):                                                       │
 │  ────────────────────                                                       │
-│  Si el Dueño Free quiere agregar una 2da sucursal:                         │
-│  → "Alcanzaste el límite de 1 negocio en Free."                            │
-│  → "¡Prueba Premium gratis por 14 días!"                                   │
-│  → POST /api/v1/business/{id}/license/trial                                │
+│  Si el Dueño Free quiere agregar una 2da sucursal:                          │
+│  → "Alcanzaste el límite de 1 negocio en Free."                             │
+│  → "¡Prueba Premium gratis por 14 días!"                                    │
+│  → POST /api/v1/business/{id}/license/trial                                 │
 │                                                                             │
 │  VALIDACIÓN AUTOMÁTICA:                                                     │
 │  - POST /business → valida max_businesses                                   │
-│  - POST /cashiers/invitation → valida max_cashiers                         │
-│  → Si excede: error 409 con mensaje de upgrade                             │
+│  - POST /cashiers/invitation → valida max_cashiers                          │
+│  → Si excede: error 409 con mensaje de upgrade                              │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```

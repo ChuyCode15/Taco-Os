@@ -1,0 +1,21 @@
+CREATE TABLE transactions (
+    id             UUID PRIMARY KEY,
+    business_id    UUID           NOT NULL,
+    session_id     UUID           NOT NULL,
+    type           VARCHAR(50)    NOT NULL,
+    cashier_id     UUID           NOT NULL,
+    device_id      VARCHAR(255),
+    items_json     TEXT,
+    payment_method VARCHAR(50),
+    amount_received DECIMAL(19,2),
+    change_amount  DECIMAL(19,2),
+    card_photo_url VARCHAR(500),
+    total          DECIMAL(19,2)  NOT NULL,
+    description    VARCHAR(500),
+    status         VARCHAR(50)    NOT NULL DEFAULT 'COMPLETADA',
+    timestamp      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_synced      BOOLEAN        NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (business_id) REFERENCES negocios(id),
+    FOREIGN KEY (session_id) REFERENCES cashier_sessions(id),
+    FOREIGN KEY (cashier_id) REFERENCES cajeros(id)
+);

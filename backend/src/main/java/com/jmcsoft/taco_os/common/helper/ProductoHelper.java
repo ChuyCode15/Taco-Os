@@ -1,9 +1,13 @@
 package com.jmcsoft.taco_os.common.helper;
 
+import com.jmcsoft.taco_os.common.exception.NoExisteException;
 import com.jmcsoft.taco_os.common.exception.YaRegistradoException;
+import com.jmcsoft.taco_os.domain.producto.Producto;
 import com.jmcsoft.taco_os.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -11,12 +15,25 @@ public class ProductoHelper {
 
     private final ProductoRepository productoRepository;
 
-    public void productoYaRegistrado(String nombre) {
-        if (productoRepository.existsByNombreAndActivoTrue(nombre)) {
+    public void productoYaRegistrado(String nombre, String negocioId) {
+        if (productoRepository.existsByNombreAndNegocioIdAndActivoTrue(nombre, UUID.fromString(negocioId))) {
             throw new YaRegistradoException(
-                "No puede registrar un producto ya registrado",
-                "ProductoHelper.productoYaRegistrado"
+                    "Ya existe un producto con ese nombre en este negocio",
+                    "ProductoHelper.productoYaRegistrado"
             );
         }
+    }
+
+    public Producto validarIdProducto(String id) {
+        if (id == null || id.isBlank()) {
+            throw new NoExisteException("El id del producto no puede estar vacío", "ProductoHelper.validarIdProducto");
+        }
+        try {
+            UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new NoExisteException("El id del producto no es válido", "ProductoHelper.validarIdProducto");
+        }
+        return productoRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> new NoExisteException("Producto no encontrado", "ProductoHelper.validarIdProducto"));
     }
 }

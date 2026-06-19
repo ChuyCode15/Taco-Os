@@ -23,25 +23,35 @@ public class Negocio {
     @Column(name = "name", nullable = false)
     private String nombre;
 
-    @Column(name = "location", nullable = false)
-    private String ubicacion;
+    @Column(name = "address", nullable = false)
+    private String direccion;
+
+    @Column(name = "phone", nullable = false)
+    private String telefono;
+
+    @Column(name = "category")
+    private String giro;
 
     @Column(name = "closing_time")
-    private String horaCierre;
+    private String horarioCierre;
 
     @Column(name = "currency", nullable = false)
     private String moneda = "MXN";
 
-    @Column(name = "base_cash", nullable = false)
-    private BigDecimal dineroBase = BigDecimal.valueOf(500);
+    @Column(name = "base_money", precision = 10, scale = 2)
+    private BigDecimal dineroBase;
 
+    @Column(name = "employees")
+    private Integer empleados;
+
+    @Column(name = "is_active", nullable = false)
     private Boolean activo = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime creadoEl;
+    private LocalDateTime registro;
 
     @PrePersist
     protected void onCreate() {
-        creadoEl = LocalDateTime.now();
+        registro = LocalDateTime.now();
     }
 }

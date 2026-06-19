@@ -11,12 +11,12 @@ public interface NegocioMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "activo", ignore = true)
-    @Mapping(target = "creadoEl", ignore = true)
+    @Mapping(target = "registro", ignore = true)
     @Mapping(target = "moneda", ignore = true)
-    @Mapping(target = "dineroBase", ignore = true)
+    @Mapping(target = "empleados", source = "empleados")
     Negocio nuevoNegocio(DatosRegistroNegocio datos);
 
-    @Mapping(target = "creadoEl", expression = "java(negocio.getCreadoEl() != null ? negocio.getCreadoEl().toString() : null)")
     @Mapping(target = "id", expression = "java(negocio.getId() != null ? negocio.getId().toString() : null)")
+    @Mapping(target = "registro", expression = "java(negocio.getRegistro() != null ? negocio.getRegistro().toString() : null)")
     DatosDetalleNegocio negocioADetalle(Negocio negocio);
 }

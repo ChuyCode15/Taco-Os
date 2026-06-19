@@ -1,0 +1,481 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_source": "insomnia.desktop",
+  "__export_date": "2025-06-18T00:00:00.000Z",
+  "resources": [
+    {
+      "_id": "wrk_tacoos",
+      "_type": "workspace",
+      "name": "Taco'Os API",
+      "description": "API REST del sistema de gestión de tacos Taco'Os - Puerto 8080",
+      "scope": "collection",
+      "parentId": null
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "jwt_token": ""
+      },
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "env_local",
+      "_type": "environment",
+      "name": "Local (8080)",
+      "data": {
+        "base_url": "http://localhost:8080"
+      },
+      "parentId": "wrk_tacoos"
+    },
+
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "name": "1. Auth",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_super_su",
+      "_type": "request_group",
+      "name": "2. Super Su",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_negocios",
+      "_type": "request_group",
+      "name": "3. Negocios",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_enlace",
+      "_type": "request_group",
+      "name": "4. Enlace (Invitaciones)",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_productos",
+      "_type": "request_group",
+      "name": "5. Productos",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_sesiones",
+      "_type": "request_group",
+      "name": "6. Sesiones Cajero",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_transacciones",
+      "_type": "request_group",
+      "name": "7. Transacciones",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_cortes",
+      "_type": "request_group",
+      "name": "8. Cortes Diarios",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_notificaciones",
+      "_type": "request_group",
+      "name": "9. Notificaciones",
+      "parentId": "wrk_tacoos"
+    },
+    {
+      "_id": "fld_licencias",
+      "_type": "request_group",
+      "name": "10. Licencias",
+      "parentId": "wrk_tacoos"
+    },
+
+    {
+      "_id": "req_auth_verificar",
+      "_type": "request",
+      "name": "Verificar usuario por Google ID",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/auth/verificar/{{ id_google }}",
+      "body": {},
+      "headers": [],
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_registrar_dueno",
+      "_type": "request",
+      "name": "Registrar dueño de negocio",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/auth/registrar",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"idGoogle\": \"ggl_1001\",\n  \"nickname\": \"JuanTacos\",\n  \"correo\": \"juan@tacos.com\",\n  \"numero\": \"+521234567801\",\n  \"rol\": \"dueño\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_registrar_cajero",
+      "_type": "request",
+      "name": "Registrar cajero",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/auth/registrar",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"idGoogle\": \"ggl_2001\",\n  \"nickname\": \"PedroCajero\",\n  \"correo\": \"pedro@cajeros.com\",\n  \"numero\": \"+521234567811\",\n  \"rol\": \"cajero\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parentId": "fld_auth"
+    },
+
+    {
+      "_id": "req_supersu_login",
+      "_type": "request",
+      "name": "Login SuperSu",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/super-su/login",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"SuperSu\",\n  \"password\": \"AdminSu\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parentId": "fld_super_su"
+    },
+    {
+      "_id": "req_supersu_listar_admins",
+      "_type": "request",
+      "name": "Listar todos los administradores",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/super-su/admins",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_super_su"
+    },
+    {
+      "_id": "req_supersu_detalle_admin",
+      "_type": "request",
+      "name": "Detalle de administrador",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/super-su/admins/{{ admin_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_super_su"
+    },
+    {
+      "_id": "req_supersu_activar",
+      "_type": "request",
+      "name": "Activar administrador",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/v1/super-su/admins/{{ admin_id }}/activar",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_super_su"
+    },
+    {
+      "_id": "req_supersu_desactivar",
+      "_type": "request",
+      "name": "Desactivar administrador",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/v1/super-su/admins/{{ admin_id }}/desactivar",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_super_su"
+    },
+    {
+      "_id": "req_supersu_stats",
+      "_type": "request",
+      "name": "Estadísticas del dashboard",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/super-su/stats",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_super_su"
+    },
+
+    {
+      "_id": "req_neg_crear",
+      "_type": "request",
+      "name": "Crear negocio",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/business",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Tacos El Güero\",\n  \"direccion\": \"Av. Revolución 1234, Centro\",\n  \"telefono\": \"+521234567890\",\n  \"queVende\": \"Tacos al pastor\",\n  \"empleados\": 4,\n  \"horario\": \"22:00\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_negocios"
+    },
+    {
+      "_id": "req_neg_detalle",
+      "_type": "request",
+      "name": "Detalle del negocio",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_negocios"
+    },
+    {
+      "_id": "req_neg_editar",
+      "_type": "request",
+      "name": "Editar negocio",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Tacos El Güero VIP\",\n  \"direccion\": \"Av. Revolución 1234, Centro\",\n  \"telefono\": \"+521234567890\",\n  \"queVende\": \"Tacos al pastor y birria\",\n  \"empleados\": 6,\n  \"horario\": \"00:00\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_negocios"
+    },
+    {
+      "_id": "req_neg_cajeros",
+      "_type": "request",
+      "name": "Listar cajeros del negocio",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}/cashiers",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_negocios"
+    },
+
+    {
+      "_id": "req_enlace_invitacion",
+      "_type": "request",
+      "name": "Generar invitación",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/link/invitation",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"negocioId\": \"{{ negocio_id }}\",\n  \"duenoId\": \"{{ dueno_id }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_enlace"
+    },
+    {
+      "_id": "req_enlace_link",
+      "_type": "request",
+      "name": "Enlazar cajero con código",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/link",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"codigo\": \"{{ invitation_code }}\",\n  \"usuarioId\": \"{{ cajero_id }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_enlace"
+    },
+
+    {
+      "_id": "req_prod_crear",
+      "_type": "request",
+      "name": "Crear producto",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}/products",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Taco al Pastor\",\n  \"price\": 15.00,\n  \"category\": \"COMIDA\",\n  \"photo_url\": \"https://storage.tacoos.com/taco-pastor.jpg\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_productos"
+    },
+    {
+      "_id": "req_prod_listar",
+      "_type": "request",
+      "name": "Listar productos",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}/products",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_productos"
+    },
+    {
+      "_id": "req_prod_detalle",
+      "_type": "request",
+      "name": "Detalle producto",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}/products/{{ producto_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_productos"
+    },
+    {
+      "_id": "req_prod_editar",
+      "_type": "request",
+      "name": "Editar producto",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}/products/{{ producto_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Taco al Pastor Especial\",\n  \"price\": 18.00,\n  \"category\": \"COMIDA\",\n  \"photo_url\": \"https://storage.tacoos.com/taco-pastor-esp.jpg\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_productos"
+    },
+    {
+      "_id": "req_prod_eliminar",
+      "_type": "request",
+      "name": "Eliminar producto",
+      "method": "DELETE",
+      "url": "{{ base_url }}/api/v1/business/{{ negocio_id }}/products/{{ producto_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_productos"
+    },
+
+    {
+      "_id": "req_sesion_abrir",
+      "_type": "request",
+      "name": "Abrir sesión de cajero",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/sessions/open",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"businessId\": \"{{ negocio_id }}\",\n  \"cashierId\": \"{{ cajero_id }}\",\n  \"deviceId\": \"device-001\",\n  \"opening_balance\": 500.00\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_sesiones"
+    },
+    {
+      "_id": "req_sesion_detalle",
+      "_type": "request",
+      "name": "Detalle de sesión",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/sessions/{{ sesion_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_sesiones"
+    },
+
+    {
+      "_id": "req_trans_registrar",
+      "_type": "request",
+      "name": "Registrar transacción (venta/gasto)",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/transactions",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"business_id\": \"{{ negocio_id }}\",\n  \"session_id\": \"{{ sesion_id }}\",\n  \"type\": \"VENTA\",\n  \"cashier_id\": \"{{ cajero_id }}\",\n  \"device_id\": \"device-001\",\n  \"items\": \"[{\\\"nombre\\\":\\\"Taco al Pastor\\\",\\\"cantidad\\\":2,\\\"precio\\\":15}]\",\n  \"payment\": {\n    \"method\": \"EFECTIVO\",\n    \"amount_received\": 50.00,\n    \"change\": 20.00\n  },\n  \"total\": 30.00,\n  \"description\": \"Venta de 2 tacos al pastor\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_transacciones"
+    },
+    {
+      "_id": "req_trans_cancelar",
+      "_type": "request",
+      "name": "Cancelar transacción",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/transactions/{{ transaccion_id }}/cancel",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"reason\": \"Cliente solicitó cancelación\",\n  \"photo\": \"https://storage.tacoos.com/comprobante-cancelacion.jpg\",\n  \"cashier_id\": \"{{ cajero_id }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_transacciones"
+    },
+
+    {
+      "_id": "req_corte_cerrar",
+      "_type": "request",
+      "name": "Cerrar sesión / Corte diario",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/cuts/close",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"session_id\": \"{{ sesion_id }}\",\n  \"cashier_id\": \"{{ cajero_id }}\",\n  \"device_id\": \"device-001\",\n  \"actual_cash\": 750.00,\n  \"notes\": \"Corte de fin de día OK\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_cortes"
+    },
+    {
+      "_id": "req_corte_lista",
+      "_type": "request",
+      "name": "Historial de cortes",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/cuts/{{ negocio_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_cortes"
+    },
+
+    {
+      "_id": "req_notif_lista",
+      "_type": "request",
+      "name": "Listar notificaciones",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/notifications/{{ negocio_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_notificaciones"
+    },
+
+    {
+      "_id": "req_lic_detalle",
+      "_type": "request",
+      "name": "Detalle de licencia",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/licenses/{{ negocio_id }}",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_licencias"
+    },
+    {
+      "_id": "req_lic_planes",
+      "_type": "request",
+      "name": "Listar planes disponibles",
+      "method": "GET",
+      "url": "{{ base_url }}/api/v1/licenses/plans",
+      "body": {},
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ jwt_token }}" }],
+      "parentId": "fld_licencias"
+    },
+    {
+      "_id": "req_lic_upgrades",
+      "_type": "request",
+      "name": "Upgrade de plan",
+      "method": "POST",
+      "url": "{{ base_url }}/api/v1/licenses/{{ negocio_id }}/upgrade",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"plan\": \"PREMIUM\",\n  \"payment_method\": \"TARJETA\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ jwt_token }}" }
+      ],
+      "parentId": "fld_licencias"
+    }
+  ]
+}

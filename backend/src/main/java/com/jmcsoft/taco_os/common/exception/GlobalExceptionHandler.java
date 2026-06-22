@@ -43,4 +43,21 @@ public class GlobalExceptionHandler {
         var error = new DatosError(ex.getCodigo(), ex.getMensaje(), ex.getUbicacion(), ex.getStatusHttp());
         return ResponseEntity.status(ex.getStatusHttp()).body(error);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<DatosError> manejarIllegalArgument(IllegalArgumentException ex) {
+        var error = new DatosError("ARGUMENTO_INVALIDO", ex.getMessage(), "GlobalExceptionHandler", 400);
+        return ResponseEntity.status(400).body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<DatosError> manejarExceptionGeneral(Exception ex) {
+        var error = new DatosError(
+                "ERROR_INTERNO",
+                "Ocurrió un error inesperado. Intenta de nuevo.",
+                "GlobalExceptionHandler",
+                500
+        );
+        return ResponseEntity.status(500).body(error);
+    }
 }

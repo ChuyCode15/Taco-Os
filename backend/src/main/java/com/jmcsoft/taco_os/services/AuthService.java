@@ -24,6 +24,9 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public DatosVerificacionAuth verificarUsuario(String idGoogle) {
+
+
+
         var admin = administradorRepository.findByIdGoogle(idGoogle);
         if (admin.isPresent()) {
             var u = admin.get();
@@ -38,7 +41,7 @@ public class AuthService {
                     u.getNegocio() != null ? u.getNegocio().getNombre() : null
             );
             String token = jwtService.generarToken(u.getId().toString(), u.getIdGoogle(), "dueño", u.getNickname());
-            return new DatosVerificacionAuth(true, token, (int)(expirationMs / 1000), usuario);
+            return new DatosVerificacionAuth(true, token, (int)(expirationMs / 3600000), usuario);
         }
 
         var cajero = cajeroRepository.findByIdGoogle(idGoogle);
@@ -55,7 +58,7 @@ public class AuthService {
                     c.getNegocio() != null ? c.getNegocio().getNombre() : null
             );
             String token = jwtService.generarToken(c.getId().toString(), c.getIdGoogle(), "cajero", c.getNickname());
-            return new DatosVerificacionAuth(true, token, (int)(expirationMs / 1000), usuario);
+            return new DatosVerificacionAuth(true, token, (int)(expirationMs / 3600000), usuario);
         }
 
         return new DatosVerificacionAuth(false, null, null, null);
@@ -91,7 +94,7 @@ public class AuthService {
                     false, null, null
             );
             String token = jwtService.generarToken(cajero.getId().toString(), cajero.getIdGoogle(), "cajero", cajero.getNickname());
-            return new DatosRespuestaAuth(token, (int)(expirationMs / 1000), usuario);
+            return new DatosRespuestaAuth(token, (int)(expirationMs / 3600000), usuario);
         } else {
             var admin = new Administrador();
             admin.setIdGoogle(datos.idGoogle());
@@ -110,7 +113,7 @@ public class AuthService {
                     false, null, null
             );
             String token = jwtService.generarToken(admin.getId().toString(), admin.getIdGoogle(), "dueño", admin.getNickname());
-            return new DatosRespuestaAuth(token, (int)(expirationMs / 1000), usuario);
+            return new DatosRespuestaAuth(token, (int)(expirationMs / 3600000), usuario);
         }
     }
 }

@@ -29,7 +29,22 @@ El dueño gestiona su negocio con una pantalla limpia:
 | **☰** | Perfil, Dark Mode, Ayuda |
 | **🔔** | Notificaciones: cancelaciones, sobrantes/faltantes, auto-cierres |
 
-### 3. Onboarding Mágico (QR Handshake)
+### 3. Control Maestro (Panel Admin)
+
+Centro de operaciones para el equipo de Taco'Os. Angular 21 + Material + Tailwind.
+
+| Módulo | Función |
+|--------|---------|
+| **Dashboard** | KPIs del sistema, métricas, actividad reciente |
+| **Clientes** | CRUD completo, detalle, planes, sesiones |
+| **Tickets/Chat** | Soporte en tiempo real, asignación, prioridades |
+| **Operaciones** | Forzar acciones, reparar problemas, auditoría |
+| **Equipo** | Gestión del staff interno, rendimiento |
+| **Facturación** | Ingresos, facturas, planes |
+
+Acceso: `http://localhost:4200` (backend en `http://localhost:8080`)
+
+### 4. Onboarding Mágico (QR Handshake)
 - Cajero elige rol → cámara se abre automáticamente
 - Patrón genera QR desde "Equipo"
 - Escaneo → enlace instantáneo con datos de perfil Google
@@ -67,6 +82,7 @@ El dueño gestiona su negocio con una pantalla limpia:
 | Capa | Tecnología | Rol |
 |------|-----------|-----|
 | **App** | Flutter + SQLite/Room | Base maestra local. 100% operable sin internet. |
+| **Control Maestro** | Angular 21 + Material + Tailwind CSS v4 | Panel admin central para el equipo de Taco'Os |
 | **Backend** | Spring Boot + PostgreSQL | Consolidación, reportes, licencias, notificaciones. |
 | **Sync** | REST batch cada 5 min | Worker en segundo plano. Servidor es esclavo. |
 | **Auth** | Google Sign-In + JWT | Sesión larga (turno). 12hr en segundo plano requiere re-login. |

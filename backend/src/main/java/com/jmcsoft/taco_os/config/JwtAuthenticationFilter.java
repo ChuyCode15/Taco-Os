@@ -38,7 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String rol = jwtService.extraerRol(jwt);
                 String nickname = jwtService.extraerNickname(jwt);
 
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + rol.toUpperCase()));
+                String authorityRole = rol.startsWith("master_") ? "MASTER" : rol.toUpperCase();
+                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + authorityRole));
 
                 var authentication = new UsernamePasswordAuthenticationToken(
                         idUsuario, null, authorities

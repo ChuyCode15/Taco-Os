@@ -38,24 +38,24 @@ Construcción ascendente: desde auth hacia negocio, pieza por pieza. Cada pieza 
 - [x] Invitación expira en 15 minutos
 
 ### Productos (Pendiente)
-- [ ] `POST /api/v1/business/{id}/products` — crear producto
-- [ ] `GET /api/v1/business/{id}/products` — listar por categoría
-- [ ] `PUT /api/v1/business/{id}/products/{id}` — editar
-- [ ] `DELETE /api/v1/business/{id}/products/{id}` — eliminar
+- [x] `POST /api/v1/business/{id}/products` — crear producto
+- [x] `GET /api/v1/business/{id}/products` — listar por categoría
+- [x] `PUT /api/v1/business/{id}/products/{id}` — editar
+- [x] `DELETE /api/v1/business/{id}/products/{id}` — eliminar
 
 ### Sesiones y Transacciones (Pendiente)
-- [ ] `POST /api/v1/cashier/open-session` — apertura de caja
-- [ ] `POST /api/v1/transactions` — venta/gasto
-- [ ] `POST /api/v1/cashier/close-session` — corte de caja
-- [ ] `POST /api/v1/transactions/{id}/cancel` — cancelación con foto
+- [x] `POST /api/v1/cashier/open-session` — apertura de caja
+- [x] `POST /api/v1/transactions` — venta/gasto
+- [x] `POST /api/v1/cashier/close-session` — corte de caja
+- [x] `POST /api/v1/transactions/{id}/cancel` — cancelación con foto
 
 ### Sincronización (Pendiente)
-- [ ] `POST /api/v1/sync` — batch cada 5 min
+- [x] `POST /api/v1/sync` — batch cada 5 min
 
 ### Reportes y Notificaciones (Pendiente)
-- [ ] Reportes: Cajas Abiertas, Cortes, Estadísticas
-- [ ] Notificaciones: GET, DELETE
-- [ ] Licencias: Planes, Upgrade, Trial
+- [x] Reportes: Cajas Abiertas, Cortes, Estadísticas
+- [x] Notificaciones: GET, DELETE
+- [x] Licencias: Planes, Upgrade, Trial
 
 ---
 

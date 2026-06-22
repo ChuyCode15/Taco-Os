@@ -66,13 +66,16 @@ Acceso: `http://localhost:4200` (backend en `http://localhost:8080`)
 
 ## Modelo de Negocio
 
-| Plan | Negocios | Cajeros/Empleados | IA      | Trial |
-|------|----------|-------------------|---------|-------|
-| **Free** | 1 | 2 cajeros | ❌       | — |
-| **Premium** | 2 | 5 cajeros | ✅       | 14 días |
-| **Business** | 5 | 25 empleados | ✅       | 14 días |
+| Plan | Negocios | Cajeros/Empleados | IA | Trial |
+|------|----------|-------------------|-----|-------|
+| **Free** | 1 | 2 cajeros | 1 consejo semanal gratis | — |
+| **Premium** | 2 | 5 cajeros | IA limitada | 14 días |
+| **Business** | 5 | 25 empleados | IA completa | 14 días |
 
 - Free es perpetuo y funcional. El negocio opera mejor que con libreta desde el día 1.
+- Free incluye 1 consejo semanal de IA (reporte básico de tendencias).
+- Premium tiene IA limitada (insights diarios, proyecciones básicas).
+- Business tiene IA completa (insights, proyecciones, alertas, predicciones).
 - 14 días trial con funciones del plan superior para incentivar la conversión.
 
 ---
@@ -94,7 +97,7 @@ Acceso: `http://localhost:4200` (backend en `http://localhost:8080`)
 
 | Fase | Enfoque | Estado |
 |------|---------|--------|
-| **I — Control Operativo** | Transacciones, corte, reportes básicos | ✅ En desarrollo |
+| **I — Control Operativo** | Transacciones, corte, reportes básicos | ✅ Completo |
 | **II — Lealtad y WhatsApp CRM** | Recibos, puntos, QR premios | ⏳ Pendiente |
 | **III — IA y Reportes Avanzados** | Insights, proyecciones, alertas | ⏳ Pendiente |
 | **IV — QR Digital y Menú** | Pedidos en mesa, inventario | ⏳ Pendiente |

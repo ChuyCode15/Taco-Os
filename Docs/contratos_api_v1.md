@@ -614,7 +614,7 @@ Marca una notificación como eliminada (soft delete).
     "price": 0,
     "max_businesses": 1,
     "max_cashiers": 2,
-    "features": ["basic_reports", "cashier_management"],
+    "features": ["basic_reports", "cashier_management", "weekly_ai_advice"],
     "has_trial": false
   },
   {
@@ -624,7 +624,7 @@ Marca una notificación como eliminada (soft delete).
     "interval": "month",
     "max_businesses": 2,
     "max_cashiers": 5,
-    "features": ["basic_reports", "detailed_reports", "cashier_management", "multiple_branches"],
+    "features": ["basic_reports", "detailed_reports", "cashier_management", "multiple_branches", "limited_ai"],
     "has_trial": true,
     "trial_days": 14
   },

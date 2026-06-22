@@ -50,12 +50,15 @@ Tres botones. Sin aprendizaje. Sin distracciones.
 ## Modelo de Negocio
 
 | Plan | Negocios | Cajeros | IA | Trial |
-|------|----------|---------|----|-------|
-| **Free** | 1 | 2 | ❌ | — |
-| **Premium** | 2 | 5 | ❌ | 14 días |
-| **Business** | 5 | 25 | ✅ | 14 días |
+|------|----------|---------|-----|-------|
+| **Free** | 1 | 2 | 1 consejo semanal gratis | — |
+| **Premium** | 2 | 5 | IA limitada | 14 días |
+| **Business** | 5 | 25 | IA completa | 14 días |
 
 - Free es perpetuo y funcional. El negocio opera mejor que con libreta desde el día 1.
+- Free incluye 1 consejo semanal de IA (reporte básico de tendencias).
+- Premium tiene IA limitada (insights diarios, proyecciones básicas).
+- Business tiene IA completa (insights, proyecciones, alertas, predicciones).
 - 14 días trial con funciones del plan superior para incentivar la conversión.
 
 ---
@@ -101,7 +104,7 @@ Tres botones. Sin aprendizaje. Sin distracciones.
 
 | Fase | Enfoque | Estado |
 |------|---------|--------|
-| **I — Control Operativo** | Transacciones, corte, reportes básicos | 🔨 En desarrollo |
+| **I — Control Operativo** | Transacciones, corte, reportes básicos | ✅ Completo |
 | **II — Lealtad y WhatsApp CRM** | Recibos, puntos, QR premios | ⏳ Pendiente |
 | **III — IA y Reportes Avanzados** | Insights, proyecciones, alertas | ⏳ Pendiente |
 | **IV — QR Digital y Menú** | Pedidos en mesa, inventario | ⏳ Pendiente |

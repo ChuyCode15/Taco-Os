@@ -20,22 +20,22 @@ Tú decides nombres, estructura y orden. Yo propongo, tú dispones.
 | 7 | Negocio listar cajeros | `GET /api/v1/business/{id}/cajeros` | ✅ |
 | 8 | Invitación QR | `POST /api/v1/business/invitation` | ✅ |
 | 9 | Enlace cajero | `POST /api/v1/business/link` | ✅ |
-| 10 | Producto crear | `POST /api/v1/business/{id}/products` | ⏳ |
-| 11 | Producto listar | `GET /api/v1/business/{id}/products` | ⏳ |
-| 12 | Producto editar | `PUT /api/v1/business/{id}/products/{id}` | ⏳ |
-| 13 | Producto eliminar | `DELETE /api/v1/business/{id}/products/{id}` | ⏳ |
-| 14 | Apertura caja | `POST /api/v1/cashier/open-session` | ⏳ |
-| 15 | Transacción venta | `POST /api/v1/transactions` | ⏳ |
-| 16 | Corte caja | `POST /api/v1/cashier/close-session` | ⏳ |
-| 17 | Cancelación | `POST /api/v1/transactions/{id}/cancel` | ⏳ |
-| 18 | Sync batch | `POST /api/v1/sync` | ⏳ |
-| 19 | Reporte cajas abiertas | `GET /api/v1/business/{id}/reports/open-sessions` | ⏳ |
-| 20 | Reporte cortes | `GET /api/v1/business/{id}/reports/cuts` | ⏳ |
-| 21 | Reporte estadísticas | `GET /api/v1/business/{id}/reports/stats` | ⏳ |
-| 22 | Notificaciones GET | `GET /api/v1/business/{id}/notifications` | ⏳ |
-| 23 | Notificaciones DELETE | `DELETE /api/v1/business/{id}/notifications/{id}` | ⏳ |
-| 24 | Planes GET | `GET /api/v1/plans` | ⏳ |
-| 25 | Licencia + Upgrade + Trial | `GET /api/v1/business/{id}/license`, `POST .../upgrade`, `POST .../trial` | ⏳ |
+| 10 | Producto crear | `POST /api/v1/business/{id}/products` | ✅ |
+| 11 | Producto listar | `GET /api/v1/business/{id}/products` | ✅ |
+| 12 | Producto editar | `PUT /api/v1/business/{id}/products/{id}` | ✅ |
+| 13 | Producto eliminar | `DELETE /api/v1/business/{id}/products/{id}` | ✅ |
+| 14 | Apertura caja | `POST /api/v1/cashier/open-session` | ✅ |
+| 15 | Transacción venta | `POST /api/v1/transactions` | ✅ |
+| 16 | Corte caja | `POST /api/v1/cashier/close-session` | ✅ |
+| 17 | Cancelación | `POST /api/v1/transactions/{id}/cancel` | ✅ |
+| 18 | Sync batch | `POST /api/v1/sync` | ✅ |
+| 19 | Reporte cajas abiertas | `GET /api/v1/business/{id}/reports/open-sessions` | ✅ |
+| 20 | Reporte cortes | `GET /api/v1/business/{id}/reports/cuts` | ✅ |
+| 21 | Reporte estadísticas | `GET /api/v1/business/{id}/reports/stats` | ✅ |
+| 22 | Notificaciones GET | `GET /api/v1/business/{id}/notifications` | ✅ |
+| 23 | Notificaciones DELETE | `DELETE /api/v1/business/{id}/notifications/{id}` | ✅ |
+| 24 | Planes GET | `GET /api/v1/plans` | ✅ |
+| 25 | Licencia + Upgrade + Trial | `GET /api/v1/business/{id}/license`, `POST .../upgrade`, `POST .../trial` | ✅ |
 
 ---
 

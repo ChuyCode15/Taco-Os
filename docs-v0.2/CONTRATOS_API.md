@@ -721,18 +721,23 @@ Auth requerido (ROLE_SUPER_ADMIN).
 | F-1 | `/api/v1/cashier/open-session` | POST | CashierSessionController |
 | F-2 | `/api/v1/cashier/close-session` | POST | CashierSessionController |
 | G-1 | `/api/v1/transactions` | POST | TransaccionController |
-| H-1 | `/api/v1/cashier/daily-cut` | POST | DailyCutController |
-| I-1 | `/api/v1/transactions/{id}/cancel` | POST | CancelacionController |
-| J-1 | `/api/v1/notifications/{userId}` | GET | NotificacionController |
-| J-2 | `/api/v1/notifications/{id}/read` | PUT | NotificacionController |
-| K-1 | `/api/v1/licenses/{negocioId}` | GET | LicenciaController |
+| H-1 | `/api/v1/cashier/close-session` | POST | DailyCutController |
+| I-1 | `/api/v1/transactions/{id}/cancel` | POST | TransaccionController |
+| J-1 | `/api/v1/business/{negocioId}/notifications` | GET | NotificacionController |
+| J-2 | `/api/v1/business/{negocioId}/notifications/{id}` | DELETE | NotificacionController |
+| K-1 | `/api/v1/business/{negocioId}/license` | GET | LicenciaController |
+| K-2 | `/api/v1/plans` | GET | LicenciaController |
+| K-3 | `/api/v1/business/{negocioId}/license/upgrade` | POST | LicenciaController |
+| K-4 | `/api/v1/business/{negocioId}/license/trial` | POST | LicenciaController |
 | L-1 | `/api/v1/sync` | POST | SyncController |
-| L-2 | `/api/v1/reports/{negocioId}` | GET | ReporteController |
+| L-2 | `/api/v1/business/{negocioId}/reports/open-sessions` | GET | ReporteController |
+| L-3 | `/api/v1/business/{negocioId}/reports/cuts` | GET | ReporteController |
+| L-4 | `/api/v1/business/{negocioId}/reports/stats` | GET | ReporteController |
 | SS-1 | `/api/v1/super-su/login` | POST | SuperSuController |
 | SS-2 | `/api/v1/super-su/admins` | GET | SuperSuController |
 | SS-3 | `/api/v1/super-su/admins/{id}` | GET | SuperSuController |
-| SS-4 | `/api/v1/super-su/admins/{id}/activate` | PUT | SuperSuController |
-| SS-5 | `/api/v1/super-su/admins/{id}/deactivate` | PUT | SuperSuController |
+| SS-4 | `/api/v1/super-su/admins/{id}/activar` | PUT | SuperSuController |
+| SS-5 | `/api/v1/super-su/admins/{id}/desactivar` | PUT | SuperSuController |
 | SS-6 | `/api/v1/super-su/stats` | GET | SuperSuController |
 
 ---

@@ -810,6 +810,71 @@ Auth requerido (ROLE_SUPER_ADMIN).
 | M-7c | `/api/v1/master/billing/invoices` | POST | Generar factura |
 | M-7d | `/api/v1/master/billing/plans` | GET | Planes disponibles |
 
+### M-8 Transactions (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-8a | `/api/v1/master/transactions` | GET | Listar todas las transacciones |
+| M-8b | `/api/v1/master/transactions/{id}` | GET | Detalle de transacción |
+| M-8c | `/api/v1/master/transactions/stats` | GET | Estadísticas de transacciones |
+
+### M-9 Products (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-9a | `/api/v1/master/products` | GET | Listar todos los productos |
+| M-9b | `/api/v1/master/products/stats` | GET | Estadísticas de productos |
+
+### M-10 Sessions (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-10a | `/api/v1/master/sessions` | GET | Listar todas las sesiones |
+| M-10b | `/api/v1/master/sessions/active` | GET | Sesiones abiertas |
+| M-10c | `/api/v1/master/sessions/{id}` | GET | Detalle de sesión |
+
+### M-11 Daily Cuts (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-11a | `/api/v1/master/daily-cuts` | GET | Listar cortes diarios |
+| M-11b | `/api/v1/master/daily-cuts/{id}` | GET | Detalle de corte |
+| M-11c | `/api/v1/master/daily-cuts/stats` | GET | Estadísticas de cortes |
+
+### M-12 Notifications (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-12a | `/api/v1/master/notifications` | GET | Listar notificaciones |
+| M-12b | `/api/v1/master/notifications/{id}` | GET | Detalle de notificación |
+| M-12c | `/api/v1/master/notifications/{id}/read` | PUT | Marcar como leída |
+| M-12d | `/api/v1/master/notifications/stats` | GET | Estadísticas de notificaciones |
+
+### M-13 Sync (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-13a | `/api/v1/master/sync/status` | GET | Estado de sincronización |
+| M-13b | `/api/v1/master/sync/force` | POST | Forzar sincronización |
+| M-13c | `/api/v1/master/sync/logs` | GET | Logs de sincronización |
+
+### M-14 Reports (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-14a | `/api/v1/master/reports/open-sessions` | GET | Cajas abiertas |
+| M-14b | `/api/v1/master/reports/cuts` | GET | Historial de cortes |
+| M-14c | `/api/v1/master/reports/stats` | GET | Estadísticas generales |
+| M-14d | `/api/v1/master/reports/export` | GET | Exportar reportes |
+
+### M-15 Audit (Sincronizado)
+
+| ID | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| M-15a | `/api/v1/master/audit` | GET | Log de auditoría |
+| M-15b | `/api/v1/master/audit/{id}` | GET | Detalle de acción |
+| M-15c | `/api/v1/master/audit/stats` | GET | Estadísticas de auditoría |
+
 ---
 
 ## Swagger

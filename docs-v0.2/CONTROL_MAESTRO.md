@@ -313,6 +313,257 @@ Gestión del equipo interno de soporte.
 
 ---
 
+### 3.7 Transacciones (`/transactions`)
+
+Vista completa de todas las transacciones de todos los clientes.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  TRANSACCIONES                                       │
+├──────────────────────────────────────────────────────┤
+│  Filtros: [Fecha] [Cliente] [Tipo] [Monto]          │
+├──────────────────────────────────────────────────────┤
+│  ┌────┬────────────┬──────────┬────────┬──────────┐ │
+│  │ #  │ Cliente    │ Tipo     │ Monto  │ Fecha    │ │
+│  ├────┼────────────┼──────────┼────────┼──────────┤ │
+│  │ 001│ Tacos Güero│ Venta    │ $450.00│ 21/06/26 │ │
+│  │ 002│ La Esquina │ Gasto    │ -$120.0│ 21/06/26 │ │
+│  │ 003│ Don Pepe   │ Venta    │ $890.00│ 21/06/26 │ │
+│  └────┴────────────┴──────────┴────────┴──────────┘ │
+│  Total: $1,220.00 | Ventas: $1,340 | Gastos: $120   │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver todas las transacciones de todos los clientes
+- Filtrar por fecha, cliente, tipo (venta/gasto), monto
+- Ver detalle de transacción (productos, método de pago)
+- Exportar transacciones (CSV/Excel)
+- Detectar anomalías (montos inusuales, patrones sospechosos)
+
+---
+
+### 3.8 Productos (`/products`)
+
+Catálogos de productos de todos los clientes.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  PRODUCTOS                                           │
+├──────────────────────────────────────────────────────┤
+│  Filtros: [Cliente] [Categoría] [Estado]            │
+├──────────────────────────────────────────────────────┤
+│  ┌────────────┬──────────┬────────┬────────┬──────┐ │
+│  │ Producto   │ Cliente  │ Precio │ Categor│ Estado│ │
+│  ├────────────┼──────────┼────────┼────────┼──────┤ │
+│  │ Tacos      │ Tacos Güe│ $15.00 │ COMIDA │ Act. │ │
+│  │ Quesadilla │ La Esqui │ $20.00 │ COMIDA │ Act. │ │
+│  │ Refresco   │ Don Pepe │ $18.00 │ BEBIDA │ Act. │ │
+│  └────────────┴──────────┴────────┴────────┴──────┘ │
+│  Total: 156 productos | 45 clientes con catálogo     │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver productos de todos los clientes
+- Filtrar por cliente, categoría, estado
+- Ver estadísticas de productos más vendidos
+- Detectar precios inusuales o inconsistentes
+
+---
+
+### 3.9 Sesiones de Cajero (`/sessions`)
+
+Vista de todas las sesiones de cajeros (abiertas/cerradas).
+
+```
+┌──────────────────────────────────────────────────────┐
+│  SESIONES DE CAJERO                                  │
+├──────────────────────────────────────────────────────┤
+│  Filtros: [Estado] [Cliente] [Fecha]                │
+├──────────────────────────────────────────────────────┤
+│  ┌────────────┬──────────┬──────────┬──────────────┐│
+│  │ Cajero     │ Cliente  │ Estado   │ Duración     ││
+│  ├────────────┼──────────┼──────────┼──────────────┤│
+│  │ Pedro      │ Tacos Güe│ Abierta  │ 4h 32min     ││
+│  │ Ana        │ La Esqui│ Cerrada  │ 8h 15min     ││
+│  │ Luis       │ Don Pepe│ Abierta  │ 2h 10min     ││
+│  └────────────┴──────────┴──────────┴──────────────┘│
+│  Abiertas: 23 | Cerradas hoy: 45 | Promedio: 7h     │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver sesiones abiertas y cerradas
+- Filtrar por estado, cliente, fecha
+- Ver duración de cada sesión
+- Alertas de sesiones muy largas (>12h)
+- Forzar cierre de sesión desde aquí
+
+---
+
+### 3.10 Cortes Diario (`/daily-cuts`)
+
+Historial de cortes diarios de todos los clientes.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  CORTES DIARIOS                                      │
+├──────────────────────────────────────────────────────┤
+│  Filtros: [Cliente] [Fecha] [Estado]                │
+├──────────────────────────────────────────────────────┤
+│  ┌────────────┬──────────┬────────┬────────┬──────┐ │
+│  │ Cliente    │ Fecha    │ Ventas │ Gasto  │ Saldo│ │
+│  ├────────────┼──────────┼────────┼────────┼──────┤ │
+│  │ Tacos Güero│ 21/06/26 │ $2,500 │ $180   │$2,320│ │
+│  │ La Esquina │ 21/06/26 │ $1,800 │ $95    │$1,705│ │
+│  │ Don Pepe   │ 21/06/26 │ $3,200 │ $250   │$2,950│ │
+│  └────────────┴──────────┴────────┴────────┴──────┘ │
+│  Total cortes hoy: 42 | Monto total: $85,400        │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver historial de cortes diarios
+- Filtrar por cliente, fecha, estado
+- Ver sobrantes/faltantes
+- Detectar anomalías en cortes
+- Exportar reportes de cortes
+
+---
+
+### 3.11 Notificaciones (`/notifications`)
+
+Gestión de notificaciones del sistema.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  NOTIFICACIONES                                      │
+├──────────────────────────────────────────────────────┤
+│  Filtros: [Tipo] [Cliente] [Leída]                  │
+├──────────────────────────────────────────────────────┤
+│  ┌────────────┬──────────┬──────────┬──────────────┐│
+│  │ Tipo       │ Cliente  │ Mensaje  │ Estado       ││
+│  ├────────────┼──────────┼──────────┼──────────────┤│
+│  │ Cancelació │ Tacos Güe│ Venta ca │ No leída     ││
+│  │ Auto-cierre│ La Esqui│ Corte au │ Leída        ││
+│  │ Sobrante   │ Don Pepe│ Sobrant  │ No leída     ││
+│  └────────────┴──────────┴──────────┴──────────────┘│
+│  Total: 234 | No leídas: 12 | Urgentes: 3           │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver todas las notificaciones del sistema
+- Filtrar por tipo, cliente, estado (leída/no leída)
+- Marcar como leída
+- Eliminar notificaciones
+- Ver estadísticas de notificaciones
+
+---
+
+### 3.12 Sincronización (`/sync`)
+
+Control de sincronización de datos.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  SINCRONIZACIÓN                                      │
+├──────────────────────────────────────────────────────┤
+│  Estado del sistema:                                 │
+│  ┌──────────────────────────────────────────────┐   │
+│  │ Última sync: hace 3 min                      │   │
+│  │ Próxima sync: en 2 min                        │   │
+│  │ Syncs hoy: 288 | Errores: 2                   │   │
+│  └──────────────────────────────────────────────┘   │
+│                                                      │
+│  Acciones:                                           │
+│  [🔄 Forzar Sync Ahora]  [📊 Ver Logs de Sync]     │
+│                                                      │
+│  Historial de errores:                               │
+│  ┌────────────┬──────────┬──────────────────────┐   │
+│  │ Cliente    │ Hora     │ Error                │   │
+│  ├────────────┼──────────┼──────────────────────┤   │
+│  │ Tacos Güero│ 14:32    │ Timeout de conexión  │   │
+│  │ Don Pepe   │ 12:15    │ Datos inválidos      │   │
+│  └────────────┴──────────┴──────────────────────┘   │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver estado de sincronización
+- Forzar sincronización manual
+- Ver logs de sincronización
+- Ver errores de sincronización
+- Reintentar sincronizaciones fallidas
+
+---
+
+### 3.13 Reportes (`/reports`)
+
+Reportes avanzados de todos los clientes.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  REPORTES                                            │
+├──────────────────────────────────────────────────────┤
+│  Tipos de reporte:                                   │
+│  [📊 Cajas Abiertas] [📋 Cortes] [📈 Estadísticas] │
+│                                                      │
+│  Filtros: [Cliente] [Fecha inicio] [Fecha fin]      │
+├──────────────────────────────────────────────────────┤
+│  Resultados:                                         │
+│  ┌──────────────────────────────────────────────┐   │
+│  │ Cajas abiertas ahora: 23                      │   │
+│  │ Cortes realizados hoy: 42                     │   │
+│  │ Total ventas hoy: $85,400                     │   │
+│  │ Promedio por corte: $2,033                    │   │
+│  └──────────────────────────────────────────────┘   │
+│                                                      │
+│  [📥 Exportar CSV]  [📈 Ver Gráfica]                │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver cajas abiertas en tiempo real
+- Historial de cortes por cliente/rango de fechas
+- Estadísticas comparativas entre clientes
+- Top productos más vendidos
+- Exportar reportes (CSV/Excel)
+- Gráficas de tendencias
+
+---
+
+### 3.14 Auditoría (`/audit`)
+
+Log completo de acciones del sistema.
+
+```
+┌──────────────────────────────────────────────────────┐
+│  AUDITORÍA                                           │
+├──────────────────────────────────────────────────────┤
+│  Filtros: [Usuario] [Acción] [Fecha] [Target]       │
+├──────────────────────────────────────────────────────┤
+│  ┌────────────┬──────────┬──────────┬──────────────┐│
+│  │ Usuario    │ Acción   │ Target   │ Fecha        ││
+│  ├────────────┼──────────┼──────────┼──────────────┤│
+│  │ Jesús M.   │ BLOCK    │ Pedro    │ 21/06 14:32  ││
+│  │ Ana López  │ ASSIGN   │ #1042    │ 21/06 13:15  ││
+│  │ System     │ AUTO_CUT │ Tacos G. │ 21/06 12:00  ││
+│  └────────────┴──────────┴──────────┴──────────────┘│
+│  Total: 1,234 acciones | Hoy: 45 | Esta semana: 312 │
+└──────────────────────────────────────────────────────┘
+```
+
+**Funcionalidades:**
+- Ver log completo de acciones
+- Filtrar por usuario, acción, fecha, target
+- Ver detalles de cada acción
+- Exportar audit log
+- Detectar patrones sospechosos
+
+---
+
 ## 4. Arquitectura de Rutas
 
 ```
@@ -327,6 +578,14 @@ Gestión del equipo interno de soporte.
 ├── /billing                  → Facturación
 ├── /team                     → Equipo de mantenimiento
 │   └── /:memberId            → Perfil del miembro
+├── /transactions             → Transacciones (sincronizado)
+├── /products                 → Productos (sincronizado)
+├── /sessions                 → Sesiones de cajero (sincronizado)
+├── /daily-cuts               → Cortes diarios (sincronizado)
+├── /notifications            → Notificaciones (sincronizado)
+├── /sync                     → Sincronización (sincronizado)
+├── /reports                  → Reportes (sincronizado)
+├── /audit                    → Auditoría (sincronizado)
 ├── /settings                 → Configuración del sistema
 │   ├── /general              → Nombre, logo, configs
 │   ├── /notifications        → Templates de notificaciones
@@ -398,6 +657,63 @@ Gestión del equipo interno de soporte.
 | `/api/v1/master/team/:id/performance` | GET | Métricas de rendimiento |
 | `/api/v1/master/team/:id` | PUT | Actualizar miembro |
 | `/api/v1/master/team/:id` | DELETE | Desactivar miembro |
+
+### Transactions (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/transactions` | GET | Listar todas las transacciones |
+| `/api/v1/master/transactions/:id` | GET | Detalle de transacción |
+| `/api/v1/master/transactions/stats` | GET | Estadísticas de transacciones |
+
+### Products (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/products` | GET | Listar todos los productos |
+| `/api/v1/master/products/stats` | GET | Estadísticas de productos |
+
+### Sessions (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/sessions` | GET | Listar todas las sesiones |
+| `/api/v1/master/sessions/active` | GET | Sesiones abiertas |
+| `/api/v1/master/sessions/:id` | GET | Detalle de sesión |
+
+### Daily Cuts (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/daily-cuts` | GET | Listar cortes diarios |
+| `/api/v1/master/daily-cuts/:id` | GET | Detalle de corte |
+| `/api/v1/master/daily-cuts/stats` | GET | Estadísticas de cortes |
+
+### Notifications (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/notifications` | GET | Listar notificaciones |
+| `/api/v1/master/notifications/:id` | GET | Detalle de notificación |
+| `/api/v1/master/notifications/:id/read` | PUT | Marcar como leída |
+| `/api/v1/master/notifications/stats` | GET | Estadísticas de notificaciones |
+
+### Sync (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/sync/status` | GET | Estado de sincronización |
+| `/api/v1/master/sync/force` | POST | Forzar sincronización |
+| `/api/v1/master/sync/logs` | GET | Logs de sincronización |
+
+### Reports (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/reports/open-sessions` | GET | Cajas abiertas |
+| `/api/v1/master/reports/cuts` | GET | Historial de cortes |
+| `/api/v1/master/reports/stats` | GET | Estadísticas generales |
+| `/api/v1/master/reports/export` | GET | Exportar reportes |
+
+### Audit (Sincronizado)
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/v1/master/audit` | GET | Log de auditoría |
+| `/api/v1/master/audit/:id` | GET | Detalle de acción |
+| `/api/v1/master/audit/stats` | GET | Estadísticas de auditoría |
 
 ### Auth (nuevo login separado)
 | Endpoint | Método | Descripción |
@@ -597,14 +913,20 @@ Basado en investigación, las mejores opciones para Angular 21:
 | 15 | Layout (Sidebar + Toolbar) | Navegación lateral colapsable |
 | 16 | Zone.js configurado | Angular 21 zoneless mode + polyfill |
 
-### ⏳ Pendiente
+### ⏳ Pendiente (Sincronización con Sistema Principal)
 
 | # | Tarea | Prioridad |
 |---|-------|-----------|
-| 1 | Conectar WebSocket para chat en tiempo real | Alta |
-| 2 | Gráficas reales con ng-apexcharts | Media |
-| 3 | Dark/Light mode toggle | Media |
-| 4 | Skeleton loaders | Baja |
-| 5 | Testing (Vitest + Cypress para E2E) | Media |
-| 6 | Audit logging frontend | Baja |
-| 7 | Notificaciones push | Baja |
+| 1 | Módulo de Transacciones | Ver transacciones de cualquier cliente, filtros, exportar | Alta |
+| 2 | Módulo de Productos | Ver catálogos de productos, estadísticas | Media |
+| 3 | Módulo de Sesiones | Ver sesiones abiertas/cerradas, alertas | Alta |
+| 4 | Módulo de Cortes Diarios | Historial de cortes, sobrantes/faltantes | Alta |
+| 5 | Módulo de Notificaciones | Ver/gestionar notificaciones del sistema | Media |
+| 6 | Módulo de Sincronización | Forzar sync, ver logs, errores | Alta |
+| 7 | Módulo de Reportes | Cajas abiertas, cortes, estadísticas | Alta |
+| 8 | Módulo de Auditoría | Log completo de acciones del sistema | Alta |
+| 9 | Conectar WebSocket para chat en tiempo real | Alta |
+| 10 | Gráficas reales con ng-apexcharts | Media |
+| 11 | Dark/Light mode toggle | Media |
+| 12 | Skeleton loaders | Baja |
+| 13 | Testing (Vitest + Cypress para E2E) | Media |

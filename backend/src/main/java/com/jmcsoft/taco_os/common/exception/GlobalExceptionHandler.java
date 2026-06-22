@@ -2,8 +2,11 @@ package com.jmcsoft.taco_os.common.exception;
 
 import com.jmcsoft.taco_os.common.dto.DatosError;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -48,6 +51,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<DatosError> manejarIllegalArgument(IllegalArgumentException ex) {
         var error = new DatosError("ARGUMENTO_INVALIDO", ex.getMessage(), "GlobalExceptionHandler", 400);
         return ResponseEntity.status(400).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<DatosError> manejarValidacion(MethodArgumentNotValidException ex) {
+        var mensajes = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        var error = new DatosError("VALIDACION_FALLIDA", mensajes, "GlobalExceptionHandler", 422);
+        return ResponseEntity.status(422).body(error);
     }
 
     @ExceptionHandler(Exception.class)

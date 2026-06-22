@@ -1,5 +1,6 @@
 package com.jmcsoft.taco_os.services;
 
+import com.jmcsoft.taco_os.common.exception.NoExisteException;
 import com.jmcsoft.taco_os.common.helper.NegocioHelper;
 import com.jmcsoft.taco_os.domain.notificacion.Notificacion;
 import com.jmcsoft.taco_os.domain.notificacion.dto.DatosListaNotificaciones;
@@ -35,11 +36,34 @@ public class NotificacionService {
     }
 
     @Transactional
+    public void marcarLeida(String negocioId, String notificacionId) {
+        negocioHelper.validarIdNegocio(negocioId);
+
+        var notificacion = notificacionRepository.findById(UUID.fromString(notificacionId))
+                .orElseThrow(() -> new NoExisteException(
+                        "Notificación no encontrada",
+                        "NotificacionService.marcarLeida"
+                ));
+        notificacion.setLeido(true);
+        notificacionRepository.save(notificacion);
+    }
+
+    @Transactional
+    public void marcarTodasLeidas(String negocioId) {
+        negocioHelper.validarIdNegocio(negocioId);
+
+        var noLeidas = notificacionRepository
+                .findByNegocioIdAndLeidoFalse(UUID.fromString(negocioId));
+        noLeidas.forEach(n -> n.setLeido(true));
+        notificacionRepository.saveAll(noLeidas);
+    }
+
+    @Transactional
     public void eliminarNotificacion(String negocioId, String notificacionId) {
         negocioHelper.validarIdNegocio(negocioId);
 
         var notificacion = notificacionRepository.findById(UUID.fromString(notificacionId))
-                .orElseThrow(() -> new com.jmcsoft.taco_os.common.exception.NoExisteException(
+                .orElseThrow(() -> new NoExisteException(
                         "Notificación no encontrada",
                         "NotificacionService.eliminarNotificacion"
                 ));

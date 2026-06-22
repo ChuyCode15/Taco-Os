@@ -10,5 +10,7 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, UUID
 
     List<Notificacion> findByNegocioIdOrderByRegistroDesc(UUID negocioId);
 
+    List<Notificacion> findByNegocioIdAndLeidoFalse(UUID negocioId);
+
     Long countByNegocioIdAndLeidoFalse(UUID negocioId);
 }

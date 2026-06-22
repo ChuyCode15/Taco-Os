@@ -76,7 +76,7 @@ class ProductoHelperTest {
         when(productoRepository.existsByNombreAndNegocioIdAndActivoTrue("Taco Dup", negocioId)).thenReturn(true);
 
         assertThrows(YaRegistradoException.class,
-                () -> productoHelper.productoYaRegistrado("Taco Dup", negocioId.toString()));
+                () -> productoHelper.validarNombreNoDuplicado("Taco Dup", negocioId.toString()));
     }
 
     @Test
@@ -85,6 +85,6 @@ class ProductoHelperTest {
         UUID negocioId = UUID.randomUUID();
         when(productoRepository.existsByNombreAndNegocioIdAndActivoTrue("Taco Nuevo", negocioId)).thenReturn(false);
 
-        assertDoesNotThrow(() -> productoHelper.productoYaRegistrado("Taco Nuevo", negocioId.toString()));
+        assertDoesNotThrow(() -> productoHelper.validarNombreNoDuplicado("Taco Nuevo", negocioId.toString()));
     }
 }

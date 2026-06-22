@@ -19,6 +19,20 @@ public class NotificacionController {
         return ResponseEntity.ok(notificaciones);
     }
 
+    @PutMapping("/{notificacionId}/read")
+    public ResponseEntity<Void> marcarLeida(
+            @PathVariable String negocioId,
+            @PathVariable String notificacionId) {
+        notificacionService.marcarLeida(negocioId, notificacionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<Void> marcarTodasLeidas(@PathVariable String negocioId) {
+        notificacionService.marcarTodasLeidas(negocioId);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{notificacionId}")
     public ResponseEntity<Void> eliminarNotificacion(
             @PathVariable String negocioId,

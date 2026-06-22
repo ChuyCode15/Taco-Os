@@ -3,55 +3,69 @@ package com.jmcsoft.taco_os.controller;
 import com.jmcsoft.taco_os.domain.producto.dto.DatosDetalleProducto;
 import com.jmcsoft.taco_os.domain.producto.dto.DatosRegistroProducto;
 import com.jmcsoft.taco_os.services.ProductoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/business/{negocioId}/products")
 @RequiredArgsConstructor
+@Tag(name = "Productos", description = "CRUD de productos del negocio")
 public class ProductoController {
 
     private final ProductoService productoService;
 
     @PostMapping
-    public ResponseEntity<DatosDetalleProducto> registrarProducto(
+    @Operation(summary = "Crear un producto nuevo")
+    public ResponseEntity<DatosDetalleProducto> crear(
             @PathVariable String negocioId,
-            @RequestBody DatosRegistroProducto datos,
+            @RequestBody @Valid DatosRegistroProducto datos,
             UriComponentsBuilder ucb) {
-        var producto = productoService.registrarProducto(negocioId, datos);
+        var producto = productoService.crear(negocioId, datos);
         var uri = ucb.path("/api/v1/business/{negocioId}/products/{id}")
                 .buildAndExpand(negocioId, producto.id()).toUri();
         return ResponseEntity.created(uri).body(producto);
     }
 
     @GetMapping
-    public ResponseEntity<List<DatosDetalleProducto>> listarProductos(
+    @Operation(summary = "Listar productos del negocio (con filtro por categoría opcional)")
+    public ResponseEntity<Page<DatosDetalleProducto>> listar(
             @PathVariable String negocioId,
-            @RequestParam(required = false) String category) {
-        if (category != null) {
-            return ResponseEntity.ok(productoService.listarPorCategoria(negocioId, category));
-        }
-        return ResponseEntity.ok(productoService.listarProductos(negocioId));
+            @RequestParam(required = false) String category,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(productoService.listar(negocioId, category, pageable));
+    }
+
+    @GetMapping("/{productoId}")
+    @Operation(summary = "Obtener detalle de un producto")
+    public ResponseEntity<DatosDetalleProducto> detalle(
+            @PathVariable String negocioId,
+            @PathVariable String productoId) {
+        return ResponseEntity.ok(productoService.detalle(negocioId, productoId));
     }
 
     @PutMapping("/{productoId}")
-    public ResponseEntity<DatosDetalleProducto> editarProducto(
+    @Operation(summary = "Actualizar un producto existente")
+    public ResponseEntity<DatosDetalleProducto> actualizar(
             @PathVariable String negocioId,
             @PathVariable String productoId,
-            @RequestBody DatosRegistroProducto datos) {
-        var producto = productoService.editarProducto(negocioId, productoId, datos);
-        return ResponseEntity.ok(producto);
+            @RequestBody @Valid DatosRegistroProducto datos) {
+        return ResponseEntity.ok(productoService.actualizar(negocioId, productoId, datos));
     }
 
     @DeleteMapping("/{productoId}")
-    public ResponseEntity<Void> eliminarProducto(
+    @Operation(summary = "Eliminar (soft delete) un producto")
+    public ResponseEntity<Void> eliminar(
             @PathVariable String negocioId,
             @PathVariable String productoId) {
-        productoService.eliminarProducto(negocioId, productoId);
+        productoService.eliminar(negocioId, productoId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -15,25 +15,44 @@ public class ProductoHelper {
 
     private final ProductoRepository productoRepository;
 
-    public void productoYaRegistrado(String nombre, String negocioId) {
+    public void validarNombreNoDuplicado(String nombre, String negocioId) {
         if (productoRepository.existsByNombreAndNegocioIdAndActivoTrue(nombre, UUID.fromString(negocioId))) {
             throw new YaRegistradoException(
                     "Ya existe un producto con ese nombre en este negocio",
-                    "ProductoHelper.productoYaRegistrado"
+                    "ProductoHelper.validarNombreNoDuplicado"
             );
         }
     }
 
     public Producto validarIdProducto(String id) {
         if (id == null || id.isBlank()) {
-            throw new NoExisteException("El id del producto no puede estar vacío", "ProductoHelper.validarIdProducto");
+            throw new NoExisteException(
+                    "El id del producto no puede estar vacío",
+                    "ProductoHelper.validarIdProducto"
+            );
         }
         try {
             UUID.fromString(id);
         } catch (IllegalArgumentException e) {
-            throw new NoExisteException("El id del producto no es válido", "ProductoHelper.validarIdProducto");
+            throw new NoExisteException(
+                    "El id del producto no es válido",
+                    "ProductoHelper.validarIdProducto"
+            );
         }
         return productoRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new NoExisteException("Producto no encontrado", "ProductoHelper.validarIdProducto"));
+                .orElseThrow(() -> new NoExisteException(
+                        "Producto no encontrado",
+                        "ProductoHelper.validarIdProducto"
+                ));
+    }
+
+    public void validarPertenencia(String productoId, String negocioId) {
+        if (!productoRepository.existsByIdAndNegocioId(
+                UUID.fromString(productoId), UUID.fromString(negocioId))) {
+            throw new NoExisteException(
+                    "El producto no pertenece a este negocio",
+                    "ProductoHelper.validarPertenencia"
+            );
+        }
     }
 }

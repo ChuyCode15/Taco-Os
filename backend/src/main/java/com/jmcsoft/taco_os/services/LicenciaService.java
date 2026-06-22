@@ -66,7 +66,7 @@ public class LicenciaService {
                 cajerosActuales,
                 licencia.getMaxNegocios(),
                 1,
-                List.of("basic_reports", "cashier_management")
+                featuresForPlan(licencia.getPlan())
         );
     }
 
@@ -139,5 +139,13 @@ public class LicenciaService {
                 licencia.getFechaFinTrial().toString(),
                 "14 días de prueba activados."
         );
+    }
+
+    private List<String> featuresForPlan(TipoPlan plan) {
+        return switch (plan) {
+            case FREE -> List.of("basic_reports", "cashier_management");
+            case PREMIUM -> List.of("basic_reports", "detailed_reports", "cashier_management", "multiple_branches", "ai_limited");
+            case BUSINESS -> List.of("basic_reports", "detailed_reports", "cashier_management", "multiple_branches", "ai_insights", "priority_support");
+        };
     }
 }

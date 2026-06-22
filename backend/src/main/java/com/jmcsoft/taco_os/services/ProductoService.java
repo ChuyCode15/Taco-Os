@@ -8,11 +8,10 @@ import com.jmcsoft.taco_os.domain.producto.dto.DatosRegistroProducto;
 import com.jmcsoft.taco_os.domain.producto.mapper.ProductoMapper;
 import com.jmcsoft.taco_os.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,41 +23,46 @@ public class ProductoService {
     private final ProductoMapper productoMapper;
 
     @Transactional
-    public DatosDetalleProducto registrarProducto(String negocioId, DatosRegistroProducto datos) {
+    public DatosDetalleProducto crear(String negocioId, DatosRegistroProducto datos) {
         var negocio = negocioHelper.validarIdNegocio(negocioId);
-        productoHelper.productoYaRegistrado(datos.nombre(), negocioId);
+        productoHelper.validarNombreNoDuplicado(datos.nombre(), negocioId);
 
-        var productoNuevo = productoMapper.nuevaProducto(datos);
-        productoNuevo.setNegocio(negocio);
-        var producto = productoRepository.save(productoNuevo);
+        var producto = productoMapper.datosAEntidad(datos);
+        producto.setNegocio(negocio);
+        var guardado = productoRepository.save(producto);
 
-        return productoMapper.productoADetalle(producto);
+        return productoMapper.entidadADetalle(guardado);
     }
 
     @Transactional(readOnly = true)
-    public List<DatosDetalleProducto> listarProductos(String negocioId) {
+    public Page<DatosDetalleProducto> listar(String negocioId, String categoria, Pageable pageable) {
         negocioHelper.validarIdNegocio(negocioId);
+        var negocioUuid = java.util.UUID.fromString(negocioId);
 
-        return productoRepository.findByNegocioIdAndActivoTrue(java.util.UUID.fromString(negocioId))
-                .stream()
-                .map(productoMapper::productoADetalle)
-                .collect(Collectors.toList());
+        if (categoria != null) {
+            var cat = Categoria.valueOf(categoria.toUpperCase());
+            return productoRepository
+                    .findByNegocioIdAndCategoriaAndActivoTrue(negocioUuid, cat, pageable)
+                    .map(productoMapper::entidadADetalle);
+        }
+
+        return productoRepository
+                .findByNegocioIdAndActivoTrue(negocioUuid, pageable)
+                .map(productoMapper::entidadADetalle);
     }
 
     @Transactional(readOnly = true)
-    public List<DatosDetalleProducto> listarPorCategoria(String negocioId, String categoria) {
+    public DatosDetalleProducto detalle(String negocioId, String productoId) {
         negocioHelper.validarIdNegocio(negocioId);
-
-        var cat = Categoria.valueOf(categoria.toUpperCase());
-        return productoRepository.findByNegocioIdAndCategoriaAndActivoTrue(java.util.UUID.fromString(negocioId), cat)
-                .stream()
-                .map(productoMapper::productoADetalle)
-                .collect(Collectors.toList());
+        productoHelper.validarPertenencia(productoId, negocioId);
+        var producto = productoHelper.validarIdProducto(productoId);
+        return productoMapper.entidadADetalle(producto);
     }
 
     @Transactional
-    public DatosDetalleProducto editarProducto(String negocioId, String productoId, DatosRegistroProducto datos) {
+    public DatosDetalleProducto actualizar(String negocioId, String productoId, DatosRegistroProducto datos) {
         negocioHelper.validarIdNegocio(negocioId);
+        productoHelper.validarPertenencia(productoId, negocioId);
         var producto = productoHelper.validarIdProducto(productoId);
 
         producto.setNombre(datos.nombre());
@@ -66,13 +70,14 @@ public class ProductoService {
         producto.setCategoria(Categoria.valueOf(datos.categoria().toUpperCase()));
         producto.setFotoUrl(datos.fotoUrl());
 
-        var productoActualizado = productoRepository.save(producto);
-        return productoMapper.productoADetalle(productoActualizado);
+        var actualizado = productoRepository.save(producto);
+        return productoMapper.entidadADetalle(actualizado);
     }
 
     @Transactional
-    public void eliminarProducto(String negocioId, String productoId) {
+    public void eliminar(String negocioId, String productoId) {
         negocioHelper.validarIdNegocio(negocioId);
+        productoHelper.validarPertenencia(productoId, negocioId);
         var producto = productoHelper.validarIdProducto(productoId);
 
         producto.setActivo(false);

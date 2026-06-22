@@ -24,4 +24,7 @@ public interface TransaccionRepository extends JpaRepository<Transaccion, UUID> 
     BigDecimal sumBySesionAndMetodoAndEstado(UUID sesionId, com.jmcsoft.taco_os.common.enums.MetodoPago metodo, EstadoTransaccion estado);
 
     Boolean existsByIdAndNegocioId(UUID id, UUID negocioId);
+
+    @Query("SELECT COUNT(t) FROM Transaccion t WHERE t.sesion.id = :sesionId AND t.estado = :estado")
+    long countBySesionIdAndEstado(UUID sesionId, EstadoTransaccion estado);
 }

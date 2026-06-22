@@ -1,10 +1,12 @@
 package com.jmcsoft.taco_os.services;
 
+import com.jmcsoft.taco_os.common.enums.EstadoTransaccion;
+import com.jmcsoft.taco_os.common.enums.MetodoPago;
+import com.jmcsoft.taco_os.common.enums.TipoTransaccion;
 import com.jmcsoft.taco_os.common.helper.NegocioHelper;
-import com.jmcsoft.taco_os.domain.corte.DailyCut;
-import com.jmcsoft.taco_os.domain.sesioncajero.CashierSession;
 import com.jmcsoft.taco_os.repository.CashierSessionRepository;
 import com.jmcsoft.taco_os.repository.DailyCutRepository;
+import com.jmcsoft.taco_os.repository.TransaccionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ public class ReporteService {
 
     private final CashierSessionRepository sesionRepository;
     private final DailyCutRepository corteRepository;
+    private final TransaccionRepository transaccionRepository;
     private final NegocioHelper negocioHelper;
 
     @Transactional(readOnly = true)
@@ -31,15 +34,22 @@ public class ReporteService {
                         com.jmcsoft.taco_os.common.enums.EstadoSesion.ABIERTA);
 
         return sesiones.stream().map(s -> {
+            var totalVentas = transaccionRepository
+                    .sumBySesionAndTipoAndEstado(s.getId(), TipoTransaccion.VENTA, EstadoTransaccion.COMPLETADA);
+            var totalGastos = transaccionRepository
+                    .sumBySesionAndTipoAndEstado(s.getId(), TipoTransaccion.GASTO, EstadoTransaccion.COMPLETADA);
+            var transactionCount = transaccionRepository
+                    .countBySesionIdAndEstado(s.getId(), EstadoTransaccion.COMPLETADA);
+
             Map<String, Object> resumen = new HashMap<>();
             resumen.put("session_id", s.getId().toString());
             resumen.put("cashier_name", s.getCajero().getNickname());
             resumen.put("branch", s.getNegocio().getNombre());
             resumen.put("opened_at", s.getApertura().toString());
             resumen.put("summary", Map.of(
-                    "transaction_count", 0,
-                    "total_sales", java.math.BigDecimal.ZERO,
-                    "total_expenses", java.math.BigDecimal.ZERO
+                    "transaction_count", transactionCount,
+                    "total_sales", totalVentas,
+                    "total_expenses", totalGastos
             ));
             return resumen;
         }).collect(Collectors.toList());

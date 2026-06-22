@@ -56,4 +56,20 @@ public class JwtService {
     public boolean esTokenExpirado(DecodedJWT jwt) {
         return jwt.getExpiresAt().before(new Date());
     }
+
+    public String refrescarToken(String token) {
+        var decoded = validarToken(token);
+        if (esTokenExpirado(decoded)) {
+            throw new com.jmcsoft.taco_os.common.exception.NoAutorizadoException(
+                    "Token expirado, inicia sesión nuevamente",
+                    "JwtService.refrescarToken"
+            );
+        }
+        return generarToken(
+                decoded.getSubject(),
+                decoded.getClaim("idGoogle").asString(),
+                decoded.getClaim("rol").asString(),
+                decoded.getClaim("nickname").asString()
+        );
+    }
 }

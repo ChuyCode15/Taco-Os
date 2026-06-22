@@ -8,12 +8,13 @@
 
 ## Índice
 
-### Backend Principal (28 endpoints)
+### Backend Principal (30 endpoints)
 
 | Sección | Contenido |
 |---------|-----------|
 | **B-1** | Auth — Verificar Google ID |
 | **B-2** | Auth — Registrar (Dueño o Cajero) |
+| **B-3** | Auth — Refresh Token |
 | **C-1** | Negocio — Crear |
 | **C-2** | Negocio — Detalle |
 | **C-3** | Negocio — Editar |
@@ -25,9 +26,10 @@
 | **G** | Transacciones |
 | **H** | Corte Diario |
 | **I** | Cancelaciones |
-| **J** | Notificaciones |
-| **K** | Licencias |
-| **L** | Sync / Reportes |
+| **J** | Notificaciones (List, Mark Read, Mark All Read, Delete) |
+| **K** | Licencias (Plans, Detail, Upgrade, Trial) |
+| **L** | Sync / Reportes (Open Sessions, Cuts, Stats) |
+| **M** | Archivos — Upload |
 | **SS** | SuperSu (Super Admin) |
 
 ### Control Maestro (20 endpoints)
@@ -179,6 +181,37 @@ Muestra pantalla: *"¿Eres Dueño de negocio o Cajero?"*
   "mensaje": "El usuario con idGoogle 1234567890 ya está registrado",
   "ubicacion": "AuthService.registrar",
   "status": 409
+}
+```
+
+---
+
+### B-3 `POST /api/v1/auth/refresh`
+
+**Propósito:** Refresca un token JWT que está por expirar.
+
+**Request:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+**Response 200:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...(nuevo)",
+  "expires_in": 3600
+}
+```
+
+**Response 401:**
+```json
+{
+  "codigo": "NO_AUTORIZADO",
+  "mensaje": "Token expirado, inicia sesión nuevamente",
+  "ubicacion": "JwtService.refrescarToken",
+  "status": 401
 }
 ```
 
@@ -524,30 +557,35 @@ Auth requerido. Cancela una transacción.
 
 Auth requerido. Sistema de notificaciones internas.
 
-### J-1 `GET /api/v1/notifications/{userId}`
-
-**Response 200:**
-```json
-[
-  {
-    "id": "550e8400-...",
-    "titulo": "Bienvenido",
-    "mensaje": "Tu cuenta ha sido creada",
-    "tipo": "INFO",
-    "leido": false,
-    "fechaCreacion": "2026-06-15T10:00:00"
-  }
-]
-```
-
-### J-2 `PUT /api/v1/notifications/{id}/read`
+### J-1 `GET /api/v1/business/{negocioId}/notifications`
 
 **Response 200:**
 ```json
 {
-  "mensaje": "Notificación marcada como leída"
+  "notificaciones": [
+    {
+      "id": "550e8400-...",
+      "titulo": "Bienvenido",
+      "mensaje": "Tu cuenta ha sido creada",
+      "tipo": "INFO",
+      "leido": false,
+      "fechaCreacion": "2026-06-15T10:00:00"
+    }
+  ]
 }
 ```
+
+### J-2 `PUT /api/v1/business/{negocioId}/notifications/{notificacionId}/read`
+
+**Response 200:** (No Body — 204 No Content)
+
+### J-3 `PUT /api/v1/business/{negocioId}/notifications/read-all`
+
+**Response 200:** (No Body — 204 No Content)
+
+### J-4 `DELETE /api/v1/business/{negocioId}/notifications/{notificacionId}`
+
+**Response 200:** (No Body — 204 No Content)
 
 ---
 
@@ -555,17 +593,81 @@ Auth requerido. Sistema de notificaciones internas.
 
 Auth requerido. Licencia de uso del sistema.
 
-### K-1 `GET /api/v1/licenses/{negocioId}`
+### K-1 `GET /api/v1/plans`
 
 **Response 200:**
 ```json
 {
-  "id": "550e8400-...",
-  "negocioId": "550e8400-...",
-  "tipo": "GRATUITA",
+  "planes": [
+    {
+      "nombre": "free",
+      "precio": 0,
+      "moneda": "MXN",
+      "periodo": "month",
+      "maxNegocios": 1,
+      "maxCajeros": 2,
+      "features": ["basic_reports", "cashier_management"],
+      "trialDisponible": false,
+      "diasTrial": null
+    }
+  ]
+}
+```
+
+### K-2 `GET /api/v1/business/{negocioId}/license`
+
+**Response 200:**
+```json
+{
+  "plan": "free",
+  "estado": "pagado",
   "fechaInicio": "2026-06-15",
-  "fechaVencimiento": "2026-07-15",
-  "activa": true
+  "fechaFin": null,
+  "fechaFinTrial": null,
+  "diasRestantesTrial": null,
+  "maxCajeros": 2,
+  "cajerosActuales": 1,
+  "maxNegocios": 1,
+  "negociosActuales": 1,
+  "features": ["basic_reports", "cashier_management"]
+}
+```
+
+### K-3 `POST /api/v1/business/{negocioId}/license/upgrade`
+
+**Request:**
+```json
+{
+  "plan": "premium"
+}
+```
+
+**Response 200:**
+```json
+{
+  "estado": "active",
+  "plan": "premium",
+  "fechaFin": "2027-06-21",
+  "mensaje": "Plan actualizado exitosamente."
+}
+```
+
+### K-4 `POST /api/v1/business/{negocioId}/license/trial`
+
+**Request:**
+```json
+{
+  "plan": "premium"
+}
+```
+
+**Response 200:**
+```json
+{
+  "estado": "trial",
+  "plan": "premium",
+  "fechaFin": "2026-07-05",
+  "mensaje": "14 días de prueba activados."
 }
 ```
 
@@ -595,15 +697,89 @@ Auth requerido.
 }
 ```
 
-### L-2 `GET /api/v1/reports/{negocioId}`
+### L-2 `GET /api/v1/business/{negocioId}/reports/open-sessions`
+
+**Response 200:**
+```json
+[
+  {
+    "session_id": "550e8400-...",
+    "cashier_name": "PedroP",
+    "branch": "Taquería Bonita",
+    "opened_at": "2026-06-21T08:00:00",
+    "summary": {
+      "transaction_count": 15,
+      "total_sales": 1250.00,
+      "total_expenses": 50.00
+    }
+  }
+]
+```
+
+### L-3 `GET /api/v1/business/{negocioId}/reports/cuts`
+
+**Response 200:**
+```json
+[
+  {
+    "cut_id": "550e8400-...",
+    "cashier_name": "PedroP",
+    "branch": "Taquería Bonita",
+    "opened_at": "2026-06-21T08:00:00",
+    "closed_at": "2026-06-21T16:00:00",
+    "total_sales": 5000.00,
+    "total_expenses": 200.00,
+    "difference": 0.00,
+    "status": "ok"
+  }
+]
+```
+
+### L-4 `GET /api/v1/business/{negocioId}/reports/stats`
 
 **Response 200:**
 ```json
 {
-  "negocioId": "550e8400-...",
-  "totalVentas": 5000.00,
-  "totalTransacciones": 75,
-  "ticketPromedio": 66.67
+  "current_week": {
+    "total_sales": 5000.00,
+    "total_expenses": 200.00,
+    "transaction_count": 75,
+    "avg_ticket": 66.67
+  },
+  "best_week": {
+    "week_of": "2026-06-01",
+    "total_sales": 6000.00,
+    "total_expenses": 250.00,
+    "transaction_count": 90,
+    "avg_ticket": 66.67
+  },
+  "comparison": {
+    "sales_vs_best": 0.83,
+    "transactions_vs_best": 0.83
+  }
+}
+```
+
+---
+
+## M — ARCHIVOS
+
+Auth requerido. Subida de archivos (fotos de cancelación, etc).
+
+### M-1 `POST /api/v1/files/upload`
+
+**Request:** `multipart/form-data`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `file` | File | Archivo a subir |
+| `type` | String | Tipo de archivo (default: "general") — "cancellation", "profile", etc. |
+
+**Response 200:**
+```json
+{
+  "url": "/api/v1/files/cancellation/uuid-filename.jpg",
+  "filename": "uuid-filename.jpg"
 }
 ```
 

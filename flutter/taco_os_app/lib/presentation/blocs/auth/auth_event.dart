@@ -13,18 +13,57 @@ abstract class AuthEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Evento disparado cuando el usuario solicita iniciar sesión con Google
+/// PASO 1: Ejecuta Google Sign-In y obtiene las credenciales del usuario.
 ///
-/// **Validates: Requirements 1.1, 1.3, 1.5**
+/// No llama al backend. Solo obtiene idGoogle, email, displayName.
+/// Si es exitoso, emite [GoogleAuthenticated].
+class GoogleSignInRequested extends AuthEvent {
+  const GoogleSignInRequested();
+}
+
+/// PASO 2: Verifica si el usuario de Google ya existe en el backend.
 ///
-/// Este evento inicia el flujo de autenticación de Google Sign-In.
-/// El AuthBloc manejará:
-/// - Contador de intentos fallidos (máximo 3)
-/// - Bloqueo de 30 segundos tras 3 fallos consecutivos
-/// - Almacenamiento del JWT en éxito
-/// - Flag isRegistration para indicar si es un nuevo registro o login
+/// Llama GET /auth/verificar/{idGoogle}.
+/// Si existe: emite [UserVerified] con JWT y datos.
+/// Si no existe: emite [UserNotFound] para ir a registro.
+class VerifyUserRequested extends AuthEvent {
+  final String idGoogle;
+  final String email;
+  final String displayName;
+
+  const VerifyUserRequested({
+    required this.idGoogle,
+    required this.email,
+    required this.displayName,
+  });
+
+  @override
+  List<Object?> get props => [idGoogle, email, displayName];
+}
+
+/// Registra un usuario nuevo en el backend.
+///
+/// Llama POST /auth/registrar con los datos del usuario.
+/// Al éxito, emite [Authenticated] con el JWT y datos.
+class RegisterUserRequested extends AuthEvent {
+  final String idGoogle;
+  final String nickname;
+  final String email;
+  final String role;
+
+  const RegisterUserRequested({
+    required this.idGoogle,
+    required this.nickname,
+    required this.email,
+    required this.role,
+  });
+
+  @override
+  List<Object?> get props => [idGoogle, nickname, email, role];
+}
+
+/// Evento legacy: Flujo completo de Google Sign-In + verificar/registrar
 class SignInRequested extends AuthEvent {
-  /// Indica si el usuario está registrándose (true) o iniciando sesión (false)
   final bool isRegistration;
 
   const SignInRequested({this.isRegistration = false});
@@ -34,26 +73,12 @@ class SignInRequested extends AuthEvent {
 }
 
 /// Evento disparado cuando el usuario solicita cerrar sesión
-///
-/// **Validates: Requirements 1.9**
-///
-/// Este evento elimina el JWT del almacenamiento seguro y limpia
-/// los datos de identidad y rol del usuario de la memoria.
 class SignOutRequested extends AuthEvent {
   const SignOutRequested();
 }
 
 /// Evento disparado para verificar la sesión activa
-///
-/// **Validates: Requirements 1.6, 1.7, 1.8**
-///
-/// Este evento verifica:
-/// - Validez del JWT (no expirado)
-/// - Tiempo en segundo plano (< 12 horas)
-///
-/// Si alguna condición falla, invalida la sesión y requiere re-autenticación.
 class SessionChecked extends AuthEvent {
-  /// Tiempo en milisegundos que la app ha estado en segundo plano
   final int backgroundTimeMs;
 
   const SessionChecked({required this.backgroundTimeMs});
@@ -63,23 +88,11 @@ class SessionChecked extends AuthEvent {
 }
 
 /// Evento disparado cuando el turno lleva más de 12 horas en segundo plano
-///
-/// **Validates: Requirements 1.7**
-///
-/// Este evento se dispara automáticamente cuando se detecta que la app
-/// ha estado en segundo plano por más de 12 horas. Invalida la sesión
-/// local, elimina el JWT y emite [Unauthenticated].
 class BackgroundTimeoutExceeded extends AuthEvent {
   const BackgroundTimeoutExceeded();
 }
 
 /// Evento disparado cuando el timer de bloqueo expira
-///
-/// **Validates: Requirements 1.5**
-///
-/// Este evento se dispara automáticamente cuando el timer de 30 segundos
-/// expira después de 3 intentos fallidos. Desbloquea los botones de login
-/// y permite que el usuario intente nuevamente.
 class UnblockRequested extends AuthEvent {
   const UnblockRequested();
 }

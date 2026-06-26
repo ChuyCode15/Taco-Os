@@ -59,8 +59,8 @@ class TransactionRemoteDataSourceImpl implements ITransactionRemoteDataSource {
 
     try {
       final response = await _dio.post(
-        ApiEndpoints.transactionsBatch,
-        data: {'transactions': transactions},
+        ApiEndpoints.sync,
+        data: {'transacciones': transactions},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 

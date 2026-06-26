@@ -124,12 +124,13 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
     String token,
     String businessId,
   ) async {
+    // Backend no tiene POST /catalog/sync. Usamos GET /business/{id}/products
+    // para obtener todos los productos (sin filtro de categoría).
     try {
-      final response = await _dio.post(
-        ApiEndpoints.catalogSync(businessId),
+      final response = await _dio.get(
+        ApiEndpoints.productsAll(businessId),
         options: Options(
           headers: {'Authorization': 'Bearer $token'},
-          // Requirement 11.2: Timeout de 30 segundos
           receiveTimeout: Duration(
             milliseconds: AppConstants.catalogSyncTimeoutMs,
           ),
@@ -161,7 +162,6 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
       } else if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout) {
-        // Requirement 11.2: Si falla o excede timeout, conservar existentes
         throw const NetworkException(
           message: 'Timeout de conexión al sincronizar catálogo (30s)',
         );

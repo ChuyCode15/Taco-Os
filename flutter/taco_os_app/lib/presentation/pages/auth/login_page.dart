@@ -12,40 +12,35 @@ import 'widgets/login_carousel.dart';
 /// - "Quiero ser cliente" (REGISTRO) - botón primario azul
 /// - "Soy cliente" (LOGIN) - botón secundario blanco/gris
 ///
-/// Ambos botones ejecutan Google Sign-In con diferentes flags:
-/// - Registro envía isRegistration: true
-/// - Login envía isRegistration: false
+/// Flujo de "Soy cliente":
+/// 1. Google Sign-In → obtiene idGoogle
+/// 2. GET /auth/verificar/{idGoogle}
+/// 3. Si existe → va a /patron/dashboard
+/// 4. Si no existe → va a /role-selection
+///
+/// Flujo de "Quiero ser cliente":
+/// 1. Google Sign-In → obtiene idGoogle
+/// 2. POST /auth/registrar con rol 'dueño'
+/// 3. Almacena JWT → va a /patron/dashboard
 ///
 /// **Validates: Requirements 1.1, 1.3, 1.4, 1.5**
-///
-/// **Subtask 13.1.1:** Actualizar LoginPage con diseño moderno y flujo
-/// de registro/login con dos botones diferenciados.
-///
-/// Diseño visual:
-/// - Fondo degradado azul/turquesa (#00BCD4 a #0097A7)
-/// - Logo "Taco'Os" en la parte superior
-/// - Sección de contenido visual (ilustración o placeholder)
-/// - Dos botones principales con estilos diferenciados
-/// - Opción "Explorar sin registrarme" opcional al final
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
-          // AC 1.2: Redirigir a selección de rol tras autenticación exitosa
-          if (state is Authenticated) {
-            context.go('/role-selection');
-          }
-        },
+        listener: _onStateChanged,
         builder: (context, state) {
           return Stack(
             children: [
-              // Fondo: carrusel fullscreen
               const Positioned.fill(child: LoginCarousel()),
-              // Overlay con degradado para contraste
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -60,14 +55,12 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
-              // Header arriba
               Positioned(
                 top: 60,
                 left: 0,
                 right: 0,
                 child: Center(child: _buildHeader()),
               ),
-              // Botones y estados abajo
               Positioned(
                 left: 0,
                 right: 0,
@@ -94,11 +87,30 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  /// Construye el header con el logo "Taco'Os"
+  /// Maneja los cambios de estado del AuthBloc
+  ///
+  /// Flujo de "Soy cliente":
+  /// GoogleAuthenticated → dispara VerifyUserRequested → UserVerified o UserNotFound
+  void _onStateChanged(BuildContext context, AuthState state) {
+    if (state is Authenticated) {
+      // Autenticación exitosa (ya sea login o registro) → dashboard
+      context.go('/patron/dashboard');
+    } else if (state is GoogleAuthenticated) {
+      // Google Sign-In completado → verificar si usuario existe en backend
+      context.read<AuthBloc>().add(VerifyUserRequested(
+        idGoogle: state.idGoogle,
+        email: state.email,
+        displayName: state.displayName,
+      ));
+    } else if (state is UserNotFound) {
+      // Usuario nuevo → ir a selección de rol para completar registro
+      context.go('/role-selection');
+    }
+  }
+
   Widget _buildHeader() {
     return Column(
       children: [
-        // Logo con tipografía moderna y redondeada
         Text(
           'Taco\'Os',
           style: TextStyle(
@@ -131,18 +143,15 @@ class LoginPage extends StatelessWidget {
 
   /// Construye los botones de acción principales
   ///
-  /// **Validates: Requirements 1.1, 1.5**
-  ///
-  /// Los botones se deshabilitan durante:
-  /// - Carga (AuthLoading)
-  /// - Bloqueo de 30 segundos tras 3 intentos fallidos
+  /// "Soy cliente": Google → verificar → dashboard si existe, registro si no
+  /// "Quiero ser cliente": Google → registrar como dueño → dashboard
   Widget _buildActionButtons(BuildContext context, AuthState state) {
     final bool isDisabled =
         state is AuthLoading || (state is AuthError && state.isBlocked);
 
     return Column(
       children: [
-        // Botón "Quiero ser cliente" (REGISTRO) - Primario azul
+        // "Quiero ser cliente" (REGISTRO) — flujo completo: Google → registrar
         SizedBox(
           width: double.infinity,
           height: 56,
@@ -150,13 +159,13 @@ class LoginPage extends StatelessWidget {
             onPressed: isDisabled
                 ? null
                 : () {
-                    // Disparar evento con flag isRegistration: true
+                    // Flujo legacy: Google → registrar → JWT
                     context.read<AuthBloc>().add(
                       const SignInRequested(isRegistration: true),
                     );
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1976D2), // Azul más oscuro
+              backgroundColor: const Color(0xFF1976D2),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -174,7 +183,7 @@ class LoginPage extends StatelessWidget {
 
         const SizedBox(height: 16),
 
-        // Botón "Soy cliente" (LOGIN) - Secundario blanco/gris
+        // "Soy cliente" (LOGIN) — flujo 2 pasos: Google → verificar
         SizedBox(
           width: double.infinity,
           height: 56,
@@ -182,9 +191,9 @@ class LoginPage extends StatelessWidget {
             onPressed: isDisabled
                 ? null
                 : () {
-                    // Disparar evento con flag isRegistration: false
+                    // PASO 1: Solo Google Sign-In (sin backend)
                     context.read<AuthBloc>().add(
-                      const SignInRequested(isRegistration: false),
+                      const GoogleSignInRequested(),
                     );
                   },
             style: OutlinedButton.styleFrom(
@@ -210,13 +219,9 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  /// Construye la opción "Explorar sin registrarme" (opcional)
   Widget _buildExploreLinkOption(BuildContext context) {
     return TextButton(
-      onPressed: () {
-        // Navegar a modo demo o ignorar
-        // Por ahora, solo mostramos el botón sin funcionalidad
-      },
+      onPressed: () {},
       child: Text(
         'Tienes algun error, Contactanos',
         style: TextStyle(
@@ -228,14 +233,6 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  /// Construye el mensaje de error descriptivo
-  ///
-  /// **Validates: Requirements 1.3, 1.5**
-  ///
-  /// Muestra:
-  /// - Mensaje de error descriptivo según el tipo de fallo
-  /// - Contador de intentos (1/3, 2/3)
-  /// - Cuenta regresiva durante el bloqueo de 30 segundos
   Widget _buildErrorMessage(AuthError state) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -267,7 +264,6 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  /// Construye el indicador de carga
   Widget _buildLoadingIndicator() {
     return Container(
       padding: const EdgeInsets.all(16),

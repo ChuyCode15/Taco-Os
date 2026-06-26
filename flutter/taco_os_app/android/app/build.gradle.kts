@@ -30,7 +30,7 @@ android {
         versionName = flutter.versionName
         
         // Google Sign-In Web Client ID (serverClientId)
-        resValue("string", "default_web_client_id", "\"921503491132-b9pipphh5no9mi4lljc5lr8dus8rf86h.apps.googleusercontent.com\"")
+        resValue("string", "default_web_client_id", "\"304760822312-u7165470ass1n776no12r6amnjtg5q93.apps.googleusercontent.com\"")
     }
 
     buildTypes {

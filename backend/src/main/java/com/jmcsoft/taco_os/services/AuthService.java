@@ -1,5 +1,6 @@
 package com.jmcsoft.taco_os.services;
 
+import com.jmcsoft.taco_os.common.enums.EstadoPlan;
 import com.jmcsoft.taco_os.common.exception.DuplicadoException;
 import com.jmcsoft.taco_os.domain.administrador.Administrador;
 import com.jmcsoft.taco_os.domain.auth.dto.*;
@@ -102,6 +103,7 @@ public class AuthService {
             admin.setNickname(datos.nickname());
             admin.setCorreo(datos.correo());
             admin.setNumero(datos.numero());
+            admin.setEstadoPlan(EstadoPlan.TRIAL_PREMIUM);
             administradorRepository.save(admin);
 
             var usuario = new DatosUsuarioAuth(

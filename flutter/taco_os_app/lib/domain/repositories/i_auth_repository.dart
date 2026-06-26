@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import '../entities/auth_result.dart';
 import '../entities/user.dart';
 import '../../core/errors/failures.dart';
 
@@ -14,15 +15,79 @@ import '../../core/errors/failures.dart';
 /// Validada por Requirement 2.4: Vinculación de Cajero mediante código QR
 /// Validada por Requirement 13.2: Interfaces abstractas para repositorios
 abstract class IAuthRepository {
+  /// Ejecuta Google Sign-In y retorna los datos del usuario de Google.
+  ///
+  /// NO llama al backend. Solo obtiene idGoogle, email, displayName.
+  /// Se usa en el flujo de login para separar la obtención de credenciales
+  /// de la verificación/registro en el backend.
+  ///
+  /// Returns:
+  /// - Right(Map): { 'idGoogle', 'email', 'displayName' }
+  /// - Left(AuthCancelledFailure): Si el usuario cancela
+  /// - Left(AuthFailure): Si hay error con Google Sign-In
+  Future<Either<Failure, Map<String, dynamic>>> signInWithGoogleOnly();
+
+  /// Verifica si un usuario de Google ya existe en el backend.
+  ///
+  /// Llama GET /auth/verificar/{idGoogle}.
+  /// Si existe (200): retorna AuthResult con JWT y datos del usuario.
+  /// Si no existe (404): retorna AuthResult con existe=false.
+  ///
+  /// Parameters:
+  /// - idGoogle: ID de Google del usuario (googleUser.id)
+  ///
+  /// Returns:
+  /// - Right(AuthResult): Resultado de la verificación
+  /// - Left(NetworkFailure): Sin conectividad
+  /// - Left(ServerFailure): Error del backend
+  Future<Either<Failure, AuthResult>> verifyUser(String idGoogle);
+
+  /// Registra un usuario nuevo en el backend.
+  ///
+  /// Llama POST /auth/registrar con los datos del usuario.
+  ///
+  /// Parameters:
+  /// - idGoogle: ID de Google del usuario
+  /// - nickname: Nombre del usuario
+  /// - email: Email del usuario
+  /// - role: 'dueño' o 'cajero'
+  ///
+  /// Returns:
+  /// - Right(AuthResult): JWT y datos del usuario registrado
+  /// - Left(ServerFailure): Error del backend
+  Future<Either<Failure, AuthResult>> registerUser({
+    required String idGoogle,
+    required String nickname,
+    required String email,
+    String? phone,
+    required String role,
+  });
+
+  /// Almacena un JWT y retorna el User parseado.
+  ///
+  /// Se usa después de recibir el JWT del backend (verificar o registrar).
+  ///
+  /// Parameters:
+  /// - token: JWT del backend
+  /// - fallbackEmail: Email de fallback (de Google)
+  /// - fallbackDisplayName: Nombre de fallback (de Google)
+  ///
+  /// Returns:
+  /// - Right(User): Usuario con datos del JWT
+  /// - Left(AuthFailure): Si el JWT es inválido
+  Future<Either<Failure, User>> storeTokenAndParseUser({
+    required String token,
+    required String fallbackEmail,
+    required String fallbackDisplayName,
+  });
+
   /// Inicia sesión con Google Sign-In
   ///
-  /// Inicia el flujo de autenticación de Google Sign-In y, si es exitoso,
-  /// almacena el token JWT en almacenamiento seguro.
+  /// Flujo completo: Google → verificar/registrar → JWT almacenado.
   ///
   /// Parameters:
   /// - isRegistration: Flag que indica si el usuario se está registrando (true)
-  ///   o iniciando sesión (false). Este parámetro se envía al backend para
-  ///   determinar el flujo de autenticación apropiado.
+  ///   o iniciando sesión (false).
   ///
   /// Returns:
   /// - Right(User): Usuario autenticado con información de perfil y rol

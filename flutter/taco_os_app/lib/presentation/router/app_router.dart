@@ -125,7 +125,7 @@ class AppRouter {
       GoRoute(
         path: '/patron/dashboard',
         redirect: (context, state) =>
-            _roleGuard(context, state, UserRole.patron),
+            _roleGuard(context, state, UserRole.dueno),
         builder: (context, state) {
           final businessId = state.uri.queryParameters['businessId'] ?? '';
           return PatronDashboardPage(businessId: businessId);
@@ -134,7 +134,7 @@ class AppRouter {
       GoRoute(
         path: '/patron/ventas',
         redirect: (context, state) =>
-            _roleGuard(context, state, UserRole.patron),
+            _roleGuard(context, state, UserRole.dueno),
         builder: (context, state) {
           final businessId = state.uri.queryParameters['businessId'] ?? '';
           return PatronVentasPage(businessId: businessId);
@@ -143,7 +143,7 @@ class AppRouter {
       GoRoute(
         path: '/patron/reportes',
         redirect: (context, state) =>
-            _roleGuard(context, state, UserRole.patron),
+            _roleGuard(context, state, UserRole.dueno),
         builder: (context, state) {
           final businessId = state.uri.queryParameters['businessId'] ?? '';
           return ReportesPage(businessId: businessId);
@@ -152,7 +152,7 @@ class AppRouter {
       GoRoute(
         path: '/patron/equipo',
         redirect: (context, state) =>
-            _roleGuard(context, state, UserRole.patron),
+            _roleGuard(context, state, UserRole.dueno),
         builder: (context, state) {
           final businessId = state.uri.queryParameters['businessId'] ?? '';
           return EquipoPage(businessId: businessId);
@@ -161,7 +161,7 @@ class AppRouter {
       GoRoute(
         path: '/patron/configuracion',
         redirect: (context, state) =>
-            _roleGuard(context, state, UserRole.patron),
+            _roleGuard(context, state, UserRole.dueno),
         builder: (context, state) {
           final businessId = state.uri.queryParameters['businessId'] ?? '';
           return ConfiguracionPage(businessId: businessId);
@@ -174,7 +174,6 @@ class AppRouter {
   ///
   /// Validado por Requirement 3.5: Bloquear acceso sin turno activo
   Future<String?> _turnoGuard(BuildContext context, GoRouterState state) async {
-    // First check authentication
     final userResult = await authRepository.getCurrentUser();
 
     return await userResult.fold((failure) async => '/login', (user) async {
@@ -182,24 +181,25 @@ class AppRouter {
         return '/login';
       }
 
+      if (user.role == UserRole.dueno) {
+        // Dueño no necesita turno → dashboard
+        return user.businessId == null ? '/patron/dashboard' : null;
+      }
+
+      // Cajero sin negocio → vincular vía QR
       if (user.businessId == null) {
-        return '/role-selection';
+        return '/qr-scan';
       }
 
-      // Check if cajero has active session
-      if (user.role == UserRole.cajero) {
-        final sessionResult = await sessionRepository.getActiveSession(
-          user.businessId!,
-        );
+      // Cajero con negocio → verificar turno activo
+      final sessionResult = await sessionRepository.getActiveSession(
+        user.businessId!,
+      );
 
-        return sessionResult.fold(
-          (failure) => '/cajero/open-session',
-          (session) => session == null ? '/cajero/open-session' : null,
-        );
-      }
-
-      // Not a cajero (shouldn't happen for cajero routes)
-      return '/patron/dashboard';
+      return sessionResult.fold(
+        (failure) => '/cajero/open-session',
+        (session) => session == null ? '/cajero/open-session' : null,
+      );
     });
   }
 
@@ -218,12 +218,18 @@ class AppRouter {
         return '/login';
       }
 
-      if (user.businessId == null) {
-        return '/role-selection';
+      // Cajero sin negocio → debe vincularse vía QR
+      if (user.role == UserRole.cajero && user.businessId == null) {
+        return '/qr-scan';
+      }
+
+      // Dueño sin negocio → puede acceder al dashboard (creará negocio ahí)
+      if (user.role == UserRole.dueno && user.businessId == null) {
+        if (requiredRole == UserRole.dueno) return null; // Allow access
+        return '/patron/dashboard';
       }
 
       if (user.role != requiredRole) {
-        // Redirect to appropriate home based on actual role
         return user.role == UserRole.cajero
             ? '/cajero/home'
             : '/patron/dashboard';

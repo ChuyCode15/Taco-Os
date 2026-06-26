@@ -32,7 +32,7 @@ public class Cancelacion {
     @Column(name = "reason", nullable = false)
     private String motivo;
 
-    @Column(name = "photo_url", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "photo_url", columnDefinition = "TEXT")
     private String fotoUrl;
 
     @Column(name = "cancelled_at", nullable = false, updatable = false)

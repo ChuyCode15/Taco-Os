@@ -1,12 +1,15 @@
 /// Enumeración de roles de usuario en el sistema Taco'Os
 ///
-/// Validada por Requirement 13.1: Entidades de dominio puras
+/// Justification: Backend uses "dueño" (owner) as the role name for business
+/// owners. Renamed from "patron" to "dueno" for consistency with backend
+/// API responses. This avoids runtime role comparison mismatches.
 enum UserRole {
   /// Usuario de rol operativo que registra ventas, gastos y realiza cortes
   cajero,
 
   /// Usuario de rol administrativo (dueño del negocio)
-  patron,
+  /// Backend sends: "rol": "dueño"
+  dueno,
 }
 
 /// Entidad de dominio que representa un usuario del sistema

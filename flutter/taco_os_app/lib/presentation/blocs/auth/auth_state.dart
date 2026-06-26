@@ -15,32 +15,67 @@ abstract class AuthState extends Equatable {
 }
 
 /// Estado inicial antes de verificar la sesión
-///
-/// Este estado se emite cuando la app se inicia y aún no se ha
-/// verificado si existe una sesión activa válida.
 class AuthInitial extends AuthState {
   const AuthInitial();
 }
 
 /// Estado de carga durante operaciones de autenticación
-///
-/// Se emite durante:
-/// - El flujo de Google Sign-In
-/// - La verificación de sesión
-/// - El cierre de sesión
 class AuthLoading extends AuthState {
   const AuthLoading();
 }
 
+/// PASO 1 COMPLETADO: Google Sign-In exitoso.
+///
+/// Contiene las credenciales de Google (idGoogle, email, displayName).
+/// El siguiente paso es llamar al backend para verificar si el usuario existe.
+class GoogleAuthenticated extends AuthState {
+  final String idGoogle;
+  final String email;
+  final String displayName;
+
+  const GoogleAuthenticated({
+    required this.idGoogle,
+    required this.email,
+    required this.displayName,
+  });
+
+  @override
+  List<Object?> get props => [idGoogle, email, displayName];
+}
+
+/// PASO 2 COMPLETADO (usuario existe): Backend verificó que el usuario tiene cuenta.
+///
+/// Contiene el JWT y los datos del usuario. Listo para navegar al dashboard.
+class UserVerified extends AuthState {
+  final User user;
+
+  const UserVerified({required this.user});
+
+  @override
+  List<Object?> get props => [user];
+}
+
+/// PASO 2 COMPLETADO (usuario nuevo): Backend indica que el usuario no existe.
+///
+/// Contiene los datos de Google para pre-llenar el formulario de registro.
+/// El siguiente paso es llamar a /auth/registrar.
+class UserNotFound extends AuthState {
+  final String idGoogle;
+  final String email;
+  final String displayName;
+
+  const UserNotFound({
+    required this.idGoogle,
+    required this.email,
+    required this.displayName,
+  });
+
+  @override
+  List<Object?> get props => [idGoogle, email, displayName];
+}
+
 /// Estado de usuario autenticado exitosamente
-///
-/// **Validates: Requirements 1.2, 1.6**
-///
-/// Este estado se emite cuando:
-/// - El usuario completa exitosamente el Google Sign-In
-/// - La sesión es válida (JWT no expirado y < 12h en segundo plano)
 class Authenticated extends AuthState {
-  /// Usuario autenticado con su perfil y rol
   final User user;
 
   const Authenticated({required this.user});
@@ -50,36 +85,14 @@ class Authenticated extends AuthState {
 }
 
 /// Estado de usuario no autenticado
-///
-/// **Validates: Requirements 1.7, 1.8, 1.9**
-///
-/// Este estado se emite cuando:
-/// - No hay sesión activa al iniciar la app
-/// - El JWT ha expirado
-/// - El tiempo en segundo plano superó las 12 horas
-/// - El usuario cierra sesión manualmente
-/// - El usuario cancela el flujo de Google Sign-In (sin mostrar error)
 class Unauthenticated extends AuthState {
   const Unauthenticated();
 }
 
 /// Estado de error en la autenticación
-///
-/// **Validates: Requirements 1.3, 1.5**
-///
-/// Este estado se emite cuando:
-/// - El Google Sign-In falla (error de red, credenciales inválidas)
-/// - Se alcanza el límite de 3 intentos fallidos consecutivos
-/// - Ocurre un error inesperado durante la autenticación
 class AuthError extends AuthState {
-  /// Mensaje de error descriptivo para mostrar al usuario
   final String message;
-
-  /// Indica si el botón de inicio de sesión está bloqueado
-  /// por haber alcanzado el límite de 3 intentos fallidos
   final bool isBlocked;
-
-  /// Tiempo restante en segundos del bloqueo (si isBlocked = true)
   final int? blockedSecondsRemaining;
 
   const AuthError({

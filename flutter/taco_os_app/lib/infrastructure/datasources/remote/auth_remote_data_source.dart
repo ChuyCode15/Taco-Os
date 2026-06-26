@@ -62,29 +62,40 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
         );
       }
 
-      // Paso 2: Obtener el token de Google (authentication es Future en v6.x)
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      // Paso 2: Backend 2-step auth: verificar → registrar
+      final idGoogle = googleUser.id;
 
-      final String? idToken = googleAuth.idToken;
-      if (idToken == null) {
-        throw const AuthException(
-          message: 'No se pudo obtener el token de Google',
-        );
-      }
-
-      // Paso 3: Intercambiar el token de Google por un JWT del backend
-      final response = await _dio.post(
-        ApiEndpoints.authGoogleSignIn,
-        data: {'googleIdToken': idToken},
+      // Paso 2a: Verificar si el usuario ya existe
+      final verificarResponse = await _dio.get(
+        ApiEndpoints.authVerificar(idGoogle),
       );
 
-      if (response.statusCode == 200 && response.data is Map) {
-        return response.data as Map<String, dynamic>;
+      final verificarData = verificarResponse.data as Map<String, dynamic>;
+      if (verificarData['existe'] == true) {
+        // Usuario existe: retorna JWT directamente
+        return verificarData;
+      }
+
+      // Paso 2b: Usuario nuevo: registrar con datos de Google
+      final registrarResponse = await _dio.post(
+        ApiEndpoints.authRegistrar,
+        data: {
+          'idGoogle': idGoogle,
+          'nickname': googleUser.displayName ?? 'Usuario',
+          'correo': googleUser.email,
+          'numero': null,
+          'rol': 'dueño',
+        },
+      );
+
+      if (registrarResponse.statusCode == 200 &&
+          registrarResponse.data is Map) {
+        return registrarResponse.data as Map<String, dynamic>;
       } else {
         throw ServerException(
-          message: 'Respuesta inesperada del servidor: ${response.statusCode}',
-          statusCode: response.statusCode ?? 500,
+          message:
+              'Respuesta inesperada del servidor: ${registrarResponse.statusCode}',
+          statusCode: registrarResponse.statusCode ?? 500,
         );
       }
     } on DioException catch (e) {
@@ -143,102 +154,22 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
 
   @override
   Future<void> signOut(String token) async {
+    // Logout es operación client-side. JWTs son stateless, no hay
+    // sesión de servidor que invalidar. Solo cerramos Google.
     try {
-      // Paso 1: Invalidar el JWT en el backend
-      await _dio.post(
-        ApiEndpoints.authSignOut,
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-
-      // Paso 2: Cerrar sesión de Google
       await _googleSignIn.signOut();
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        throw const TimeoutException(
-          message: 'La conexión está tardando demasiado. Intenta de nuevo.',
-        );
-      } else if (e.type == DioExceptionType.connectionError) {
-        final errorMessage = e.message?.toLowerCase() ?? '';
-        if (errorMessage.contains('failed host lookup') ||
-            errorMessage.contains('network is unreachable') ||
-            errorMessage.contains('no address associated') ||
-            errorMessage.contains('software caused connection abort')) {
-          throw const NetworkException(
-            message: 'Sin conexión a internet. Verifica tu conexión.',
-          );
-        } else {
-          throw const BackendUnavailableException(
-            message:
-                'No se puede conectar con el servidor. Verifica que el backend esté activo.',
-          );
-        }
-      } else if (e.response != null) {
-        throw ServerException(
-          message: 'Error del servidor: ${e.response?.statusCode}',
-          statusCode: e.response?.statusCode ?? 500,
-        );
-      } else {
-        throw NetworkException(
-          message: 'Error de red desconocido: ${e.message}',
-        );
-      }
+    } catch (e) {
+      // Ignorar errores de Google Sign-In en logout
     }
   }
 
   @override
   Future<Map<String, dynamic>> getCurrentUser(String token) async {
-    try {
-      final response = await _dio.get(
-        ApiEndpoints.authMe,
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-
-      if (response.statusCode == 200 && response.data is Map) {
-        return response.data as Map<String, dynamic>;
-      } else if (response.statusCode == 401) {
-        throw const AuthException(message: 'Token JWT inválido o expirado');
-      } else {
-        throw ServerException(
-          message: 'Respuesta inesperada del servidor: ${response.statusCode}',
-          statusCode: response.statusCode ?? 500,
-        );
-      }
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw const AuthException(message: 'Token JWT inválido o expirado');
-      } else if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout) {
-        throw const TimeoutException(
-          message: 'La conexión está tardando demasiado. Intenta de nuevo.',
-        );
-      } else if (e.type == DioExceptionType.connectionError) {
-        final errorMessage = e.message?.toLowerCase() ?? '';
-        if (errorMessage.contains('failed host lookup') ||
-            errorMessage.contains('network is unreachable') ||
-            errorMessage.contains('no address associated') ||
-            errorMessage.contains('software caused connection abort')) {
-          throw const NetworkException(
-            message: 'Sin conexión a internet. Verifica tu conexión.',
-          );
-        } else {
-          throw const BackendUnavailableException(
-            message:
-                'No se puede conectar con el servidor. Verifica que el backend esté activo.',
-          );
-        }
-      } else if (e.response != null) {
-        throw ServerException(
-          message: 'Error del servidor: ${e.response?.statusCode}',
-          statusCode: e.response?.statusCode ?? 500,
-        );
-      } else {
-        throw NetworkException(
-          message: 'Error de red desconocido: ${e.message}',
-        );
-      }
-    }
+    // Backend no tiene endpoint /auth/me. getCurrentUser() decodifica
+    // el JWT localmente (estándar: Google, Facebook, AWS lo hacen).
+    // Este método ya no se usa — ver auth_repository_impl.dart.
+    throw UnimplementedError(
+      'getCurrentUser se ejecuta localmente via JWT decode',
+    );
   }
 }

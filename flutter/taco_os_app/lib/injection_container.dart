@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 // Core
+import 'core/constants/api_endpoints.dart';
 import 'core/network/network_info.dart';
 
 // Domain - Repositories
@@ -121,18 +122,28 @@ Future<void> init() async {
 
   // Dio HTTP client - Used by all remote data sources
   sl.registerLazySingleton<Dio>(() {
-    final dio = Dio();
-    // Configure base options, interceptors, etc. if needed
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiEndpoints.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+    // Add interceptors for logging or auth refresh if needed
     return dio;
   });
 
   // Google Sign-In - Used by auth remote data source
   // Requirement 1.1: Google Sign-In authentication
-  // Note: En v6.x, usar constructor con clientId
+  // Note: On Android, use serverClientId (not clientId) — Android ignores clientId
   sl.registerLazySingleton<GoogleSignIn>(
     () => GoogleSignIn(
-      clientId:
-          '921503491132-b9pipphh5no9mi4lljc5lr8dus8rf86h.apps.googleusercontent.com',
+      serverClientId:
+          '304760822312-u7165470ass1n776no12r6amnjtg5q93.apps.googleusercontent.com',
       scopes: ['email', 'profile'],
     ),
   );
@@ -291,6 +302,7 @@ Future<void> init() async {
       signInUseCase: sl<SignInUseCase>(),
       signOutUseCase: sl<SignOutUseCase>(),
       checkSessionUseCase: sl<CheckSessionUseCase>(),
+      authRepository: sl<IAuthRepository>(),
     ),
   );
 

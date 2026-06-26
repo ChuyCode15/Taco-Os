@@ -342,24 +342,21 @@ class SyncServiceImpl implements ISyncService {
   @override
   Future<void> syncCatalogOnStartup(String businessId) async {
     try {
-      // Requirement 11.2: Al iniciar la app con conectividad,
-      // llamar ProductRepository.syncCatalog() con timeout de 30s
-      final hasConnection = await _networkInfo.isConnected;
-
-      if (!hasConnection) {
-        // Sin conectividad, no hacer nada
-        // Requirement 11.4: Conservar productos existentes en Local_DB
+      if (businessId.isEmpty ||
+          businessId == 'BUSINESS_ID_PLACEHOLDER') {
         return;
       }
 
-      // Intentar sincronizar el catálogo con timeout
-      // Requirement 11.2: timeout de 30s
+      final hasConnection = await _networkInfo.isConnected;
+      if (!hasConnection) {
+        return;
+      }
+
       final result = await _productRepository
           .syncCatalog(businessId)
           .timeout(
             AppConstants.catalogSyncTimeout,
             onTimeout: () {
-              // Requirement 11.4: Si excede el timeout, conservar productos existentes
               return const Left(
                 NetworkFailure(message: 'Timeout al sincronizar catálogo'),
               );
@@ -368,20 +365,14 @@ class SyncServiceImpl implements ISyncService {
 
       result.fold(
         (failure) {
-          // Requirement 11.4: Si falla o excede el timeout,
-          // conservar productos existentes en Local_DB sin modificarlos
-          print('Error al sincronizar catálogo en startup: ${failure.message}');
-          // No lanzamos error - la app debe continuar funcionando
+          print('Sync catálogo startup omitido: ${failure.message}');
         },
         (_) {
-          // Sincronización exitosa
-          print('Catálogo sincronizado exitosamente en startup');
+          print('Catálogo sincronizado en startup');
         },
       );
     } catch (e) {
-      // Requirement 11.4: En cualquier error, conservar productos existentes
-      print('Error al sincronizar catálogo en startup: $e');
-      // No lanzamos error - la app debe continuar funcionando
+      print('Sync catálogo startup omitido: $e');
     }
   }
 

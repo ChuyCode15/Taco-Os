@@ -2,6 +2,7 @@ package com.jmcsoft.taco_os.services;
 
 import com.jmcsoft.taco_os.common.helper.AdministradorHelper;
 import com.jmcsoft.taco_os.common.helper.NegocioHelper;
+import com.jmcsoft.taco_os.domain.licencia.Licencia;
 import com.jmcsoft.taco_os.domain.negocio.dto.DatosDetalleNegocio;
 import com.jmcsoft.taco_os.domain.negocio.dto.DatosRegistroNegocio;
 import com.jmcsoft.taco_os.domain.negocio.mapper.NegocioMapper;
@@ -10,6 +11,7 @@ import com.jmcsoft.taco_os.domain.cajero.dto.DatosListaCajeros;
 import com.jmcsoft.taco_os.domain.cajero.mapper.CajeroMapper;
 import com.jmcsoft.taco_os.repository.AdministradorRepository;
 import com.jmcsoft.taco_os.repository.CajeroRepository;
+import com.jmcsoft.taco_os.repository.LicenciaRepository;
 import com.jmcsoft.taco_os.repository.NegocioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class NegocioService {
     private final NegocioRepository negocioRepository;
     private final AdministradorRepository administradorRepository;
     private final CajeroRepository cajeroRepository;
+    private final LicenciaRepository licenciaRepository;
     private final NegocioHelper negocioHelper;
     private final AdministradorHelper administradorHelper;
     private final NegocioMapper negocioMapper;
@@ -41,6 +44,10 @@ public class NegocioService {
 
         dueno.setNegocio(negocio);
         administradorRepository.save(dueno);
+
+        var licencia = new Licencia();
+        licencia.setNegocio(negocio);
+        licenciaRepository.save(licencia);
 
         return negocioMapper.negocioADetalle(negocio);
     }

@@ -25,7 +25,7 @@ public class JwtService {
                 .withSubject(idUsuario)
                 .withClaim("idGoogle", idGoogle)
                 .withClaim("rol", rol)
-                .withClaim("nickname", nickname)
+                .withClaim("nickname", nickname != null ? nickname : "")
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + expirationMs))
                 .sign(algorithm);

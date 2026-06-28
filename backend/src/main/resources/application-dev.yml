@@ -29,5 +29,5 @@ spring:
 
 jwt:
   secret: TacoOs2025SecretKeyForJwtTokenGenerationAndValidationP455w0rd
-  expiration-ms: 3600000
+  expiration-ms: 43200000
 

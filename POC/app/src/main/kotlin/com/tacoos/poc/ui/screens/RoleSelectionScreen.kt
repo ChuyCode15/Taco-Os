@@ -50,7 +50,7 @@ fun RoleSelectionScreen(navController: NavController, viewModel: RegistrationVie
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("ADMINISTRADOR", fontSize = 20.sp, fontWeight = FontWeight.Black)
-                    Text("Gestión total del negocio", fontSize = 12.sp, fontWeight = FontWeight.Normal)
+                    Text("Registra y administra tu negocio", fontSize = 12.sp, fontWeight = FontWeight.Normal)
                 }
             }
             
@@ -66,7 +66,7 @@ fun RoleSelectionScreen(navController: NavController, viewModel: RegistrationVie
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("CAJERO", fontSize = 20.sp, fontWeight = FontWeight.Black)
-                    Text("Registro de ventas diarias", fontSize = 12.sp, fontWeight = FontWeight.Normal)
+                    Text("Sé colaborador eficiente de tu empresa", fontSize = 12.sp, fontWeight = FontWeight.Normal)
                 }
             }
         }

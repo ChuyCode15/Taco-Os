@@ -1,0 +1,31 @@
+Avance pryecto Tacos 
+
+Analis del fjo de operacion para usarlo de ejemplo en l;a creacion e implementacion de funciones en la app 
+
+- usuario hace login (es Sistema hace login correcto a google y fucniona perfecto junto al backend )
+
+ vista inicio
+
+- el hay que poner el registrar Abajo al cargado al lado derecho del boton de login pero que se vea igual que como esta 
+	* popup welcome
+		- popup welcome color del background debe ser blanco pero con transparencia que se vea el fondo y quitamos las cajas de suario y constreña junto con el boton se va usar solo google account
+		- el boton se llama iniiar session y mostramos el logo pequeño de google. 
+		- las letras pequeñas Abajo de welcome le ponesmo inicia sescion con google account 
+		- cambiamos welcome por Binvenidos poqeu esta app es para latino America 
+	* popup Registrarse
+		- donde dice "crea tu cuaenta professional" cambialo por : registrate pra disfritar Taco'Os
+		- eliminamos "solo registro mediante google" eso se entinde si nada mas esa opcion esta 
+		- el color del background debe ser blanco pero con transparencia
+
+Vista asignacion de ROl
+	
+	- boton de Administrador cambiamos la frase inferior y le ponemos "registra y administra tu negocio"
+	- boton de cajero se colaborado eficiente de tu empresa
+
+vista registra tu negocio 
+
+- HAY QUe POENER UNA FRASE ENTEDIBLE SIMPLE QUE DIGA  "Comienza registrado estos datos"
+		- Nombre de tu negocio
+		- dode dice podremos almo as amable con tipo de publico que biuscamso  dejamso giro entre aprentesi pero agregamos "que vendes?" y ejemplos hamburguesa, tacos, carnitas etc...
+		- tiene dos cajas que se ven apertura y cierre, eso no se entiende facil o se no puede asumir ponemos el titulo Horario se servicio   hora de apertura y horario de con casillas y boc;laeus de horari y uan si todo lo dias es es mismo horario si no se depsleguia la opcion de horario por dia si abre se el paeloma la casilla y abre el botn al lado pm a am en cada dia
+

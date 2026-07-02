@@ -113,28 +113,13 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             )
         }
 
-        // 0. Botón Registrarse (Esquina superior derecha)
-        Text(
-            text = "REGISTRARSE",
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(32.dp)
-                .clickable {
-                    showRegisterMode = true
-                    showLoginBox = true
-                },
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            letterSpacing = 1.sp
-        )
-
-        // Botón Principal Login (Medio para abajo)
+        // 0. Botón Registrarse (Cargado abajo al lado derecho del botón login)
+        // Se maneja dentro de la columna del botón de login para posicionarlo relativo a él
         if (!showLoginBox) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 120.dp),
+                    .padding(bottom = 60.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -144,19 +129,40 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
                     letterSpacing = 2.sp,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
-                Button(
-                    onClick = {
-                        showRegisterMode = false
-                        showLoginBox = true
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.75f)
-                        .height(65.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryNavy),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(0.85f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("INICIAR SESIÓN", fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 1.sp)
+                    Button(
+                        onClick = {
+                            showRegisterMode = false
+                            showLoginBox = true
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(65.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryNavy),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                    ) {
+                        Text("INICIAR SESIÓN", fontWeight = FontWeight.Black, fontSize = 14.sp, letterSpacing = 1.sp)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Text(
+                        text = "REGISTRARSE",
+                        modifier = Modifier
+                            .clickable {
+                                showRegisterMode = true
+                                showLoginBox = true
+                            },
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        letterSpacing = 1.sp
+                    )
                 }
             }
         }
@@ -192,15 +198,12 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
 
 @Composable
 fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.75f)
+            .fillMaxHeight(0.6f)
             .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
-        color = ActionBlue.copy(alpha = 0.85f), // Azul translúcido
+        color = Color.White.copy(alpha = 0.9f), // Blanco con transparencia
         tonalElevation = 12.dp
     ) {
         Column(
@@ -215,102 +218,54 @@ fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit
                     .width(50.dp)
                     .height(5.dp)
                     .clip(RoundedCornerShape(2.5.dp))
-                    .background(Color.White.copy(alpha = 0.4f))
+                    .background(Color.Black.copy(alpha = 0.1f))
                     .clickable { onClose() }
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = if (isRegister) "Bienvenido" else "Welcome",
-                color = Color.White,
-                fontSize = 32.sp,
+                text = if (isRegister) "Regístrate para disfrutar Taco'Os" else "Bienvenidos",
+                color = PrimaryNavy,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Black,
-                letterSpacing = (-1).sp
+                letterSpacing = (-1).sp,
+                textAlign = TextAlign.Center
             )
 
             Text(
-                text = if (isRegister) "Crea tu cuenta profesional" else "Usuario y Contraseña",
-                color = Color.White.copy(alpha = 0.7f),
+                text = if (isRegister) "" else "Inicia sesión con Google account",
+                color = PrimaryNavy.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.bodyLarge
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
-            if (!isRegister) {
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = { Text("ejemplo@gmail.com", color = Color.White.copy(alpha = 0.4f)) },
-                    label = { Text("USUARIO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        focusedBorderColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("CONTRASEÑA", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    visualTransformation = PasswordVisualTransformation(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        focusedBorderColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = { /* Login Tradicional */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy)
-                ) {
-                    Text("ENTRAR", fontWeight = FontWeight.Black, fontSize = 16.sp)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = if (isRegister) "Solo registro mediante Google" else "— O —",
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+            // Se usa solo Google Account
             Button(
                 onClick = onGoogleLogin,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = ActionBlue),
+                    .height(65.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy, contentColor = Color.White),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
-                Text(
-                    text = if (isRegister) "REGÍSTRATE CON GOOGLE" else "USAR GOOGLE ACCOUNT",
-                    fontWeight = FontWeight.Black,
-                    fontSize = 14.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Simulación de logo de Google (un círculo de colores o un placeholder de texto)
+                    Text(
+                        text = "G ", 
+                        fontWeight = FontWeight.Bold, 
+                        color = Color.White,
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        text = if (isRegister) "REGÍSTRATE CON GOOGLE" else "INICIAR SESIÓN",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 16.sp,
+                        letterSpacing = 1.sp
+                    )
+                }
             }
         }
     }

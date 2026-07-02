@@ -79,7 +79,7 @@ data class AppMetadata(
     val isLicenseValid: Boolean = true
 )
 
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class], version = 3)
+@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
     abstract fun userDao(): UserDao

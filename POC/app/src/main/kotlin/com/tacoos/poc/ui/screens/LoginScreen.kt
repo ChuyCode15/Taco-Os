@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,6 +74,8 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
                 viewModel.resetState()
             }
             is LoginUiState.UserNotFound -> {
+                // Ajuste: Mostrar error específico y llevar a registro
+                Toast.makeText(context, "No estás registrado. Por favor, crea una cuenta.", Toast.LENGTH_LONG).show()
                 navController.navigate("role_selection") {
                     popUpTo("login") { inclusive = true }
                 }
@@ -89,7 +90,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Imagen de Fondo (Simulada con un Gradiente y Texto para estética Apple/Taco)
+        // Imagen de Fondo
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,7 +100,6 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
                     )
                 )
         ) {
-            // Aquí iría la Image(painterResource(id = R.drawable.street_business_bg)...)
             Text(
                 text = "TACO'OS",
                 modifier = Modifier
@@ -113,13 +113,12 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             )
         }
 
-        // 0. Botón Registrarse (Cargado abajo al lado derecho del botón login)
-        // Se maneja dentro de la columna del botón de login para posicionarlo relativo a él
+        // Botón Principal Login y Registro (Abajo Centrados)
         if (!showLoginBox) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 60.dp),
+                    .padding(bottom = 80.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -129,41 +128,37 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
                     letterSpacing = 2.sp,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(0.85f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                
+                Button(
+                    onClick = {
+                        showRegisterMode = false
+                        showLoginBox = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.75f)
+                        .height(65.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryNavy),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            showRegisterMode = false
+                    Text("INICIAR SESIÓN", fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 1.sp)
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "REGISTRARSE",
+                    modifier = Modifier
+                        .clickable {
+                            showRegisterMode = true
                             showLoginBox = true
                         },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(65.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryNavy),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
-                    ) {
-                        Text("INICIAR SESIÓN", fontWeight = FontWeight.Black, fontSize = 14.sp, letterSpacing = 1.sp)
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        text = "REGISTRARSE",
-                        modifier = Modifier
-                            .clickable {
-                                showRegisterMode = true
-                                showLoginBox = true
-                            },
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        letterSpacing = 1.sp
-                    )
-                }
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    letterSpacing = 1.sp,
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
@@ -203,7 +198,7 @@ fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit
             .fillMaxWidth()
             .fillMaxHeight(0.6f)
             .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
-        color = Color.White.copy(alpha = 0.9f), // Blanco con transparencia
+        color = Color.White.copy(alpha = 0.95f),
         tonalElevation = 12.dp
     ) {
         Column(
@@ -212,7 +207,6 @@ fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Indicador de cierre (Drag handle)
             Box(
                 modifier = Modifier
                     .width(50.dp)
@@ -234,14 +228,13 @@ fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit
             )
 
             Text(
-                text = if (isRegister) "" else "Inicia sesión con Google account",
+                text = "Inicia sesión con Google account",
                 color = PrimaryNavy.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.bodyLarge
             )
 
             Spacer(modifier = Modifier.height(50.dp))
 
-            // Se usa solo Google Account
             Button(
                 onClick = onGoogleLogin,
                 modifier = Modifier
@@ -252,7 +245,6 @@ fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Simulación de logo de Google (un círculo de colores o un placeholder de texto)
                     Text(
                         text = "G ", 
                         fontWeight = FontWeight.Bold, 

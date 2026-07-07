@@ -1,5 +1,6 @@
 package com.tacoos.poc.ui.screens
 
+import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
+import java.util.*
 
 @Composable
 fun BusinessRegistrationScreen(navController: NavController, viewModel: RegistrationViewModel = viewModel()) {
@@ -39,7 +41,7 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
         mutableStateOf(diasSemana.associateWith { Triple(true, "09:00 AM", "08:00 PM") }) 
     }
     
-    // Horario general (si mismoHorario es true)
+    // Horario general
     var aperturaGeneral by remember { mutableStateOf("09:00 AM") }
     var cierreGeneral by remember { mutableStateOf("08:00 PM") }
 
@@ -48,8 +50,6 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             navController.navigate("dashboard") {
                 popUpTo("login") { inclusive = true }
             }
-        } else if (uiState is RegistrationUiState.Error) {
-            Toast.makeText(context, (uiState as RegistrationUiState.Error).message, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -67,8 +67,7 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
                 text = "Comienza registrando estos datos", 
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Black,
-                    color = PrimaryNavy,
-                    letterSpacing = (-0.5).sp
+                    color = PrimaryNavy
                 )
             )
             Text(
@@ -79,7 +78,6 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            // Estilo Apple: Campos redondeados y limpios
             AppTextField(value = nombre, onValueChange = { nombre = it }, label = "Nombre de tu negocio")
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -95,7 +93,6 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            // SECCIÓN HORARIOS
             Text(
                 text = "Horario de servicio",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PrimaryNavy)
@@ -105,19 +102,19 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 8.dp).clickable { mismoHorario = !mismoHorario }
             ) {
-                Checkbox(
-                    checked = mismoHorario,
-                    onCheckedChange = { mismoHorario = it },
-                    colors = CheckboxDefaults.colors(checkedColor = ActionBlue)
-                )
+                Checkbox(checked = mismoHorario, onCheckedChange = { mismoHorario = it })
                 Text("Mismo horario todos los días", style = MaterialTheme.typography.bodyMedium)
             }
 
             if (mismoHorario) {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    TimePickerField(label = "Apertura", value = aperturaGeneral, modifier = Modifier.weight(1f))
+                    TimePickerField(label = "Apertura", value = aperturaGeneral, modifier = Modifier.weight(1f)) {
+                        aperturaGeneral = it
+                    }
                     Spacer(modifier = Modifier.width(16.dp))
-                    TimePickerField(label = "Cierre", value = cierreGeneral, modifier = Modifier.weight(1f))
+                    TimePickerField(label = "Cierre", value = cierreGeneral, modifier = Modifier.weight(1f)) {
+                        cierreGeneral = it
+                    }
                 }
             } else {
                 diasSemana.forEach { dia ->
@@ -128,8 +125,12 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
                         apertura = config.second,
                         cierre = config.third,
                         onToggle = { 
-                            horariosPorDia = horariosPorDia.toMutableMap().apply { 
-                                put(dia, config.copy(first = it)) 
+                            horariosPorDia = horariosPorDia.toMutableMap().apply { put(dia, config.copy(first = it)) }
+                        },
+                        onTimeClick = { isStart, newTime ->
+                            horariosPorDia = horariosPorDia.toMutableMap().apply {
+                                val current = get(dia)!!
+                                put(dia, if(isStart) current.copy(second = newTime) else current.copy(third = newTime))
                             }
                         }
                     )
@@ -140,22 +141,13 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             
             Button(
                 onClick = { 
-                    if (nombre.isNotBlank() && domicilio.isNotBlank()) {
-                        viewModel.registerUserAndBusiness(nombre, domicilio, giro)
-                    } else {
-                        Toast.makeText(context, "Completa los campos obligatorios", Toast.LENGTH_SHORT).show()
-                    }
+                    if (nombre.isNotBlank()) viewModel.registerUserAndBusiness(nombre, domicilio, giro)
                 },
                 modifier = Modifier.fillMaxWidth().height(60.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy),
-                enabled = uiState !is RegistrationUiState.Loading
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy)
             ) {
-                if (uiState is RegistrationUiState.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
-                } else {
-                    Text("LISTO", fontWeight = FontWeight.Black, fontSize = 16.sp)
-                }
+                Text("LISTO", fontWeight = FontWeight.Black, fontSize = 16.sp)
             }
         }
     }
@@ -181,7 +173,8 @@ fun AppTextField(value: String, onValueChange: (String) -> Unit, label: String, 
 }
 
 @Composable
-fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier) {
+fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier, onTimeSelected: (String) -> Unit) {
+    val context = LocalContext.current
     Column(modifier = modifier) {
         Text(text = label.uppercase(), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = PrimaryNavy.copy(alpha = 0.6f)))
         Spacer(modifier = Modifier.height(4.dp))
@@ -190,6 +183,14 @@ fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier)
                 .fillMaxWidth()
                 .height(56.dp)
                 .background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                .clickable {
+                    val calendar = Calendar.getInstance()
+                    TimePickerDialog(context, { _, h, m ->
+                        val ampm = if (h < 12) "AM" else "PM"
+                        val hour = if (h == 0) 12 else if (h > 12) h - 12 else h
+                        onTimeSelected(String.format("%02d:%02d %s", hour, m, ampm))
+                    }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+                }
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -199,28 +200,43 @@ fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun DayScheduleRow(day: String, isOpen: Boolean, apertura: String, cierre: String, onToggle: (Boolean) -> Unit) {
+fun DayScheduleRow(day: String, isOpen: Boolean, apertura: String, cierre: String, onToggle: (Boolean) -> Unit, onTimeClick: (Boolean, String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(checked = isOpen, onCheckedChange = onToggle)
-        Text(text = day, modifier = Modifier.width(90.dp), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold))
+        Text(text = day, modifier = Modifier.width(90.dp), fontWeight = FontWeight.Bold)
         
         if (isOpen) {
             Row(modifier = Modifier.weight(1f)) {
-                Box(
-                    modifier = Modifier.weight(1f).height(40.dp).background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(8.dp)),
-                    contentAlignment = Alignment.Center
-                ) { Text(apertura, fontSize = 12.sp) }
+                TimeBox(value = apertura, modifier = Modifier.weight(1f)) { onTimeClick(true, it) }
                 Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier.weight(1f).height(40.dp).background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(8.dp)),
-                    contentAlignment = Alignment.Center
-                ) { Text(cierre, fontSize = 12.sp) }
+                TimeBox(value = cierre, modifier = Modifier.weight(1f)) { onTimeClick(false, it) }
             }
         } else {
-            Text("Cerrado", modifier = Modifier.weight(1f), color = Color.Gray, fontSize = 12.sp)
+            Text("Cerrado", modifier = Modifier.weight(1f), color = Color.Gray)
         }
+    }
+}
+
+@Composable
+fun TimeBox(value: String, modifier: Modifier, onSelected: (String) -> Unit) {
+    val context = LocalContext.current
+    Box(
+        modifier = modifier
+            .height(40.dp)
+            .background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+            .clickable {
+                val calendar = Calendar.getInstance()
+                TimePickerDialog(context, { _, h, m ->
+                    val ampm = if (h < 12) "AM" else "PM"
+                    val hour = if (h == 0) 12 else if (h > 12) h - 12 else h
+                    onSelected(String.format("%02d:%02d %s", hour, m, ampm))
+                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(value, fontSize = 12.sp)
     }
 }

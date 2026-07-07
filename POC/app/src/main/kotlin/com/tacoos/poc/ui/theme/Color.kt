@@ -18,3 +18,11 @@ val DividerGray = Color(0xFFC6C6C8)
 // Translucent Overlay (Liquid Glass)
 val GlassBlue = Color(0xCC1E293B) 
 val GlassWhite = Color(0xCCFFFFFF)
+
+// Dark Mode Apple Style (Duolingo-like background)
+val DarkBackground = Color(0xFF1B1B1B) // Gris oscuro elegante
+val DarkSurface = Color(0xFF2C2C2E)    // Superficie Apple Dark
+val DarkActionBlue = Color(0xFF0A84FF)  // Azul brillante iOS Dark
+val DarkTextPrimary = Color(0xFFFFFFFF)
+val DarkTextSecondary = Color(0xFFEBEBF5)
+val DarkDivider = Color(0xFF38383A)

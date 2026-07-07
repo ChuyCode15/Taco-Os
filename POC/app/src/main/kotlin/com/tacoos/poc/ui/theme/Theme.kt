@@ -18,14 +18,28 @@ private val LightColorScheme = lightColorScheme(
     error = ErrorRed
 )
 
+private val DarkColorScheme = darkColorScheme(
+    primary = DarkActionBlue,
+    onPrimary = Color.White,
+    secondary = PrimaryNavy,
+    onSecondary = Color.White,
+    tertiary = SuccessGreen,
+    background = DarkBackground,
+    surface = DarkSurface,
+    onBackground = DarkTextPrimary,
+    onSurface = DarkTextPrimary,
+    error = ErrorRed
+)
+
 @Composable
 fun TacoOsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    // Para el POS mantendremos LightTheme como base de claridad
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    
     MaterialTheme(
-        colorScheme = LightColorScheme,
+        colorScheme = colorScheme,
         typography = Typography(),
         content = content
     )

@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         SalesScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 
                     }
                     composable("settings") { PlaceholderScreen(navController, "Ajustes") }
-                    composable("reports") { PlaceholderScreen(navController, "Reportes") }
+                    composable("reports") { ReportsScreen(navController) }
                     composable("cashiers") { TeamScreen(navController) }
                 }
             }

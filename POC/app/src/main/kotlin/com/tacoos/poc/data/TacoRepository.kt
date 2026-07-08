@@ -6,7 +6,6 @@ import com.tacoos.poc.data.local.User
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
-import java.util.UUID
 
 class TacoRepository(
     private val api: TacoApi,
@@ -67,12 +66,14 @@ class TacoRepository(
     }
 
     // --- Sales (Local First) ---
-    suspend fun registerSale(amount: Double, negocioId: String) {
+    suspend fun registerSale(amount: Double, negocioId: String, userId: String, productsJson: String) {
         // Registro inmediato en SQLite para máxima agilidad
         db.saleDao().insertSale(
             com.tacoos.poc.data.local.Sale(
                 amount = amount,
                 negocioId = negocioId,
+                userId = userId,
+                productsJson = productsJson,
                 isSynced = false
             )
         )

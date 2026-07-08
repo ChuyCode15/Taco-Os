@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("settings") { PlaceholderScreen(navController, "Ajustes") }
                     composable("reports") { PlaceholderScreen(navController, "Reportes") }
-                    composable("cashiers") { PlaceholderScreen(navController, "Cajeros") }
+                    composable("cashiers") { TeamScreen(navController) }
                 }
             }
         }

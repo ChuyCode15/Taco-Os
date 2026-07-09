@@ -1,0 +1,19 @@
+solo un detalle critico no se tiene que borrar nada no elimines nada nunca po supocicion si estorba algo consultas para que yo lo analice y te diga si prosigues o no, si no se mensiona no quiere decir que lo borres o lo reasignes si no se mesiona no se mueve!.
+la estrategia de desarollo que estamso utilizando es implemetacion y por correccion por instruccion especifica. 
+esi que solo agregamos y trabajamos con lo que te digo que hacer si no lo mensiono muy posblimente es poque eso ya quedo muy bien y no lo tocamos 
+
+- vista venatas
+	* Popup Nueva venta 
+		- agregar product debe esta Abajo de la lista de productos que sa se agregaron No! Abajo de de cobrar 
+		- en la vista para agrera un nuevo product dice NUEVA VENTA esta mal debe decir productos 
+		- la vista "Productos" la categoria deven ser como pestañas de navegador y dentro mostrar los produsto de cada categoria sin camviar vista solo comod e pestaña dentro de la caja de  lista de prodcutso de caa categoria al final deve esta como parte de la lista agregar product nuevo este llevara un popup de registro nuevo productos (solo sale el pop vacio hasta que que se trabaje es parte es solo temporal pero la accion debe existeri y un boton de retroceder nada mas)
+		- dentro del popup que se habre en el boton de cobrar titulo dice "Nueva Venta" se cambiara por "Resumen de venta" y se mostrara un resumen de la venta en forma de ticek simple  25 tacos 500, 4 cocas 100, 2 flanes 70 y sigue el total que ya esta y lo botones de efectivo y tarjeta estanbien 
+			*en la caja de "paga con"  cuando ingresen un valor solo se permite numeric Abajo con letras grandes deve aparcer la resta del vuelto ose si el total es de 250 y se imngresa paga con 400 inmeditamnte Abajo sin apretar nada ya se calcula 150 de cambio y 
+			* el bon de confirma deve decir "cobra"
+			* despues de cobrar si todo aocurrio de maner corecta y no fallo nada durante la transaccion, inmedeatamnet depues de dar cabrar deve salir un alirte qeu se cierre solo por 1.5 seg o 1 segu que diga raya verde se cobaraon 256.00 con exito y si pasa algo que el traccional se encarga de eliminar lso registros y sale el alert rojo fallo el cobro segun sea el caso    
+			* en medio de cancelkar y agregar venta deve eatr el boton de gasto 
+				- el boton de gasto al dar click un pop qu epermite registrar un gasto desde la caja como po rejemplo faltaron servilletas y mandan al cjhalan por las sevilletas de volada a la tienda se registra detalle total y opcion de sacar una foto de ticket se registr el nombre del cajero y la hora cantidad corte al que pertenece el gasto 
+		- si entro a ventas y hago registras cuando salgo y vuelvo a aentrar ya no estan los datso se pierden o no se registran 
+
+  
+		

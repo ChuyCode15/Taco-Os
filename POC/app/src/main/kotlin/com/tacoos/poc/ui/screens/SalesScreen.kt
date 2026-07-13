@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -350,6 +351,7 @@ fun ActionButton(icon: ImageVector, label: String, color: Color, onClick: () -> 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     var step by remember { mutableStateOf(1) } // 1: Nota de Venta, 2: Agregar Producto (Categorías/Productos)
     val saleDetails = remember { mutableStateListOf<POSItem>() }
     var selectedCategory by remember { mutableStateOf("Comidas") }
@@ -370,7 +372,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier.fillMaxHeight(0.3f).fillMaxWidth().padding(16.dp), // Tamaño vertical limitado al 30%
+        modifier = Modifier.heightIn(min = screenHeight * 0.3f, max = screenHeight * 0.9f).fillMaxWidth().padding(16.dp), // Dinámico: Min 30% Max 90%
         content = {
             Surface(modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(28.dp), color = Color.White) {
                 Column(modifier = Modifier.padding(24.dp)) {
@@ -450,10 +452,11 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
     
     if (showCobroPopup) {
         val total = saleDetails.sumOf { it.price * it.quantity }
+        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
         AlertDialog(
             onDismissRequest = { showCobroPopup = false },
             content = {
-                Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.3f), shape = RoundedCornerShape(24.dp), color = Color.White) {
+                Surface(modifier = Modifier.fillMaxWidth().heightIn(min = screenHeight * 0.3f, max = screenHeight * 0.9f), shape = RoundedCornerShape(24.dp), color = Color.White) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text("Resumen de venta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
                         Spacer(Modifier.height(8.dp))
@@ -557,6 +560,7 @@ fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     var detalle by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var capturedPhoto by remember { mutableStateOf<Bitmap?>(null) }
@@ -568,7 +572,7 @@ fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         content = {
-            Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.3f), shape = RoundedCornerShape(24.dp), color = Color.White) {
+            Surface(modifier = Modifier.fillMaxWidth().heightIn(min = screenHeight * 0.3f, max = screenHeight * 0.9f), shape = RoundedCornerShape(24.dp), color = Color.White) {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text("Registrar Gasto", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
                     Spacer(Modifier.height(8.dp))

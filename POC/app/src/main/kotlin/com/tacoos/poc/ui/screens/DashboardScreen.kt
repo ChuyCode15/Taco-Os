@@ -150,8 +150,38 @@ fun DashboardScreen(
                     }
                 }
                 Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(modifier = Modifier.fillMaxWidth().height(160.dp).padding(16.dp).clip(RoundedCornerShape(24.dp)).background(Brush.linearGradient(colors = listOf(PrimaryNavy, ActionBlue))), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    // Banner de imágenes aleatorias (Simulado)
+                    val banners = listOf(
+                        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&q=80", // Comida
+                        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80", // Administración
+                        "https://images.unsplash.com/photo-1513135065346-a098a63a73ee?w=500&q=80"  // Control
+                    )
+                    var currentBannerIndex by remember { mutableStateOf(0) }
+                    LaunchedEffect(Unit) {
+                        while(true) {
+                            delay(5000)
+                            currentBannerIndex = (currentBannerIndex + 1) % banners.size
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp)
+                            .padding(16.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(Color.LightGray)
+                    ) {
+                        // Aquí se usaría AsyncImage o similar para cargar desde URL
+                        // Por ahora simulamos con el fondo Navy/Blue y el texto del banner
+                        Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(colors = listOf(PrimaryNavy, ActionBlue))), contentAlignment = Alignment.Center) {
+                            Text("BANNER: ${banners[currentBannerIndex].takeLast(10)}", color = Color.White.copy(alpha = 0.5f))
+                        }
+                        
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Text("VENTAS HOY", color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Bold)
                             Text("$12,450.00", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
                         }

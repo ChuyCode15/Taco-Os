@@ -8,13 +8,25 @@ import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
 import java.util.UUID
 
+/**
+ * TacoRepository: Capa de abstracción de datos (Single Source of Truth).
+ * Inyección de dependencias: Recibe la interfaz de la API (Retrofit) y la base de datos local (Room).
+ * Propósito: Orquestar la comunicación entre el almacenamiento local y la sincronización con el servidor.
+ */
 class TacoRepository(
     private val api: TacoApi,
     private val db: AppDatabase
 ) {
-    // --- Auth & Session ---
+    // --- Autenticación y Gestión de Sesión ---
+
+    /**
+     * verifyUser: Consulta al servidor si un Google ID ya está registrado.
+     */
     suspend fun verifyUser(idGoogle: String) = api.verifyUser(idGoogle)
 
+    /**
+     * registerUser: Envía la solicitud de creación de un nuevo perfil de usuario al Backend.
+     */
     suspend fun registerUser(
         idGoogle: String,
         nombre: String,
@@ -29,29 +41,39 @@ class TacoRepository(
         )
     )
 
+    /**
+     * createBusiness: Registra los datos del establecimiento vinculado a un dueño.
+     */
     suspend fun createBusiness(duenoId: String, nombre: String, direccion: String, giro: String) =
         api.createBusiness(
             duenoId = duenoId,
             request = BusinessRequest(
                 nombre = nombre,
                 direccion = direccion,
-                telefono = "N/A", // Valor por defecto para el POC
+                telefono = "N/A", // Valor predeterminado para el alcance del POC.
                 queVende = giro
             )
         )
 
+    /**
+     * saveUserLocally: Persiste la información del usuario en SQLite.
+     * Actualiza la metadata de sesión para el control de inactividad de 12 horas.
+     */
     suspend fun saveUserLocally(user: User) {
         db.userDao().clearUser()
         db.userDao().insertUser(user)
-        // Actualizar inicio de sesión (12h clock starts)
+        // Actualizar marca de tiempo del login.
         db.metadataDao().updateMetadata(
             AppMetadata(
                 lastLoginTimestamp = System.currentTimeMillis(),
-                lastMasterSyncTimestamp = System.currentTimeMillis() // Suponemos sync exitoso al login
+                lastMasterSyncTimestamp = System.currentTimeMillis()
             )
         )
     }
 
+    /**
+     * isSessionValid: Valida si la sesión actual ha expirado (límite de 12 horas).
+     */
     suspend fun isSessionValid(): Boolean {
         val metadata = db.metadataDao().getMetadata() ?: return false
         val now = System.currentTimeMillis()
@@ -59,6 +81,9 @@ class TacoRepository(
         return (now - metadata.lastLoginTimestamp) < twelveHours
     }
 
+    /**
+     * isLicenseValid: Verifica la validez de la licencia localmente contra el tiempo de última sincronización.
+     */
     suspend fun isLicenseValid(): Boolean {
         val metadata = db.metadataDao().getMetadata() ?: return false
         val now = System.currentTimeMillis()
@@ -66,9 +91,13 @@ class TacoRepository(
         return (now - metadata.lastMasterSyncTimestamp) < twentyFourHours && metadata.isLicenseValid
     }
 
-    // --- Sales (Local First) ---
+    // --- Operaciones de Venta (Local First) ---
+
+    /**
+     * registerSale: Inserta una transacción de venta en la base de datos local de forma inmediata.
+     * Marca la venta como no sincronizada para que el SyncWorker la procese después.
+     */
     suspend fun registerSale(amount: Double, negocioId: String) {
-        // Registro inmediato en SQLite para máxima agilidad
         db.saleDao().insertSale(
             com.tacoos.poc.data.local.Sale(
                 amount = amount,
@@ -78,10 +107,16 @@ class TacoRepository(
         )
     }
 
+    /**
+     * getTodayTotal: Recupera la suma total de ventas locales registradas desde el inicio del día actual.
+     */
     suspend fun getTodayTotal(): Double {
         val startOfDay = System.currentTimeMillis() - (System.currentTimeMillis() % (24 * 60 * 60 * 1000L))
         return db.saleDao().getTodayTotal(startOfDay) ?: 0.0
     }
 
+    /**
+     * getCurrentUser: Recupera el perfil del usuario activo almacenado localmente.
+     */
     suspend fun getCurrentUser() = db.userDao().getCurrentUser()
 }

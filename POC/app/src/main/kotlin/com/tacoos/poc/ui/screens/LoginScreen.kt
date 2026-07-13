@@ -28,14 +28,21 @@ import com.google.android.gms.common.api.ApiException
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
 
+/**
+ * LoginScreen: Punto de entrada de la aplicación.
+ * Inyección de dependencias: NavController para flujo de sesión, LoginViewModel para lógica de negocio.
+ * Autenticación: Implementa Google Sign-In como método exclusivo de registro/acceso.
+ */
 @Composable
 fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewModel()) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
+    // Estado local para la animación del popup de login.
     var showLoginBox by remember { mutableStateOf(false) }
     var showRegisterMode by remember { mutableStateOf(false) }
 
+    // Configuración de Google Sign-In Options (GSO).
     val gso = remember {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(GoogleSignInConfig.SERVER_CLIENT_ID)
@@ -44,6 +51,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
     }
     val googleSignInClient = remember { GoogleSignIn.getClient(context as android.app.Activity, gso) }
 
+    // Inyección de Activity Result para gestionar la respuesta de la autenticación de Google.
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -52,6 +60,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             val account = task.getResult(ApiException::class.java)
             val idGoogle = account.id ?: return@rememberLauncherForActivityResult
             android.util.Log.d("TacoOs", "Google Sign-In success: id=$idGoogle, email=${account.email}")
+            // Delega la validación de cuenta al ViewModel.
             viewModel.onGoogleSignInResult(
                 idGoogle = idGoogle,
                 nombre = account.displayName ?: "",
@@ -64,9 +73,11 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
         }
     }
 
+    // Observador de Estado: Gestiona la navegación según el resultado de la autenticación.
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is LoginUiState.Success -> {
+                // Navegación inteligente según el rol del usuario.
                 val route = if (state.user.rol == "dueño" || state.user.rol == "administrador") "dashboard" else "sales"
                 navController.navigate(route) {
                     popUpTo("login") { inclusive = true }
@@ -74,7 +85,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
                 viewModel.resetState()
             }
             is LoginUiState.UserNotFound -> {
-                // Ajuste: Mostrar error específico y llevar a registro
+                // Manejo de Error 404: Si no existe, redirige al flujo de registro de negocio.
                 Toast.makeText(context, "No estás registrado. Por favor, crea una cuenta.", Toast.LENGTH_LONG).show()
                 navController.navigate("role_selection") {
                     popUpTo("login") { inclusive = true }
@@ -90,7 +101,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Imagen de Fondo
+        // Fondo visual con gradiente Navy/Blue.
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -113,7 +124,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             )
         }
 
-        // Botón Principal Login y Registro (Abajo Centrados)
+        // Bloque de Acciones Principales (Login y Registro).
         if (!showLoginBox) {
             Column(
                 modifier = Modifier
@@ -162,6 +173,7 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
             }
         }
 
+        // Popup Dinámico (LoginBox): Se muestra con animación de deslizamiento.
         AnimatedVisibility(
             visible = showLoginBox,
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -172,11 +184,13 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
                 isRegister = showRegisterMode,
                 onClose = { showLoginBox = false },
                 onGoogleLogin = {
+                    // Lanza el flujo nativo de Google Account.
                     googleSignInLauncher.launch(googleSignInClient.signInIntent)
                 }
             )
         }
 
+        // Indicador de Carga: Bloquea la UI mientras se verifica el usuario con el Backend.
         if (uiState is LoginUiState.Loading) {
             Box(
                 modifier = Modifier
@@ -191,6 +205,10 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel = viewMo
     }
 }
 
+/**
+ * LoginBox: Formulario simplificado para acceso con Google.
+ * Inyección de eventos: onClose para cerrar el popup, onGoogleLogin para autenticar.
+ */
 @Composable
 fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit) {
     Surface(
@@ -207,6 +225,7 @@ fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Indicador visual de cierre (estilo modal iOS).
             Box(
                 modifier = Modifier
                     .width(50.dp)
@@ -235,6 +254,7 @@ fun LoginBox(isRegister: Boolean, onClose: () -> Unit, onGoogleLogin: () -> Unit
 
             Spacer(modifier = Modifier.height(50.dp))
 
+            // Botón Único de Google Sign-In.
             Button(
                 onClick = onGoogleLogin,
                 modifier = Modifier

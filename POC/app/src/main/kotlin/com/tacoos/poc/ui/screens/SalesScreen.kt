@@ -46,18 +46,28 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Singleton para persistencia del corte en el POC
+/**
+ * Singleton ShiftManager: Gestiona la persistencia de la sesión de caja abierta durante la ejecución del POC.
+ * Actúa como un contenedor de estado global para evitar la pérdida de datos al navegar entre pantallas.
+ */
 object ShiftManager {
     var isShiftOpen by mutableStateOf(false)
     var openTimestamp by mutableStateOf(0L)
     var fondoCaja by mutableStateOf(0.0)
     var currentCashier by mutableStateOf("Desconocido")
     
-    // Listas persistentes durante la sesión
+    // Listas persistentes: Se mantienen activas mientras el objeto ShiftManager viva en memoria.
     val sales = mutableStateListOf<POSSale>()
     val expenses = mutableStateListOf<POSExpense>()
 }
 
+/**
+ * POSSale: Modelo de datos para representar una transacción de venta.
+ * @param id Identificador único de la venta.
+ * @param amount Monto total cobrado.
+ * @param method Método de pago (Efectivo/Tarjeta).
+ * @param status Estado de la venta (Cobrada/Cancelada).
+ */
 data class POSSale(
     val id: String,
     val amount: Double,
@@ -67,12 +77,18 @@ data class POSSale(
     val items: List<SaleItemSummary> = emptyList()
 )
 
+/**
+ * SaleItemSummary: Resumen consolidado de productos vendidos en una nota.
+ */
 data class SaleItemSummary(
     val productName: String,
     val totalQuantity: Int,
     val totalPrice: Double
 )
 
+/**
+ * POSItem: Representación de un producto en el catálogo o carrito.
+ */
 data class POSItem(
     val name: String,
     val price: Double,
@@ -80,6 +96,9 @@ data class POSItem(
     var quantity: Int = 0
 )
 
+/**
+ * POSExpense: Modelo para el registro de gastos operativos desde caja.
+ */
 data class POSExpense(
     val id: String = UUID.randomUUID().toString(),
     val detail: String,
@@ -89,6 +108,11 @@ data class POSExpense(
     val receiptPhoto: Bitmap? = null
 )
 
+/**
+ * SalesScreen: Pantalla principal del Punto de Venta (POS).
+ * Inyección de dependencias: NavController para navegación.
+ * Manejo de estado: Utiliza ShiftManager para la persistencia del turno activo.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange: (Boolean) -> Unit) {
@@ -96,20 +120,22 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val context = LocalContext.current
     
+    // Estado local para la venta seleccionada en la lista (auditoría/cancelación)
     var selectedSale by remember { mutableStateOf<POSSale?>(null) }
     
+    // Controladores de visibilidad para diálogos (Formularios)
     var showOpeningDialog by remember { mutableStateOf(false) }
     var showNewSalePopup by remember { mutableStateOf(false) }
     var showCortePopup by remember { mutableStateOf(false) }
     var showExpensePopup by remember { mutableStateOf(false) }
     
-    // Alertas de éxito/error de transacción
+    // Feedback visual para transacciones (Mensajes temporales)
     var transactionSuccessMessage by remember { mutableStateOf<String?>(null) }
     var transactionErrorMessage by remember { mutableStateOf<String?>(null) }
 
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
-    // Auto-cierre de alertas
+    // Lógica de auto-cierre para alertas transaccionales (1.5 segundos)
     LaunchedEffect(transactionSuccessMessage) {
         if (transactionSuccessMessage != null) {
             delay(1500)
@@ -158,7 +184,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize().padding(padding)) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Info Bar
+                    // Barra de Información Superior: Muestra fecha y usuario logueado.
                     Row(
                         modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f)).padding(12.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -168,6 +194,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
                     }
 
                     if (!ShiftManager.isShiftOpen) {
+                        // Bloqueo de Caja: Vista mostrada cuando no hay un turno activo.
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Default.Lock, null, modifier = Modifier.size(100.dp), tint = Color.LightGray.copy(alpha = 0.5f))
@@ -180,6 +207,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
                             }
                         }
                     } else {
+                        // Dashboard de Turno Activo: Listado de ventas y botones de acción.
                         Column(modifier = Modifier.weight(1f).padding(16.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("CORTE ACTIVO", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
@@ -205,6 +233,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
                                 }
                             }
                             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+                                // Botón Cancelar: Solo permite cancelar si han pasado menos de 5 minutos (Inmutabilidad).
                                 ActionButton(Icons.Default.Close, "Cancelar", Color.Red) {
                                     selectedSale?.let { 
                                         if(System.currentTimeMillis() - it.timestamp < 300000) {
@@ -216,13 +245,15 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
                                     }
                                 }
                                 
-                                // BOTON GASTO (Implementación solicitada entre cancelar y venta)
+                                // Botón Gasto: Abre el formulario para registrar salidas de efectivo.
                                 ActionButton(Icons.Default.ShoppingCart, "Gasto", WarningAmber) {
                                     showExpensePopup = true
                                 }
                                 
+                                // Botón Venta: Inicia el flujo de cobro.
                                 ActionButton(Icons.Default.Add, "Venta", SuccessGreen) { showNewSalePopup = true }
                             }
+                            // Botón Cerrar Corte: Finaliza la sesión y limpia las listas transaccionales.
                             Button(onClick = { showCortePopup = true }, modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy)) {
                                 Text("CERRAR CORTE", fontWeight = FontWeight.Black)
                             }
@@ -230,14 +261,14 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
                     }
                 }
                 
-                // Alert de éxito transaccional
+                // Barra de alerta de éxito
                 if (transactionSuccessMessage != null) {
                     Box(modifier = Modifier.fillMaxWidth().height(50.dp).background(SuccessGreen).align(Alignment.TopCenter), contentAlignment = Alignment.Center) {
                         Text(transactionSuccessMessage!!, color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
                 
-                // Alert de error transaccional
+                // Barra de alerta de error
                 if (transactionErrorMessage != null) {
                     Box(modifier = Modifier.fillMaxWidth().height(50.dp).background(Color.Red).align(Alignment.TopCenter), contentAlignment = Alignment.Center) {
                         Text(transactionErrorMessage!!, color = Color.White, fontWeight = FontWeight.Bold)
@@ -247,6 +278,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
         }
     }
 
+    // Formulario: Apertura de Caja (Solicita fondo inicial)
     if (showOpeningDialog) {
         var fondoInput by remember { mutableStateOf("") }
         AlertDialog(
@@ -278,6 +310,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
         )
     }
 
+    // Inyección de lógica: Lanza el flujo de Nueva Venta.
     if (showNewSalePopup) {
         NewSaleDialog(
             onDismiss = { showNewSalePopup = false },
@@ -293,6 +326,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
         )
     }
 
+    // Formulario: Registro de Gasto.
     if (showExpensePopup) {
         ExpenseDialog(
             onDismiss = { showExpensePopup = false },
@@ -304,6 +338,7 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
         )
     }
 
+    // Formulario: Cierre de Corte (Resumen Final).
     if (showCortePopup) {
         CorteDialog(
             sales = ShiftManager.sales,
@@ -320,6 +355,11 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
     }
 }
 
+/**
+ * SaleRow: Fila individual para representar una venta en la lista.
+ * @param sale Datos de la venta.
+ * @param isSelected Indica si la fila está seleccionada para acciones.
+ */
 @Composable
 fun SaleRow(sale: POSSale, isSelected: Boolean, onClick: () -> Unit) {
     val statusColor = if(sale.status == "Cancelada") Color.Red else (if(sale.method == "Efectivo") SuccessGreen else ActionBlue)
@@ -337,6 +377,9 @@ fun SaleRow(sale: POSSale, isSelected: Boolean, onClick: () -> Unit) {
     }
 }
 
+/**
+ * ActionButton: Botón circular estilizado para acciones de POS.
+ */
 @Composable
 fun ActionButton(icon: ImageVector, label: String, color: Color, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -348,6 +391,10 @@ fun ActionButton(icon: ImageVector, label: String, color: Color, onClick: () -> 
     }
 }
 
+/**
+ * NewSaleDialog: Formulario dinámico para la creación de una nota de venta.
+ * Lógica de estado: Utiliza un "step" para navegar entre la nota, categorías y productos.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
@@ -356,11 +403,15 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
     val saleDetails = remember { mutableStateListOf<POSItem>() }
     var selectedCategory by remember { mutableStateOf("Comidas") }
     
+    // Estado de formulario de cobro
     var paymentMethod by remember { mutableStateOf("Efectivo") }
     var amountPaid by remember { mutableStateOf("") }
+    
+    // Sub-diálogos
     var showTempProductPopup by remember { mutableStateOf(false) }
     var showCobroPopup by remember { mutableStateOf(false) }
 
+    // Catálogo estático para el POC
     val products = listOf(
         POSItem("Taco Pastor", 15.0, "Comidas"),
         POSItem("Taco Bistec", 18.0, "Comidas"),
@@ -390,6 +441,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                     Box(modifier = Modifier.weight(1f).padding(vertical = 16.dp)) {
                         when(step) {
                             1 -> {
+                                // Vista 1: Detalle actual de la nota.
                                 Column {
                                     Box(modifier = Modifier.weight(1f)) {
                                         if(saleDetails.isEmpty()) {
@@ -399,7 +451,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                                         }
                                     }
                                     
-                                    // AGREGAR PRODUCTO DEBAJO DE LA LISTA
+                                    // Acción: Cambiar a vista de catálogo.
                                     TextButton(onClick = { step = 2 }, modifier = Modifier.fillMaxWidth()) {
                                         Text("+ AGREGAR PRODUCTO", color = ActionBlue, fontWeight = FontWeight.Bold)
                                     }
@@ -412,8 +464,9 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                                 }
                             }
                             2 -> {
+                                // Vista 2: Catálogo de productos por categorías.
                                 Column {
-                                    // PESTAÑAS
+                                    // Selector de Pestañas (Categorías)
                                     Row(modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(12.dp))) {
                                         listOf("Comidas", "Bebidas", "Postres").forEach { cat ->
                                             Box(
@@ -450,6 +503,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
         }
     )
     
+    // Formulario de Cobro: Muestra resumen tipo ticket y calcula cambio.
     if (showCobroPopup) {
         val total = saleDetails.sumOf { it.price * it.quantity }
         val screenHeight = LocalConfiguration.current.screenHeightDp.dp
@@ -460,7 +514,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text("Resumen de venta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
                         Spacer(Modifier.height(8.dp))
-                        // TICKET SIMPLE
+                        // Resumen de Ticket
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             items(saleDetails) { item ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
@@ -518,6 +572,10 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
     }
 }
 
+/**
+ * ProductRowInline: Fila de catálogo con entrada de cantidad integrada.
+ * Gestiona el foco automático del teclado al seleccionar un producto.
+ */
 @Composable
 fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit) {
     var qty by remember { mutableStateOf("") }
@@ -529,7 +587,7 @@ fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit) {
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Miniatura cuadrito
+            // Miniatura visual del producto.
             Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray))
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -538,6 +596,7 @@ fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit) {
             }
             
             if (isSelected) {
+                // Entrada de cantidad Inline (se muestra solo al seleccionar la fila).
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = qty,
@@ -557,6 +616,10 @@ fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit) {
     }
 }
 
+/**
+ * ExpenseDialog: Formulario para el registro de gastos.
+ * Incluye integración con la cámara para capturar fotos de tickets.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
@@ -565,6 +628,7 @@ fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
     var cantidad by remember { mutableStateOf("") }
     var capturedPhoto by remember { mutableStateOf<Bitmap?>(null) }
     
+    // Inyección de Activity Result: Lanza la cámara nativa para capturar miniatura de ticket.
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         capturedPhoto = bitmap
     }
@@ -599,6 +663,10 @@ fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
     )
 }
 
+/**
+ * CorteDialog: Formulario de resumen final de turno.
+ * Realiza cálculos de arqueo de caja (Efectivo + Fondo - Gastos).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CorteDialog(sales: List<POSSale>, expenses: List<POSExpense>, onDismiss: () -> Unit, onConfirm: () -> Unit) {
@@ -654,6 +722,9 @@ fun CorteDialog(sales: List<POSSale>, expenses: List<POSExpense>, onDismiss: () 
     )
 }
 
+/**
+ * ReportRow: Componente utilitario para mostrar filas de etiquetas y valores en reportes.
+ */
 @Composable
 fun ReportRow(label: String, value: String) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {

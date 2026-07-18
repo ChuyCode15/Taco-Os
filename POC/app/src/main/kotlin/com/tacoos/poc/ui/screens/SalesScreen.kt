@@ -510,52 +510,65 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
         AlertDialog(
             onDismissRequest = { showCobroPopup = false },
             content = {
-                Surface(modifier = Modifier.fillMaxWidth().heightIn(min = screenHeight * 0.3f, max = screenHeight * 0.9f), shape = RoundedCornerShape(24.dp), color = Color.White) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Resumen de venta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
-                        Spacer(Modifier.height(8.dp))
+                Surface(modifier = Modifier.fillMaxWidth().heightIn(min = screenHeight * 0.3f, max = screenHeight * 0.9f), shape = RoundedCornerShape(28.dp), color = Color.White) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text("Resumen de venta", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                        Spacer(Modifier.height(16.dp))
+                        
                         // Resumen de Ticket
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             items(saleDetails) { item ->
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    Text("${item.quantity} ${item.name}", modifier = Modifier.weight(1f), fontSize = 12.sp)
-                                    Text("$${item.price * item.quantity}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("${item.quantity} ${item.name}", color = Color.Gray)
+                                    Text("$${item.price * item.quantity}", fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
-                        Divider(Modifier.padding(vertical = 4.dp))
-                        Text("TOTAL: $${total}", fontSize = 24.sp, fontWeight = FontWeight.Black, color = PrimaryNavy)
                         
-                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                            Button(onClick = { paymentMethod = "Efectivo" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if(paymentMethod == "Efectivo") ActionBlue else Color.Gray)) { Text("Efectivo") }
+                        Divider(Modifier.padding(vertical = 8.dp))
+                        
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("TOTAL:", fontWeight = FontWeight.Black)
+                            Text("$${total}", fontSize = 24.sp, fontWeight = FontWeight.Black, color = PrimaryNavy)
+                        }
+                        
+                        Spacer(Modifier.height(16.dp))
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Button(onClick = { paymentMethod = "Efectivo" }, modifier = Modifier.weight(1f).height(50.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = if(paymentMethod == "Efectivo") ActionBlue else Color.Gray)) { Text("Efectivo") }
                             Spacer(Modifier.width(8.dp))
-                            Button(onClick = { paymentMethod = "Tarjeta" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if(paymentMethod == "Tarjeta") ActionBlue else Color.Gray)) { Text("Tarjeta") }
+                            Button(onClick = { paymentMethod = "Tarjeta" }, modifier = Modifier.weight(1f).height(50.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = if(paymentMethod == "Tarjeta") ActionBlue else Color.Gray)) { Text("Tarjeta") }
                         }
 
                         if(paymentMethod == "Efectivo") {
+                            Spacer(Modifier.height(16.dp))
                             OutlinedTextField(
                                 value = amountPaid,
                                 onValueChange = { if(it.all { c -> c.isDigit() }) amountPaid = it },
                                 label = { Text("Paga con") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp)
                             )
                             val p = amountPaid.toDoubleOrNull() ?: 0.0
                             if(p >= total) {
-                                Text("CAMBIO: $${p - total}", color = SuccessGreen, fontSize = 28.sp, fontWeight = FontWeight.Black)
+                                Column(modifier = Modifier.padding(top = 12.dp)) {
+                                    Text("CAMBIO", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = SuccessGreen)
+                                    Text("$${p - total}", color = SuccessGreen, fontSize = 36.sp, fontWeight = FontWeight.Black)
+                                }
                             }
                         }
                         
+                        Spacer(Modifier.height(24.dp))
                         Button(
                             onClick = { 
                                 val summaries = saleDetails.map { SaleItemSummary(it.name, it.quantity, it.price * it.quantity) }
                                 onConfirm(POSSale(UUID.randomUUID().toString(), total, paymentMethod, "Cobrada", items = summaries))
                                 showCobroPopup = false
                             },
-                            modifier = Modifier.fillMaxWidth().height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth().height(60.dp),
+                            shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen)
-                        ) { Text("COBRA", fontWeight = FontWeight.Black) }
+                        ) { Text("COBRA", fontWeight = FontWeight.Black, fontSize = 18.sp) }
                     }
                 }
             }

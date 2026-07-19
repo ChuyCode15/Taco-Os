@@ -1,6 +1,7 @@
 package com.tacoos.poc.ui.screens
 
 import android.app.Application
+import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.tacoos.poc.TacoApp
@@ -23,15 +24,26 @@ sealed class RegistrationUiState {
 class RegistrationViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as TacoApp
     private val repository = TacoRepository(app.api, app.database)
-
     private val _uiState = MutableStateFlow<RegistrationUiState>(RegistrationUiState.Idle)
     val uiState: StateFlow<RegistrationUiState> = _uiState
+
+    var nombre by mutableStateOf("")
+        private set
+    var domicilio by mutableStateOf("")
+        private set
+    var giro by mutableStateOf("")
+        private set
+
+    // Funciones para actualizar esos campos desde la UI
+    fun onNombreChange(newName: String) { nombre = newName }
+    fun onDomicilioChange(newAddress: String) { domicilio = newAddress }
+    fun onGiroChange(newGiro: String) { giro = newGiro }
 
     fun selectRole(rol: String) {
         GoogleSignInState.rol = rol
     }
 
-    fun registerUserAndBusiness(businessName: String, address: String, giro: String) {
+    fun registerUserAndBusiness() {
         _uiState.value = RegistrationUiState.Loading
         viewModelScope.launch {
             try {
@@ -51,8 +63,8 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
                 if (GoogleSignInState.rol == "dueño") {
                     val businessResponse = repository.createBusiness(
                         duenoId = userId,
-                        nombre = businessName,
-                        direccion = address,
+                        nombre = nombre,
+                        direccion = domicilio,
                         giro = giro
                     )
 

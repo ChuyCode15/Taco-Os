@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.tacoos.poc.domain.usecase.FormatTimeUseCase
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
 import java.util.*
@@ -34,9 +35,7 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
     val uiState by viewModel.uiState.collectAsState()
 
     // Estados locales del formulario de datos básicos.
-    var nombre by remember { mutableStateOf("") }
-    var domicilio by remember { mutableStateOf("") }
-    var giro by remember { mutableStateOf("") }
+
     
     // Estados para la lógica de Horarios:
     // mismoHorario define si se aplica una regla general o individual por día de la semana.
@@ -87,15 +86,21 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             Spacer(modifier = Modifier.height(32.dp))
             
             // Inyección de componentes de entrada de texto estilizados.
-            AppTextField(value = nombre, onValueChange = { nombre = it }, label = "Nombre de tu negocio")
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            AppTextField(value = domicilio, onValueChange = { domicilio = it }, label = "Domicilio")
+            AppTextField(
+                value = viewModel.nombre,
+                onValueChange = { viewModel.onNombreChange(it)},
+                label = "Nombre de tu negocio")
             Spacer(modifier = Modifier.height(16.dp))
             
             AppTextField(
-                value = giro, 
-                onValueChange = { giro = it }, 
+                value = viewModel.domicilio,
+                onValueChange = { viewModel.onDomicilioChange(it) },
+                label = "Domicilio")
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            AppTextField(
+                value = viewModel.giro,
+                onValueChange = { viewModel.onGiroChange(it) },
                 label = "¿Qué vendes? (Giro)",
                 placeholder = "Ej: Hamburguesas, tacos, carnitas..."
             )
@@ -154,7 +159,7 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             // Botón de Envío: Delega el registro al ViewModel de Registro.
             Button(
                 onClick = { 
-                    if (nombre.isNotBlank()) viewModel.registerUserAndBusiness(nombre, domicilio, giro)
+                    if (viewModel.nombre.isNotBlank()) viewModel.registerUserAndBusiness()
                 },
                 modifier = Modifier.fillMaxWidth().height(60.dp),
                 shape = RoundedCornerShape(20.dp),
@@ -202,15 +207,17 @@ fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier,
                 .fillMaxWidth()
                 .height(56.dp)
                 .background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+
                 .clickable {
                     // Inyección de lógica nativa: TimePickerDialog.
                     val calendar = Calendar.getInstance()
                     TimePickerDialog(context, { _, h, m ->
-                        val ampm = if (h < 12) "AM" else "PM"
-                        val hour = if (h == 0) 12 else if (h > 12) h - 12 else h
-                        onTimeSelected(String.format("%02d:%02d %s", hour, m, ampm))
+                        val formattedTime = FormatTimeUseCase()(h, m)
+                        onTimeSelected(formattedTime)
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
                 }
+
+
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -256,9 +263,8 @@ fun TimeBox(value: String, modifier: Modifier, onSelected: (String) -> Unit) {
             .clickable {
                 val calendar = Calendar.getInstance()
                 TimePickerDialog(context, { _, h, m ->
-                    val ampm = if (h < 12) "AM" else "PM"
-                    val hour = if (h == 0) 12 else if (h > 12) h - 12 else h
-                    onSelected(String.format("%02d:%02d %s", hour, m, ampm))
+                    val formattedTime = FormatTimeUseCase()(h, m)
+                    onSelected(formattedTime)
                 }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
             },
         contentAlignment = Alignment.Center

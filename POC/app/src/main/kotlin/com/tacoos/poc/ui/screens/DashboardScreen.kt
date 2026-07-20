@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.tacoos.poc.ui.components.AppleToggle
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
 import kotlinx.coroutines.delay
@@ -37,20 +38,30 @@ import kotlinx.coroutines.launch
 
 /**
  * TacoNotification: Modelo de datos para las alertas del sistema.
+ * @param id Identificador único.
+ * @param title Título de la notificación.
+ * @param message Mensaje detallado.
+ * @param date Fecha o tiempo transcurrido.
+ * @param type Tipo de alerta para navegación (support, sale, alert).
+ * @param isRead Estado de lectura.
  */
 data class TacoNotification(
     val id: String,
     val title: String,
     val message: String,
     val date: String,
-    val type: String, // "support", "sale", "alert"
+    val type: String,
     var isRead: Boolean = false
 )
 
 /**
  * DashboardScreen: Panel principal de control para el Administrador.
- * Inyección de dependencias: NavController para navegación entre módulos (Ventas, Reportes, Cajeros).
- * Manejo de UI: Integra Modo Oscuro dinámico y banner interactivo.
+ * Implementa un banner rotativo, menú lateral y sistema de notificaciones en tiempo real.
+ * 
+ * Inyección de dependencias (SOLID):
+ * @param navController Controlador para gestionar el flujo de navegación.
+ * @param isDarkMode Estado reactivo del tema oscuro.
+ * @param onThemeChange Callback inyectado para propagar cambios de tema a la clase base.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +87,7 @@ fun DashboardScreen(
     var showNotificationMenu by remember { mutableStateOf(false) }
     var bellShaking by remember { mutableStateOf(false) }
 
-    // Simulación de llegada de notificación: Activa animación de campana y sonido.
+    // Simulación de llegada de notificación asíncrona.
     LaunchedEffect(Unit) {
         delay(5000)
         bellShaking = true
@@ -98,18 +109,41 @@ fun DashboardScreen(
                 drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
             ) {
                 Spacer(Modifier.height(48.dp))
-                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), 
+                    verticalAlignment = Alignment.CenterVertically, 
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text("MI PERFIL", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
-                    // Componente Toggle estilo Apple para Modo Oscuro.
+                    // Inyección de componente compartido AppleToggle para Modo Oscuro.
                     AppleToggle(checked = isDarkMode, onCheckedChange = onThemeChange)
                 }
                 Spacer(Modifier.height(16.dp))
-                // Elementos de navegación lateral.
-                NavigationDrawerItem(label = { Text("Ajustes") }, selected = false, onClick = { scope.launch { drawerState.close() }; navController.navigate("settings") }, icon = { Icon(Icons.Default.Settings, null) })
-                NavigationDrawerItem(label = { Text("Ayuda / Soporte") }, selected = false, onClick = { scope.launch { drawerState.close() }; showSupportBubble = true }, icon = { Icon(Icons.Default.Info, null) })
+                NavigationDrawerItem(
+                    label = { Text("Ajustes") }, 
+                    selected = false, 
+                    onClick = { 
+                        scope.launch { drawerState.close() }
+                        navController.navigate("settings") 
+                    }, 
+                    icon = { Icon(Icons.Default.Settings, null) }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Ayuda / Soporte") }, 
+                    selected = false, 
+                    onClick = { 
+                        scope.launch { drawerState.close() }
+                        showSupportBubble = true 
+                    }, 
+                    icon = { Icon(Icons.Default.Info, null) }
+                )
                 Spacer(modifier = Modifier.weight(1f))
-                // Cerrar Sesión: Limpia estado y regresa a Login.
-                Text("Cerrar Sesión", modifier = Modifier.padding(24.dp).clickable { navController.navigate("login") { popUpTo(0) } }, color = Color.Red, fontWeight = FontWeight.Black)
+                Text(
+                    text = "Cerrar Sesión", 
+                    modifier = Modifier.padding(24.dp).clickable { navController.navigate("login") { popUpTo(0) } }, 
+                    color = Color.Red, 
+                    fontWeight = FontWeight.Black
+                )
             }
         }
     ) {
@@ -122,13 +156,15 @@ fun DashboardScreen(
                     },
                     actions = {
                         Box {
-                            // Animación de campana (Shake) cuando llega notificación.
-                            val shakeOffset by animateDpAsState(if (bellShaking) 5.dp else 0.dp)
+                            val shakeOffset by animateDpAsState(if (bellShaking) 5.dp else 0.dp, label = "bellShake")
                             IconButton(onClick = { showNotificationMenu = !showNotificationMenu }, modifier = Modifier.offset(x = shakeOffset)) {
-                                Icon(Icons.Default.Notifications, null, tint = if(notifications.any { !it.isRead }) ActionBlue else MaterialTheme.colorScheme.onSurface)
+                                Icon(
+                                    imageVector = Icons.Default.Notifications, 
+                                    contentDescription = null, 
+                                    tint = if(notifications.any { !it.isRead }) ActionBlue else MaterialTheme.colorScheme.onSurface
+                                )
                             }
                             
-                            // Menú Desplegable de Notificaciones.
                             DropdownMenu(
                                 expanded = showNotificationMenu,
                                 onDismissRequest = { showNotificationMenu = false },
@@ -140,12 +176,16 @@ fun DashboardScreen(
                                         Text("No hay notificaciones", modifier = Modifier.fillMaxWidth().padding(16.dp), textAlign = TextAlign.Center, color = Color.Gray)
                                     } else {
                                         notifications.forEach { notif ->
-                                            NotificationItem(notif = notif, onClick = { 
-                                                notif.isRead = true
-                                                showNotificationMenu = false
-                                                if(notif.type == "support") showSupportBubble = true
-                                                if(notif.type == "sale") navController.navigate("sales")
-                                            }, onDismiss = { notifications.remove(notif) })
+                                            NotificationItem(
+                                                notif = notif, 
+                                                onClick = { 
+                                                    notif.isRead = true
+                                                    showNotificationMenu = false
+                                                    if(notif.type == "support") showSupportBubble = true
+                                                    if(notif.type == "sale") navController.navigate("sales")
+                                                }, 
+                                                onDismiss = { notifications.remove(notif) }
+                                            )
                                         }
                                     }
                                 }
@@ -161,14 +201,13 @@ fun DashboardScreen(
             }
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-                // Efecto visual de fondo para el Dashboard (Círculos difuminados).
                 if (isDarkMode) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         drawCircle(color = Color.White.copy(alpha = 0.03f), radius = 400f, center = androidx.compose.ui.geometry.Offset(size.width * 0.8f, size.height * 0.2f))
                     }
                 }
                 Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Banner Dinámico: Rotación de imágenes y resumen de ventas.
+                    // Banner Dinámico (SOLID: Lógica de presentación separada)
                     val banners = listOf(
                         "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&q=80",
                         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80",
@@ -204,7 +243,6 @@ fun DashboardScreen(
                     }
 
                     Spacer(Modifier.height(16.dp))
-                    // Botones principales de administración.
                     AdminButton(title = "VENTAS", icon = Icons.Default.ShoppingCart, onClick = { navController.navigate("sales") })
                     Spacer(Modifier.height(12.dp))
                     AdminButton(title = "REPORTES", icon = Icons.Default.List, onClick = { navController.navigate("reports") })
@@ -212,13 +250,23 @@ fun DashboardScreen(
                     AdminButton(title = "CAJEROS", icon = Icons.Default.Person, onClick = { navController.navigate("cashiers") })
                 }
                 
-                // Burbuja Flotante de Soporte: Aparece al solicitar ayuda.
                 if (showSupportBubble) {
-                    Box(modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp).size(60.dp).clip(CircleShape).background(ActionBlue).clickable { hasNewSupportMessage = false }, contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp)
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(ActionBlue)
+                            .clickable { hasNewSupportMessage = false }, 
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(Icons.Outlined.MailOutline, null, tint = Color.White)
                         if (hasNewSupportMessage) Box(modifier = Modifier.align(Alignment.TopEnd).size(12.dp).clip(CircleShape).background(Color.Red))
-                        // Botón de cierre para minimizar la burbuja.
-                        IconButton(onClick = { showSupportBubble = false }, modifier = Modifier.align(Alignment.TopStart).offset(x = (-8).dp, y = (-8).dp).size(24.dp)) {
+                        IconButton(
+                            onClick = { showSupportBubble = false }, 
+                            modifier = Modifier.align(Alignment.TopStart).offset(x = (-8).dp, y = (-8).dp).size(24.dp)
+                        ) {
                             Icon(Icons.Default.Close, null, tint = Color.White, modifier = Modifier.size(12.dp))
                         }
                     }
@@ -229,23 +277,10 @@ fun DashboardScreen(
 }
 
 /**
- * AppleToggle: Interruptor ovalado personalizado con estética iOS.
- */
-@Composable
-fun AppleToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    val thumbOffset by animateDpAsState(if (checked) 22.dp else 2.dp)
-    val bgColor by animateColorAsState(if (checked) ActionBlue else Color.LightGray)
-
-    Box(
-        modifier = Modifier.width(50.dp).height(30.dp).clip(CircleShape).background(bgColor).clickable { onCheckedChange(!checked) }.padding(4.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Box(modifier = Modifier.offset(x = thumbOffset).size(22.dp).clip(CircleShape).background(Color.White))
-    }
-}
-
-/**
- * NotificationItem: Representación visual de una alerta en el menú desplegable.
+ * NotificationItem: Representación visual de una alerta individual.
+ * @param notif Modelo de la notificación.
+ * @param onClick Acción al seleccionar la alerta.
+ * @param onDismiss Acción al eliminar la alerta.
  */
 @Composable
 fun NotificationItem(notif: TacoNotification, onClick: () -> Unit, onDismiss: () -> Unit) {
@@ -266,7 +301,10 @@ fun NotificationItem(notif: TacoNotification, onClick: () -> Unit, onDismiss: ()
 }
 
 /**
- * AdminButton: Botón de acceso directo a módulos de administración.
+ * AdminButton: Botón estilizado para acciones de alto nivel en el Dashboard.
+ * @param title Texto del botón.
+ * @param icon Icono descriptivo.
+ * @param onClick Callback de navegación.
  */
 @Composable
 fun AdminButton(title: String, icon: ImageVector, onClick: () -> Unit) {
@@ -274,7 +312,10 @@ fun AdminButton(title: String, icon: ImageVector, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(0.85f).height(70.dp),
         shape = RoundedCornerShape(22.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer, 
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Icon(icon, null, modifier = Modifier.size(24.dp))

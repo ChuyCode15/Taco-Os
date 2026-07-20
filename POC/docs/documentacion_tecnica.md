@@ -1,32 +1,27 @@
 # Documentación Técnica - Taco'Os POC
 
-## 1. Persistencia y Sincronización
-*   **Local DB (SQLite/Room):** Almacenamiento de operaciones inmutables tras el corte.
-*   **AppMetadata:** Control de sesiones y licencias (Tabla `app_metadata`).
-*   **Sincronización:** Cada 5-10 minutos hacia el servidor principal vía `TacoApi#syncBatch`.
-*   **Modo Offline:** Capacidad de operar hasta 12 horas sin conexión a internet tras el login inicial.
-*   **Schema:** `exportSchema = false` para simplificar el despliegue en etapa POC.
+## 1. Arquitectura Modular (SOLID)
+La aplicación sigue los principios SOLID para garantizar un código mantenible y escalable:
+*   **Single Responsibility (SRP):** Los componentes de UI están separados de la lógica de negocio y los modelos de datos.
+*   **Open/Closed (OCP):** Uso de componentes genéricos como `TacoDialog` que permiten extender la funcionalidad sin modificar la base.
+*   **Inyección de Dependencias:** La navegación y los estados se inyectan a través de parámetros y callbacks, facilitando las pruebas y el desacoplamiento.
 
-## 2. Seguridad y Sesión
-*   **Autenticación:** Google Sign-In como método único/principal (Bienvenidos/Latinoamérica).
-*   **Tokens:** Duración de 12 horas.
-*   **Manejo de Errores:** 
-    *   Error 404 en Login: Indica que el usuario no existe y redirige al flujo de Registro de Rol y Negocio.
-*   **Inmutabilidad:** Las ventas son inmutables después de 5 minutos de su creación o una vez realizado el Cierre de Corte.
+## 2. Estructura de Archivos
+*   `com.tacoos.poc.ui.components`: Contiene componentes reutilizables (`TacoDialog`, `AppleToggle`, `ActionButton`).
+*   `com.tacoos.poc.ui.screens`: Pantallas principales de la aplicación.
+*   `SalesState.kt`: Centraliza los modelos de datos y la gestión de estado global (`ShiftManager`).
 
-## 3. Interfaz de Usuario (Apple-like / Clean Code)
-*   **Estilo:** Basado en componentes iOS con bordes muy redondeados (20dp-32dp) y transparencias (Glassmorphism).
-*   **Modo Oscuro:** Inspiración Duolingo (Fondo gris profundo `#1B1B1B` con formas vectoriales sutiles en Canvas).
-*   **Navegación:** Menú lateral (Hamburger) persistente en vistas operativas para acceso a Ajustes y Modo Oscuro.
-*   **Feedback:** Animación de sacudida (Shake) y sonidos de sistema para notificaciones entrantes.
+## 3. Persistencia y Sincronización
+*   **Local DB (SQLite/Room):** Almacenamiento inmutable tras el cierre de corte.
+*   **Sincronización:** Cada 15 minutos vía `SyncWorker`.
+*   **Estado de Sesión:** El `ShiftManager` persiste los datos de ventas y gastos durante la ejecución de la app mientras el turno esté abierto.
 
-## 4. Módulos Operativos (POS)
-*   **Caja:** Sistema de bloqueo si la caja no ha sido abierta.
-*   **Ventas:** 
-    *   Registro con indicadores visuales: Verde (Efectivo), Azul (Tarjeta), Rojo (Cancelada).
-    *   Módulo de Nueva Venta con selector de categorías (Comidas, Bebidas, Postres) y teclado numérico dedicado.
-*   **Cierre de Corte:** Reporte consolidado de Efectivo vs Tarjeta con seguridad de doble confirmación.
-*   **Soporte:** Burbuja flotante de chat con indicador de mensajes nuevos, minimizable.
+## 4. Interfaz de Usuario
+*   **Estética:** Apple-like con bordes redondeados (`28.dp`) y transparencias.
+*   **Altura Dinámica:** Todos los diálogos operativos implementan una altura dinámica (30% min - 90% max) para adaptarse al contenido y al tamaño de pantalla.
+*   **Modo Oscuro:** Soporte nativo unificado a través de `TacoOsTheme`.
 
-## 5. Horarios de Negocio
-*   **Selector Inteligente:** Permite horario único para toda la semana o desglose individual por día mediante `TimePickerDialog`.
+## 5. Módulos Operativos (POS)
+*   **Gestión de Turnos:** Apertura de caja con fondo inicial y cierre con reporte detallado.
+*   **Ventas:** Registro inmutable después de 5 minutos.
+*   **Gastos:** Registro con captura de evidencia fotográfica (cámara).

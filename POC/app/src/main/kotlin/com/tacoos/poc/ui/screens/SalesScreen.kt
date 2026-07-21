@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,9 +19,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -261,13 +264,18 @@ fun SaleRow(sale: POSSale, isSelected: Boolean, onClick: () -> Unit) {
     }
 }
 
+/**
+ * NewSaleDialog: Proceso de nueva venta con pasos dinámicos.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
-    var step by remember { mutableStateOf(1) }
+    var step by remember { mutableStateOf(1) } // 1: Nota, 2: Productos
     val saleDetails = remember { mutableStateListOf<POSItem>() }
+    val sessionItems = remember { mutableStateListOf<POSItem>() } // Lista temporal de "Agregar Producto"
     var selectedCategory by remember { mutableStateOf("Comidas") }
     var showCobroPopup by remember { mutableStateOf(false) }
+    var itemToDeleteIndex by remember { mutableStateOf<Int?>(null) } // Índice para el popup de eliminación ("nube")
 
     val products = listOf(
         POSItem("Taco Pastor", 15.0, "Comidas"),
@@ -277,49 +285,180 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
         POSItem("Flan", 35.0, "Postres")
     )
 
-    TacoDialog(title = if (step == 1) "Nota de Venta" else "Agregar Producto", onDismiss = onDismiss, maxHeightFactor = 0.6f, navigationIcon = if (step > 1) Icons.Default.ArrowBack else null, onNavigationClick = { step = 1 }) {
+    TacoDialog(
+        title = if (step == 1) "Nota de Venta" else "Agregar Producto",
+        onDismiss = onDismiss,
+        maxHeightFactor = 0.6f,
+        navigationIcon = if (step > 1) Icons.Default.ArrowBack else null,
+        onNavigationClick = { step = 1 },
+        headerAction = if (step == 2) {
+            {
+                Text(
+                    text = "+",
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .clickable { /* Acción registro nuevo producto */ },
+                    color = ActionBlue,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            }
+        } else null
+    ) {
         if (step == 1) {
+            // VISTA: NOTA DE VENTA
             Column {
                 Box(modifier = Modifier.weight(1f)) {
-                    if (saleDetails.isEmpty()) { Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Sin productos", color = Color.Gray) } }
-                    else { LazyColumn { items(saleDetails) { item -> Row(modifier = Modifier.fillMaxWidth().padding(4.dp)) { Text("${item.quantity}x ${item.name}", modifier = Modifier.weight(1f)); Text("$${item.price * item.quantity}") } } } }
+                    if (saleDetails.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Sin productos", color = Color.Gray) }
+                    } else {
+                        Box {
+                            LazyColumn {
+                                itemsIndexed(saleDetails) { index, item ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { itemToDeleteIndex = index }
+                                            .padding(8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text("${item.quantity}x ${item.name}", modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
+                                        Text("$${item.price * item.quantity}", fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                            
+                            // BURBUJA DE ELIMINACIÓN ("Nube" con bote de basura)
+                            itemToDeleteIndex?.let { index ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable { itemToDeleteIndex = null },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Surface(
+                                        modifier = Modifier.shadow(8.dp, RoundedCornerShape(16.dp)),
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = Color.White
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            IconButton(onClick = {
+                                                saleDetails.removeAt(index)
+                                                itemToDeleteIndex = null
+                                            }) {
+                                                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                TextButton(onClick = { step = 2 }, modifier = Modifier.fillMaxWidth()) { Text("+ AGREGAR PRODUCTO", color = ActionBlue, fontWeight = FontWeight.Bold) }
-                if (saleDetails.isNotEmpty()) { Button(onClick = { showCobroPopup = true }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp)) { Text("COBRAR", fontWeight = FontWeight.Black) } }
+                TextButton(onClick = { step = 2 }, modifier = Modifier.fillMaxWidth()) {
+                    Text("+ AGREGAR PRODUCTO", color = ActionBlue, fontWeight = FontWeight.Bold)
+                }
+                if (saleDetails.isNotEmpty()) {
+                    Button(onClick = { showCobroPopup = true }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp)) {
+                        Text("COBRAR", fontWeight = FontWeight.Black)
+                    }
+                }
             }
         } else {
+            // VISTA: AGREGAR PRODUCTO
             Column {
+                // Selector de pestañas
                 Row(modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(12.dp))) {
                     listOf("Comidas", "Bebidas", "Postres").forEach { cat ->
-                        Box(modifier = Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(12.dp)).background(if (selectedCategory == cat) ActionBlue else Color.Transparent).clickable { selectedCategory = cat }, contentAlignment = Alignment.Center) { Text(cat, color = if (selectedCategory == cat) Color.White else Color.Gray, fontWeight = FontWeight.Bold, fontSize = 11.sp) }
+                        Box(
+                            modifier = Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(12.dp))
+                                .background(if (selectedCategory == cat) ActionBlue else Color.Transparent)
+                                .clickable { selectedCategory = cat },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(cat, color = if (selectedCategory == cat) Color.White else Color.Gray, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
+                
+                // Catálogo e Ítems de Sesión
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(products.filter { it.category == selectedCategory }) { prod ->
-                        ProductRowInline(prod) { qty -> saleDetails.add(prod.copy(quantity = qty)) }
+                        ProductRowInline(prod) { qty ->
+                            sessionItems.add(prod.copy(quantity = qty))
+                        }
                     }
-                    item { TextButton(onClick = { }, modifier = Modifier.fillMaxWidth()) { Text("Registrar un producto Nuevo", color = ActionBlue, fontWeight = FontWeight.Bold) } }
-                    item { if (saleDetails.isNotEmpty()) { Button(onClick = { step = 1 }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp), colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy)) { Text("Listo", fontWeight = FontWeight.Bold) } } }
+                    
+                    // Lista de Previsualización (Session Items)
+                    if (sessionItems.isNotEmpty()) {
+                        item { Divider(Modifier.padding(vertical = 12.dp)) }
+                        items(sessionItems) { item ->
+                            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                                Text(
+                                    text = "${item.quantity} ${item.name}",
+                                    fontSize = 11.sp,
+                                    color = Color.Gray,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text("$${item.price * item.quantity}", fontSize = 11.sp, color = Color.Gray)
+                            }
+                        }
+                    }
+                    
+                    item {
+                        if (sessionItems.isNotEmpty()) {
+                            Button(
+                                onClick = {
+                                    // CONSOLIDACIÓN: Agrupa por nombre y suma cantidades
+                                    sessionItems.groupBy { it.name }.forEach { (name, list) ->
+                                        val totalQty = list.sumOf { it.quantity }
+                                        val product = list.first()
+                                        val existing = saleDetails.find { it.name == name }
+                                        if (existing != null) {
+                                            existing.quantity += totalQty
+                                        } else {
+                                            saleDetails.add(product.copy(quantity = totalQty))
+                                        }
+                                    }
+                                    sessionItems.clear()
+                                    step = 1
+                                },
+                                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy)
+                            ) { Text("Listo", fontWeight = FontWeight.Bold) }
+                        }
+                    }
                 }
             }
         }
     }
 
     if (showCobroPopup) {
-        CobroForm(items = saleDetails, onDismiss = { showCobroPopup = false }) { amount, method ->
-            val summaries = saleDetails.groupBy { it.name }.map { (name, list) -> SaleItemSummary(name, list.sumOf { it.quantity }, list.sumOf { it.price * it.quantity }) }
-            onConfirm(POSSale(UUID.randomUUID().toString(), amount, method, "Cobrada", items = summaries))
-            showCobroPopup = false
-        }
+        CobroForm(
+            items = saleDetails,
+            onDismiss = { showCobroPopup = false },
+            onConfirm = { amount, method ->
+                val summaries = saleDetails.map { SaleItemSummary(it.name, it.quantity, it.price * it.quantity) }
+                onConfirm(POSSale(UUID.randomUUID().toString(), amount, method, "Cobrada", items = summaries))
+                showCobroPopup = false
+            }
+        )
     }
 }
 
+/**
+ * CobroForm: Pantalla final de pago.
+ */
 @Composable
 fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, String) -> Unit) {
     val total = items.sumOf { it.price * it.quantity }
     var paymentMethod by remember { mutableStateOf("Efectivo") }
     var amountPaid by remember { mutableStateOf("") }
+
     TacoDialog(title = "Resumen de venta", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(items) { item -> Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text("${item.quantity} ${item.name}", color = Color.Gray); Text("$${item.price * item.quantity}", fontWeight = FontWeight.Bold) } }
@@ -345,6 +484,9 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
     }
 }
 
+/**
+ * ProductRowInline: Fila de producto con diseño neutro y icono "+".
+ */
 @Composable
 fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit) {
     var qty by remember { mutableStateOf("") }
@@ -366,12 +508,16 @@ fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit) {
     }
 }
 
+/**
+ * ExpenseDialog: Formulario de gastos.
+ */
 @Composable
 fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
     var detalle by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var capturedPhoto by remember { mutableStateOf<Bitmap?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { capturedPhoto = it }
+
     TacoDialog(title = "Registrar Gasto", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
         OutlinedTextField(value = detalle, onValueChange = { detalle = it }, label = { Text("Detalle") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = cantidad, onValueChange = { if (it.all { c -> c.isDigit() }) cantidad = it }, label = { Text("Total") }, modifier = Modifier.fillMaxWidth())
@@ -388,6 +534,9 @@ fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
     }
 }
 
+/**
+ * CorteDialog: Formulario final de arqueo.
+ */
 @Composable
 fun CorteDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     val totalSales = ShiftManager.sales.filter { it.status == "Cobrada" }.sumOf { it.amount }
@@ -395,6 +544,7 @@ fun CorteDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     val totalCard = ShiftManager.sales.filter { it.status == "Cobrada" && it.method == "Tarjeta" }.sumOf { it.amount }
     val totalExp = ShiftManager.expenses.sumOf { it.amount }
     val cashInDrawer = totalCash + ShiftManager.fondoCaja - totalExp
+
     TacoDialog(title = "¿Cerrar Corte?", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
         Text("Responsable: ${ShiftManager.currentCashier}", fontWeight = FontWeight.Bold)
         Divider(modifier = Modifier.padding(vertical = 8.dp))

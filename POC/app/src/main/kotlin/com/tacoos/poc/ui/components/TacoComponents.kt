@@ -47,6 +47,7 @@ fun TacoDialog(
     onNavigationClick: (() -> Unit)? = null,
     minHeightFactor: Float = 0.3f,
     maxHeightFactor: Float = 0.9f,
+    headerAction: @Composable (() -> Unit)? = null,
     confirmButton: @Composable (() -> Unit)? = null,
     dismissButton: @Composable (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
@@ -84,6 +85,7 @@ fun TacoDialog(
                             fontWeight = FontWeight.Black,
                             modifier = Modifier.weight(1f)
                         )
+                        headerAction?.invoke()
                         IconButton(onClick = onDismiss) {
                             Icon(Icons.Default.Close, contentDescription = "Cerrar")
                         }

@@ -1,125 +1,192 @@
 package com.tacoos.poc.data.local
 
-import androidx.room.OnConflictStrategy
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Database
-import androidx.room.RoomDatabase
+import androidx.room.*
+import java.util.*
 
-/**
- * Entidad User: Representa el perfil del usuario autenticado en la DB local.
- */
 @Entity(tableName = "users")
 data class User(
-    @PrimaryKey val id: String, // UUID generado por el servidor.
+    @PrimaryKey val id: String,
     val idGoogle: String,
     val nombre: String,
     val email: String,
-    val rol: String, // "dueño", "administrador" o "cajero".
-    val negocioId: String? = null
+    val rol: String,
+    val negocioId: String? = null,
+    val tenantId: String
 )
 
-/**
- * Entidad Business: Información básica del establecimiento comercial.
- */
-@Entity(tableName = "business")
-data class Business(
-    @PrimaryKey val id: String,
-    val nombre: String,
-    val direccion: String,
-    val telefono: String,
-    val moneda: String,
-    val dineroBase: Double
+@Entity(tableName = "shifts")
+data class Shift(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val businessId: String,
+    val cashierId: String,
+    val tenantId: String,
+    val openTimestamp: Long = System.currentTimeMillis(),
+    val closeTimestamp: Long? = null,
+    val initialCash: Double = 0.0,
+    val totalSales: Double = 0.0,
+    val totalExpenses: Double = 0.0,
+    val totalCancellations: Double = 0.0,
+    val totalCash: Double = 0.0,
+    val totalCard: Double = 0.0,
+    val isSynced: Boolean = false,
+    val comment: String? = null
 )
 
-/**
- * Entidad Sale: Registro de transacciones individuales para permitir operación Offline.
- */
-@Entity(tableName = "sales")
-data class Sale(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val amount: Double,
+@Entity(tableName = "sale_notes")
+data class SaleNote(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val shiftId: String,
+    val businessId: String,
+    val cashierId: String,
+    val tenantId: String,
+    val customerName: String? = null,
+    val totalAmount: Double,
+    val paymentMethod: String, // "Efectivo" o "Tarjeta"
     val timestamp: Long = System.currentTimeMillis(),
-    val isSynced: Boolean = false, // Marca para el SyncWorker.
-    val negocioId: String
+    val isSynced: Boolean = false,
+    val isCancelled: Boolean = false
 )
 
-/**
- * SaleDao: Interfaz de acceso a datos para operaciones de venta en SQLite.
- */
-@Dao
-interface SaleDao {
-    @Query("SELECT * FROM sales ORDER BY timestamp DESC")
-    suspend fun getAllSales(): List<Sale>
+@Entity(
+    tableName = "sale_details",
+    foreignKeys = [
+        ForeignKey(
+            entity = SaleNote::class,
+            parentColumns = ["id"],
+            childColumns = ["noteId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("noteId")]
+)
+data class SaleDetail(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val noteId: String,
+    val productName: String,
+    val quantity: Int,
+    val unitPrice: Double, // Estampado
+    val subtotal: Double   // Estampado
+)
 
-    @Insert
-    suspend fun insertSale(sale: Sale)
+@Entity(tableName = "expenses")
+data class Expense(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val shiftId: String,
+    val cashierId: String,
+    val businessId: String,
+    val tenantId: String,
+    val description: String,
+    val amount: Double,
+    val photoPath: String? = null,
+    val timestamp: Long = System.currentTimeMillis(),
+    val isSynced: Boolean = false
+)
 
-    @Query("SELECT SUM(amount) FROM sales WHERE timestamp >= :todayStart")
-    suspend fun getTodayTotal(todayStart: Long): Double?
-}
+@Entity(tableName = "cancellations")
+data class Cancellation(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val noteId: String,
+    val shiftId: String,
+    val cashierId: String,
+    val reason: String,
+    val photoPath: String? = null,
+    val timestamp: Long = System.currentTimeMillis(),
+    val isSynced: Boolean = false
+)
 
-/**
- * UserDao: Gestión del perfil de usuario local (Single user por sesión).
- */
-@Dao
-interface UserDao {
-    @Insert
-    suspend fun insertUser(user: User)
-
-    @Query("SELECT * FROM users LIMIT 1")
-    suspend fun getCurrentUser(): User?
-
-    @Query("DELETE FROM users")
-    suspend fun clearUser()
-}
-
-/**
- * BusinessDao: Acceso a la configuración del negocio local.
- */
-@Dao
-interface BusinessDao {
-    @Insert
-    suspend fun insertBusiness(business: Business)
-
-    @Query("SELECT * FROM business WHERE id = :id")
-    suspend fun getBusiness(id: String): Business?
-}
-
-/**
- * Entidad AppMetadata: Metadata técnica para control de licencias y expiración de sesiones.
- */
 @Entity(tableName = "app_metadata")
 data class AppMetadata(
     @PrimaryKey val id: Int = 1,
     val lastLoginTimestamp: Long,
     val lastMasterSyncTimestamp: Long,
+    val lastPruneTimestamp: Long = 0L,
     val isLicenseValid: Boolean = true
 )
 
-/**
- * AppDatabase: Clase abstracta de Room que define la arquitectura de la DB SQLite.
- * exportSchema = false: Simplifica el despliegue del POC al no requerir archivos JSON de migración externos.
- */
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class], version = 3, exportSchema = false)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun saleDao(): SaleDao
-    abstract fun userDao(): UserDao
-    abstract fun businessDao(): BusinessDao
-    abstract fun metadataDao(): MetadataDao
+// --- DAOs ---
+
+@Dao
+interface UserDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUser(user: User)
+    @Query("SELECT * FROM users LIMIT 1")
+    suspend fun getCurrentUser(): User?
+    @Query("DELETE FROM users")
+    suspend fun clearUser()
 }
 
-/**
- * MetadataDao: Operaciones sobre la metadata técnica de la aplicación.
- */
+@Dao
+interface ShiftDao {
+    @Insert
+    suspend fun openShift(shift: Shift)
+    @Update
+    suspend fun updateShift(shift: Shift)
+    @Query("SELECT * FROM shifts WHERE businessId = :businessId AND closeTimestamp IS NULL LIMIT 1")
+    suspend fun getActiveShift(businessId: String): Shift?
+    @Query("SELECT * FROM shifts WHERE isSynced = 0")
+    suspend fun getPendingShifts(): List<Shift>
+    @Query("DELETE FROM shifts WHERE closeTimestamp < :threshold AND isSynced = 1")
+    suspend fun pruneSyncedShifts(threshold: Long)
+}
+
+@Dao
+interface SaleDao {
+    @Insert
+    suspend fun insertNote(note: SaleNote)
+    @Insert
+    suspend fun insertDetails(details: List<SaleDetail>)
+    @Update
+    suspend fun updateNote(note: SaleNote)
+    @Query("SELECT * FROM sale_notes WHERE shiftId = :shiftId")
+    suspend fun getNotesByShift(shiftId: String): List<SaleNote>
+    @Query("SELECT * FROM sale_details WHERE noteId = :noteId")
+    suspend fun getDetailsByNote(noteId: String): List<SaleDetail>
+    @Query("SELECT * FROM sale_notes WHERE isSynced = 0")
+    suspend fun getPendingNotes(): List<SaleNote>
+    @Query("DELETE FROM sale_notes WHERE timestamp < :threshold AND isSynced = 1")
+    suspend fun pruneSyncedSales(threshold: Long)
+}
+
+@Dao
+interface ExpenseDao {
+    @Insert
+    suspend fun insertExpense(expense: Expense)
+    @Update
+    suspend fun updateExpense(expense: Expense)
+    @Query("SELECT * FROM expenses WHERE shiftId = :shiftId")
+    suspend fun getExpensesByShift(shiftId: String): List<Expense>
+    @Query("SELECT * FROM expenses WHERE isSynced = 0")
+    suspend fun getPendingExpenses(): List<Expense>
+    @Query("DELETE FROM expenses WHERE timestamp < :threshold AND isSynced = 1")
+    suspend fun pruneSyncedExpenses(threshold: Long)
+}
+
+@Dao
+interface CancellationDao {
+    @Insert
+    suspend fun insertCancellation(cancellation: Cancellation)
+    @Query("SELECT * FROM cancellations WHERE isSynced = 0")
+    suspend fun getPendingCancellations(): List<Cancellation>
+}
+
 @Dao
 interface MetadataDao {
     @Query("SELECT * FROM app_metadata WHERE id = 1")
     suspend fun getMetadata(): AppMetadata?
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateMetadata(metadata: AppMetadata)
+}
+
+@Database(
+    entities = [User::class, Shift::class, SaleNote::class, SaleDetail::class, Expense::class, Cancellation::class, AppMetadata::class],
+    version = 9,
+    exportSchema = false
+)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun userDao(): UserDao
+    abstract fun shiftDao(): ShiftDao
+    abstract fun saleDao(): SaleDao
+    abstract fun expenseDao(): ExpenseDao
+    abstract fun cancellationDao(): CancellationDao
+    abstract fun metadataDao(): MetadataDao
 }

@@ -75,7 +75,8 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
                         nombre = GoogleSignInState.nombre,
                         email = GoogleSignInState.email,
                         rol = GoogleSignInState.rol,
-                        negocioId = businessResponse.id.toString()
+                        negocioId = businessResponse.id.toString(),
+                        tenantId = userId
                     )
                     repository.saveUserLocally(user)
                     _uiState.value = RegistrationUiState.Success(user)
@@ -110,7 +111,8 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
                     nombre = GoogleSignInState.nombre,
                     email = GoogleSignInState.email,
                     rol = "cajero",
-                    negocioId = null
+                    negocioId = null,
+                    tenantId = "" // Se asignará al enlazar
                 )
                 repository.saveUserLocally(user)
                 _uiState.value = RegistrationUiState.UserCreated

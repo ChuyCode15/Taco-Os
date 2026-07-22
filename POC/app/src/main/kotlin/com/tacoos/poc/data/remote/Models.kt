@@ -8,7 +8,7 @@ data class AuthResponse(
     val token: String? = null,
     val vencimiento: Int? = null,
     val usuario: DatosUsuarioAuth? = null,
-    val mensaje: String? = null // Para errores
+    val mensaje: String? = null
 )
 
 data class DatosUsuarioAuth(
@@ -73,4 +73,12 @@ data class LinkResponse(
     val direccion: String?,
     val moneda: String?,
     val dineroBase: Double?
+)
+
+// --- Sync Models ---
+
+data class SyncBatchRequest(
+    val userEmail: String, // Identificador simple para el POC
+    val shifts: List<Map<String, Any>> = emptyList(),
+    val sales: List<Map<String, Any>> = emptyList()
 )

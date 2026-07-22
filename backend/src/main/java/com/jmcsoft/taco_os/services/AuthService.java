@@ -24,10 +24,7 @@ public class AuthService {
     private long expirationMs;
 
     @Transactional(readOnly = true)
-    public DatosVerificacionAuth verificarUsuario(String idGoogle) {
-
-
-
+    public DatosVerificarAuth verificarUsuario(String idGoogle) {
         var admin = administradorRepository.findByIdGoogle(idGoogle);
         if (admin.isPresent()) {
             var u = admin.get();
@@ -42,7 +39,7 @@ public class AuthService {
                     u.getNegocio() != null ? u.getNegocio().getNombre() : null
             );
             String token = jwtService.generarToken(u.getId().toString(), u.getIdGoogle(), "dueño", u.getNickname());
-            return new DatosVerificacionAuth(true, token, (int)(expirationMs / 3600000), usuario);
+            return DatosVerificarAuth.registrado(token, (int)(expirationMs / 3600000), usuario);
         }
 
         var cajero = cajeroRepository.findByIdGoogle(idGoogle);
@@ -59,20 +56,17 @@ public class AuthService {
                     c.getNegocio() != null ? c.getNegocio().getNombre() : null
             );
             String token = jwtService.generarToken(c.getId().toString(), c.getIdGoogle(), "cajero", c.getNickname());
-            return new DatosVerificacionAuth(true, token, (int)(expirationMs / 3600000), usuario);
+            return DatosVerificarAuth.registrado(token, (int)(expirationMs / 3600000), usuario);
         }
 
-        return new DatosVerificacionAuth(false, null, null, null);
+        return DatosVerificarAuth.noRegistrado();
     }
 
     @Transactional
     public DatosRespuestaAuth registrar(DatosRegistroAuth datos) {
         if (administradorRepository.existsByIdGoogle(datos.idGoogle()) ||
                 cajeroRepository.existsByIdGoogle(datos.idGoogle())) {
-            throw new DuplicadoException(
-                    "Ya existe un usuario registrado con ese idGoogle",
-                    "AuthService.registrar"
-            );
+            throw new DuplicadoException("Ya existe un usuario registrado con ese idGoogle", "AuthService.registrar");
         }
 
         String rol = datos.rol() != null ? datos.rol() : "dueño";

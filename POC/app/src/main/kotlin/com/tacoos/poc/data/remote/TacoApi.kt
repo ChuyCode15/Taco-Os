@@ -60,9 +60,17 @@ interface TacoApi {
     suspend fun getLicenseStatus(@Path("negocioId") negocioId: UUID): Map<String, Any>
 
     @POST("api/v1/sync")
-    suspend fun syncBatch(@Body data: Map<String, Any>): Map<String, Any>
+    suspend fun syncBatch(@Body request: SyncBatchRequest): Map<String, Any>
+
+    @Multipart
+    @POST("api/v1/sync/upload-photo")
+    suspend fun uploadPhoto(
+        @Part("file\"; filename=\"photo.jpg\"") file: okhttp3.RequestBody,
+        @Part("type") type: okhttp3.RequestBody // "expense" o "cancellation"
+    ): Map<String, String> // Retorna {"url": "..."}
 
     @GET("api/v1/health")
+
     suspend fun checkHealth(): Map<String, String>
     
     companion object {

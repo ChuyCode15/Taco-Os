@@ -85,16 +85,7 @@ data class Expense(
     val status: String = "ACTIVE" // ACTIVE, CANCELLED
 )
 
-@Entity(tableName = "expenses")
-data class Expense(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val amount: Double,
-    val description: String,
-    val timestamp: Long = System.currentTimeMillis(),
-    val negocioId: String,
-    val userId: String,
-    val isSynced: Boolean = false
-)
+
 
 @Dao
 interface SaleDao {
@@ -123,14 +114,7 @@ interface ExpenseDao {
     suspend fun getSalesByRange(negocioId: String, startDate: Long, endDate: Long): List<Sale>
 }
 
-@Dao
-interface ExpenseDao {
-    @Query("SELECT * FROM expenses WHERE negocioId = :negocioId AND timestamp BETWEEN :startDate AND :endDate")
-    suspend fun getExpensesByRange(negocioId: String, startDate: Long, endDate: Long): List<Expense>
 
-    @Insert
-    suspend fun insertExpense(expense: Expense): Unit
-}
 
 @Dao
 interface UserDao {
@@ -186,11 +170,4 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun metadataDao(): MetadataDao
 }
 
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class], version = 4, exportSchema = false)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun saleDao(): SaleDao
-    abstract fun userDao(): UserDao
-    abstract fun businessDao(): BusinessDao
-    abstract fun metadataDao(): MetadataDao
-    abstract fun expenseDao(): ExpenseDao
-}
+

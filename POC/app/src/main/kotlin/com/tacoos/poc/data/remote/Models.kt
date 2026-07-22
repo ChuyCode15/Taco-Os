@@ -49,6 +49,15 @@ data class BusinessResponse(
     val dineroBase: Double = 0.0
 )
 
+// Sale Sync Models
+data class SaleRequest(
+    val amount: Double,
+    val productsJson: String,
+    val userId: String,
+    val timestamp: Long,
+    val status: String = "ACTIVE"
+)
+
 // Linking Models
 data class InvitationRequest(
     val negocioId: UUID,

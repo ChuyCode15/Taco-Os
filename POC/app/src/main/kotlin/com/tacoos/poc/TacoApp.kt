@@ -2,8 +2,10 @@ package com.tacoos.poc
 
 import android.app.Application
 import androidx.room.Room
+import androidx.work.*
 import com.tacoos.poc.data.local.AppDatabase
 import com.tacoos.poc.data.remote.TacoApi
+import com.tacoos.poc.sync.SyncWorker
 import com.tacoos.poc.ui.screens.GoogleSignInState
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -21,7 +23,7 @@ import java.util.concurrent.TimeUnit
  * Propósito: Inicializar componentes críticos como Room, Retrofit y WorkManager al arrancar el proceso.
  */
 class TacoApp : Application() {
-    
+
     // Inyección de dependencias de acceso global (manual).
     lateinit var database: AppDatabase
     lateinit var api: TacoApi
@@ -54,7 +56,7 @@ class TacoApp : Application() {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(TacoApi::class.java)
+
 
         // Inicialización del Repositorio Único.
         repository = TacoRepository(api, database)

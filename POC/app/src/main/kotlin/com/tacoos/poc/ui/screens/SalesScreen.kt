@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.tacoos.poc.ui.components.ActionButton
@@ -48,6 +49,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+
+// Modelos de datos
+data class POSSale(val id: String, val amount: Double, val method: String, val status: String, val timestamp: Long = System.currentTimeMillis())
+data class POSItem(val name: String, val price: Double, val category: String, var quantity: Int = 0)
 
 /**
  * SalesScreen: Pantalla principal del Punto de Venta (POS).
@@ -105,9 +110,9 @@ fun SalesScreen(
                 NavigationDrawerItem(
                     label = { Text("Ajustes") },
                     selected = false,
-                    onClick = { 
+                    onClick = {
                         scope.launch { drawerState.close() }
-                        navController.navigate("settings") 
+                        navController.navigate("settings")
                     },
                     icon = { Icon(Icons.Default.Settings, null) }
                 )
@@ -300,11 +305,12 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
     var itemToDeleteIndex by remember { mutableStateOf<Int?>(null) } // Índice para el popup de eliminación ("nube")
 
     val products = listOf(
-        POSItem("Taco Pastor", 15.0, "Comidas"),
-        POSItem("Taco Bistec", 18.0, "Comidas"),
-        POSItem("Coca 600ml", 20.0, "Bebidas"),
-        POSItem("Fanta 600ml", 20.0, "Bebidas"),
-        POSItem("Flan", 35.0, "Postres")
+        POSItem("Taco Pastor", 25.0, "Comidas"),
+        POSItem("Taco Bistec", 30.0, "Comidas"),
+        POSItem("Gringa", 65.0, "Comidas"),
+        POSItem("Coca 600ml", 22.0, "Bebidas"),
+        POSItem("Agua Fresca", 20.0, "Bebidas"),
+        POSItem("Flan Casero", 45.0, "Postres")
     )
 
     TacoDialog(
@@ -349,7 +355,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                                     }
                                 }
                             }
-                            
+
                             // BURBUJA DE ELIMINACIÓN ("Nube" con bote de basura)
                             itemToDeleteIndex?.let { index ->
                                 Box(
@@ -406,7 +412,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(8.dp))
-                
+
                 // Catálogo e Ítems de Sesión
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(products.filter { it.category == selectedCategory }) { prod ->
@@ -414,7 +420,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                             sessionItems.add(prod.copy(quantity = qty))
                         }
                     }
-                    
+
                     // Lista de Previsualización (Session Items)
                     if (sessionItems.isNotEmpty()) {
                         item { Divider(Modifier.padding(vertical = 12.dp)) }
@@ -430,7 +436,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
                             }
                         }
                     }
-                    
+
                     item {
                         if (sessionItems.isNotEmpty()) {
                             Button(
@@ -481,9 +487,9 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
     var paymentMethod by remember { mutableStateOf("Efectivo") }
     var amountPaid by remember { mutableStateOf("") }
     var voucherPhoto by remember { mutableStateOf<Bitmap?>(null) }
-    
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { 
-        voucherPhoto = it 
+
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+        voucherPhoto = it
     }
 
     TacoDialog(title = "Resumen de venta", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
@@ -497,7 +503,7 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
             Spacer(Modifier.width(8.dp))
             Button(onClick = { paymentMethod = "Tarjeta" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (paymentMethod == "Tarjeta") ActionBlue else Color.Gray)) { Text("Tarjeta") }
         }
-        
+
         Spacer(Modifier.height(12.dp))
 
         if (paymentMethod == "Efectivo") {
@@ -527,15 +533,15 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
         Spacer(Modifier.height(16.dp))
 
         val canConfirm = if (paymentMethod == "Tarjeta") voucherPhoto != null else true
-        
+
         Button(
             onClick = { onConfirm(total, paymentMethod, voucherPhoto) },
             enabled = canConfirm,
             modifier = Modifier.fillMaxWidth().height(60.dp),
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(containerColor = if (canConfirm) SuccessGreen else Color.Gray)
-        ) { 
-            Text("COBRA", fontWeight = FontWeight.Black, fontSize = 18.sp) 
+        ) {
+            Text("COBRA", fontWeight = FontWeight.Black, fontSize = 18.sp)
         }
     }
 }

@@ -11,11 +11,11 @@ import androidx.room.RoomDatabase
 
 @Entity(tableName = "users")
 data class User(
-    @PrimaryKey val id: String, // UUID as String
+    @PrimaryKey val id: String,
     val idGoogle: String,
     val nombre: String,
     val email: String,
-    val rol: String, // "dueño" o "cajero"
+    val rol: String,
     val negocioId: String? = null
 )
 
@@ -38,7 +38,7 @@ data class Sale(
     val negocioId: String,
     val userId: String,
     val productsJson: String,
-    val status: String = "ACTIVE" // ACTIVE, CANCELLED
+    val status: String = "ACTIVE"
 )
 
 @Entity(tableName = "expenses")
@@ -57,8 +57,14 @@ interface SaleDao {
     @Query("SELECT * FROM sales ORDER BY timestamp DESC")
     suspend fun getAllSales(): List<Sale>
 
+    @Query("SELECT * FROM sales WHERE isSynced = 0 AND status = 'ACTIVE'")
+    suspend fun getUnsyncedSales(): List<Sale>
+
     @Insert
     suspend fun insertSale(sale: Sale): Unit
+
+    @Query("UPDATE sales SET isSynced = 1 WHERE id = :saleId")
+    suspend fun markAsSynced(saleId: Long)
 
     @Query("SELECT SUM(amount) FROM sales WHERE timestamp >= :todayStart AND status = 'ACTIVE'")
     suspend fun getTodayTotal(todayStart: Long): Double?

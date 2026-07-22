@@ -3,9 +3,12 @@ package com.tacoos.poc.data
 import com.tacoos.poc.data.local.AppDatabase
 import com.tacoos.poc.data.local.AppMetadata
 import com.tacoos.poc.data.local.User
+import com.tacoos.poc.data.local.Sale as LocalSale
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
+import com.tacoos.poc.data.remote.SaleRequest
+import android.util.Log
 
 class TacoRepository(
     private val api: TacoApi,
@@ -34,7 +37,7 @@ class TacoRepository(
             request = BusinessRequest(
                 nombre = nombre,
                 direccion = direccion,
-                telefono = "N/A", // Valor por defecto para el POC
+                telefono = "N/A",
                 queVende = giro
             )
         )
@@ -42,11 +45,10 @@ class TacoRepository(
     suspend fun saveUserLocally(user: User) {
         db.userDao().clearUser()
         db.userDao().insertUser(user)
-        // Actualizar inicio de sesión (12h clock starts)
         db.metadataDao().updateMetadata(
             AppMetadata(
                 lastLoginTimestamp = System.currentTimeMillis(),
-                lastMasterSyncTimestamp = System.currentTimeMillis() // Suponemos sync exitoso al login
+                lastMasterSyncTimestamp = System.currentTimeMillis()
             )
         )
     }
@@ -67,9 +69,8 @@ class TacoRepository(
 
     // --- Sales (Local First) ---
     suspend fun registerSale(amount: Double, negocioId: String, userId: String, productsJson: String) {
-        // Registro inmediato en SQLite para máxima agilidad
         db.saleDao().insertSale(
-            com.tacoos.poc.data.local.Sale(
+            LocalSale(
                 amount = amount,
                 negocioId = negocioId,
                 userId = userId,
@@ -85,4 +86,27 @@ class TacoRepository(
     }
 
     suspend fun getCurrentUser() = db.userDao().getCurrentUser()
+
+    // --- Sync Logic ---
+    suspend fun syncPendingSales() {
+        val pendingSales = db.saleDao().getAllSales().filter { !it.isSynced && it.status == "ACTIVE" }
+        if (pendingSales.isEmpty()) return
+
+        Log.d("TacoRepository", "Sincronizando ${pendingSales.size} ventas...")
+        
+        pendingSales.forEach { sale ->
+            try {
+                // Mapear al modelo de la API y enviar
+                // val response = api.uploadSale(sale.negocioId, SaleRequest(...))
+                // if (response.isSuccessful) {
+                //    db.saleDao().markAsSynced(sale.id)
+                // }
+                
+                // Simulación exitosa para el POC
+                // db.saleDao().markAsSynced(sale.id) 
+            } catch (e: Exception) {
+                Log.e("TacoRepository", "Error sincronizando venta ${sale.id}", e)
+            }
+        }
+    }
 }

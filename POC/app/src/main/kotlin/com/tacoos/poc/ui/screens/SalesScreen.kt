@@ -1,8 +1,6 @@
 package com.tacoos.poc.ui.screens
 
-import android.media.RingtoneManager
 import android.widget.Toast
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,15 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
@@ -35,60 +32,40 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-data class POSSale(
-    val id: String,
-    val amount: Double,
-    val method: String, // "Efectivo", "Tarjeta"
-    val status: String, // "Cobrada", "Cancelada"
-    val timestamp: Long = System.currentTimeMillis()
-)
-
-data class POSItem(
-    val name: String,
-    val price: Double,
-    val category: String, // "Comidas", "Bebidas", "Postres"
-    var quantity: Int = 0
-)
+// Modelos de datos
+data class POSSale(val id: String, val amount: Double, val method: String, val status: String, val timestamp: Long = System.currentTimeMillis())
+data class POSItem(val name: String, val price: Double, val category: String, var quantity: Int = 0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange: (Boolean) -> Unit) {
+fun SalesScreen(
+    navController: NavController, 
+    isDarkMode: Boolean, 
+    onThemeChange: (Boolean) -> Unit,
+    viewModel: SalesViewModel = viewModel()
+) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val context = LocalContext.current
     
     var isShiftStarted by remember { mutableStateOf(false) }
-    var sales = remember { mutableStateListOf<POSSale>() }
-    var selectedSale by remember { mutableStateOf<POSSale?>(null) }
-    
-    // Nueva Venta State
+    val sales = remember { mutableStateListOf<POSSale>() }
     var showNewSalePopup by remember { mutableStateOf(false) }
-    var cartItems = remember { mutableStateListOf<POSItem>() }
-    
-    // Corte State
     var showCortePopup by remember { mutableStateOf(false) }
 
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val currentTime = dateFormat.format(Date())
+    // Simulación de datos de usuario (esto debería venir de tu Auth/ViewModel)
+    val userName = "Admin Taco-Os" 
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.width(300.dp),
-                drawerContainerColor = MaterialTheme.colorScheme.surface,
-                drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
-            ) {
-                Spacer(Modifier.height(48.dp))
-                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("MENU", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
-                    AppleToggle(checked = isDarkMode, onCheckedChange = onThemeChange)
-                }
-                Spacer(Modifier.height(16.dp))
-                NavigationDrawerItem(label = { Text("Ajustes") }, selected = false, onClick = { navController.navigate("settings") }, icon = { Icon(Icons.Default.Settings, null) })
-                Spacer(modifier = Modifier.weight(1f))
-                Text("Cerrar Sesión", modifier = Modifier.padding(24.dp).clickable { navController.navigate("login") { popUpTo(0) { inclusive = true } } }, color = Color.Red, fontWeight = FontWeight.Black)
-            }
+            AppDrawerContent(
+                userName = userName,
+                isDarkMode = isDarkMode,
+                onThemeChange = onThemeChange,
+                navController = navController,
+                onClose = { scope.launch { drawerState.close() } }
+            )
         }
     ) {
         Scaffold(
@@ -96,86 +73,56 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
                 TopAppBar(
                     title = { Text("VENTAS", fontWeight = FontWeight.Black) },
                     navigationIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, null) }
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) { Icon(Icons.Default.Menu, null) }
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menú")
                         }
-                    },
-                    actions = {
-                        IconButton(onClick = { /* Notif */ }) { Icon(Icons.Default.Notifications, null) }
                     }
                 )
             }
         ) { padding ->
             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-                // Barra de Info (Fecha y Usuario)
-                Row(
-                    modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f)).padding(12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                val currentTime = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                Row(modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f)).padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(currentTime, fontWeight = FontWeight.Bold, color = Color.Gray)
-                    Text(GoogleSignInState.nombre.ifEmpty { "Usuario" }, fontWeight = FontWeight.Bold, color = ActionBlue)
+                    Text("CAJERO ACTIVO", fontWeight = FontWeight.Bold, color = ActionBlue)
                 }
 
                 if (!isShiftStarted) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Lock, null, modifier = Modifier.size(80.dp), tint = Color.LightGray)
-                            Spacer(Modifier.height(16.dp))
-                            Text("CAJA CERRADA", fontWeight = FontWeight.Black, color = Color.Gray)
-                            Spacer(Modifier.height(24.dp))
-                            Button(onClick = { isShiftStarted = true }, shape = RoundedCornerShape(20.dp), colors = ButtonDefaults.buttonColors(containerColor = ActionBlue)) {
-                                Text("ABRIR CAJA", fontWeight = FontWeight.Bold)
-                            }
+                        Button(onClick = { isShiftStarted = true }, shape = RoundedCornerShape(20.dp), colors = ButtonDefaults.buttonColors(containerColor = ActionBlue)) {
+                            Text("ABRIR CAJA", fontWeight = FontWeight.Bold)
                         }
                     }
                 } else {
-                    // Lista de Ventas POS Style
                     Column(modifier = Modifier.weight(1f).padding(16.dp)) {
-                        Text("REGISTRO DE HOY", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                        Text("REGISTRO DE HOY (LOCAL)", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))
                         
-                        Surface(
-                            modifier = Modifier.fillMaxSize().weight(1f),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
-                        ) {
+                        Surface(modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)) {
                             LazyColumn {
-                                items(sales) { sale ->
-                                    SaleRow(sale, isSelected = selectedSale?.id == sale.id) { selectedSale = sale }
-                                }
+                                items(sales) { sale -> SaleRow(sale) }
                             }
                         }
 
-                        // Botones de Acción (Apple Style Horizontal)
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            ActionButton(Icons.Default.Close, "Cancelar", Color.Red) {
-                                selectedSale?.let { 
-                                    if(System.currentTimeMillis() - it.timestamp < 300000) {
-                                        sales[sales.indexOf(it)] = it.copy(status = "Cancelada")
-                                        selectedSale = null
-                                    } else {
-                                        Toast.makeText(context, "Pasaron más de 5 min", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                            ActionButton(Icons.Default.Search, "Ver", ActionBlue) { /* Ver detalle */ }
-                            ActionButton(Icons.Default.Add, "Venta", SuccessGreen) { showNewSalePopup = true }
-                        }
-                        
                         Spacer(Modifier.height(16.dp))
                         
+                        // RESTAURADO: Botón original grande de NUEVA VENTA
                         Button(
-                            onClick = { showCortePopup = true },
-                            modifier = Modifier.align(Alignment.End),
-                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy),
-                            shape = RoundedCornerShape(12.dp)
+                            onClick = { showNewSalePopup = true },
+                            modifier = Modifier.fillMaxWidth().height(65.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen)
                         ) {
-                            Text("CERRAR CORTE")
+                            Icon(Icons.Default.Add, null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("NUEVA VENTA", fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        }
+                        
+                        TextButton(
+                            onClick = { showCortePopup = true },
+                            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp)
+                        ) {
+                            Text("CERRAR CORTE", color = Color.Gray, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -183,86 +130,150 @@ fun SalesScreen(navController: NavController, isDarkMode: Boolean, onThemeChange
         }
     }
 
-    // POPUP NUEVA VENTA
     if (showNewSalePopup) {
         NewSaleDialog(
             onDismiss = { showNewSalePopup = false },
-            onConfirm = { amount, method ->
+            onConfirm = { amount, method, items ->
+                viewModel.saveSale(amount, items)
                 sales.add(0, POSSale(UUID.randomUUID().toString(), amount, method, "Cobrada"))
                 showNewSalePopup = false
-                cartItems.clear()
+                Toast.makeText(context, "Venta guardada", Toast.LENGTH_SHORT).show()
             }
         )
     }
 
-    // POPUP CORTE
     if (showCortePopup) {
-        CorteDialog(
-            sales = sales,
-            onDismiss = { showCortePopup = false },
-            onConfirm = { 
-                isShiftStarted = false
-                sales.clear()
-                showCortePopup = false
-            }
-        )
+        CorteDialog(sales = sales, onDismiss = { showCortePopup = false }, onConfirm = { isShiftStarted = false; sales.clear(); showCortePopup = false })
     }
 }
 
 @Composable
-fun SaleRow(sale: POSSale, isSelected: Boolean, onClick: () -> Unit) {
-    val statusColor = when(sale.status) {
-        "Cancelada" -> Color.Red
-        else -> if(sale.method == "Efectivo") SuccessGreen else Color(0xFF00BFFF)
+fun AppDrawerContent(
+    userName: String,
+    isDarkMode: Boolean,
+    onThemeChange: (Boolean) -> Unit,
+    navController: NavController,
+    onClose: () -> Unit
+) {
+    ModalDrawerSheet(modifier = Modifier.width(300.dp)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // HEADER: Foto ovalada y nombre
+            Box(modifier = Modifier.fillMaxWidth().background(PrimaryNavy).padding(top = 48.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
+                Column {
+                    // Ícono de perfil ovalado (Simulando foto de Google)
+                    Surface(
+                        modifier = Modifier
+                            .size(70.dp)
+                            .clip(RoundedCornerShape(25.dp)), // Forma ovalada
+                        color = Color.White.copy(alpha = 0.2f)
+                    ) {
+                        Icon(Icons.Default.Person, null, modifier = Modifier.padding(12.dp), tint = Color.White)
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text(userName, color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp)
+                    Text("Administrador", color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // OPCIONES PRINCIPALES
+            NavigationDrawerItem(
+                label = { Text("Dashboard", fontWeight = FontWeight.Bold) },
+                selected = false,
+                onClick = { onClose(); navController.navigate("dashboard") },
+                icon = { Icon(Icons.Default.Dashboard, null) },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            NavigationDrawerItem(
+                label = { Text("Ventas", fontWeight = FontWeight.Bold) },
+                selected = false,
+                onClick = { onClose(); navController.navigate("sales") },
+                icon = { Icon(Icons.Default.PointOfSale, null) },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            NavigationDrawerItem(
+                label = { Text("Reportes", fontWeight = FontWeight.Bold) },
+                selected = false,
+                onClick = { onClose(); navController.navigate("reports") },
+                icon = { Icon(Icons.Default.BarChart, null) },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            NavigationDrawerItem(
+                label = { Text("Ajustes", fontWeight = FontWeight.Bold) },
+                selected = false,
+                onClick = { onClose(); navController.navigate("settings") },
+                icon = { Icon(Icons.Default.Settings, null) },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+
+            Divider(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp))
+
+            // MODO OSCURO
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(if(isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode, null, tint = Color.Gray)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Modo Oscuro", fontWeight = FontWeight.Bold)
+                }
+                Switch(checked = isDarkMode, onCheckedChange = onThemeChange)
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // CERRAR SESIÓN (AL FINAL Y EN ROJO)
+            Text(
+                "CERRAR SESIÓN", 
+                modifier = Modifier
+                    .padding(24.dp)
+                    .clickable { 
+                        onClose()
+                        navController.navigate("login") { popUpTo(0) } 
+                    }, 
+                color = Color.Red, 
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
+        }
     }
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(if(isSelected) ActionBlue.copy(alpha = 0.1f) else Color.Transparent)
-            .clickable { onClick() }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(statusColor))
+}
+
+@Composable
+fun SaleRow(sale: POSSale) {
+    Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(if(sale.method == "Efectivo") SuccessGreen else ActionBlue))
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text("Venta #${sale.id.take(4)}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             Text(sale.method, fontSize = 12.sp, color = Color.Gray)
         }
-        Text("$${sale.amount}", fontWeight = FontWeight.Black, color = if(sale.status == "Cancelada") Color.Red else PrimaryNavy)
-    }
-}
-
-@Composable
-fun ActionButton(icon: ImageVector, label: String, color: Color, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(16.dp)).background(color.copy(alpha = 0.1f)).clickable { onClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(icon, null, tint = color)
-        }
-        Text(label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = color)
+        Text("$${sale.amount}", fontWeight = FontWeight.Black, color = PrimaryNavy)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (Double, String) -> Unit) {
-    var step by remember { mutableStateOf(1) } // 1: Cart, 2: Categories, 3: Products, 4: Quantity, 5: Payment
-    var cart = remember { mutableStateListOf<POSItem>() }
+fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (Double, String, List<POSItem>) -> Unit) {
+    var step by remember { mutableStateOf(1) }
+    val cart = remember { mutableStateListOf<POSItem>() }
     var selectedCategory by remember { mutableStateOf("") }
     var selectedProduct by remember { mutableStateOf<POSItem?>(null) }
-    var qtyInput by remember { mutableStateOf("") }
+    var qtyInput by remember { mutableStateOf("1") }
     var paymentMethod by remember { mutableStateOf("Efectivo") }
 
     val products = listOf(
-        POSItem("Taco Pastor", 15.0, "Comidas"),
-        POSItem("Taco Bistec", 18.0, "Comidas"),
-        POSItem("Coca 600ml", 20.0, "Bebidas"),
-        POSItem("Fanta 600ml", 20.0, "Bebidas"),
-        POSItem("Flan", 35.0, "Postres")
+        POSItem("Taco Pastor", 25.0, "Comidas"),
+        POSItem("Taco Bistec", 30.0, "Comidas"),
+        POSItem("Gringa", 65.0, "Comidas"),
+        POSItem("Coca 600ml", 22.0, "Bebidas"),
+        POSItem("Agua Fresca", 20.0, "Bebidas"),
+        POSItem("Flan Casero", 45.0, "Postres")
     )
 
     AlertDialog(
@@ -274,17 +285,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (Double, String) -> Unit) {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if(step > 1) IconButton(onClick = { step-- }) { Icon(Icons.Default.ArrowBack, null) }
-                        Text(
-                            text = when(step) {
-                                1 -> "Nueva Venta"
-                                2 -> "Categorías"
-                                3 -> selectedCategory
-                                4 -> "Cantidad"
-                                else -> "Cobrar"
-                            }, 
-                            style = MaterialTheme.typography.headlineSmall, 
-                            fontWeight = FontWeight.Black
-                        )
+                        Text("Nueva Venta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
                         Spacer(Modifier.weight(1f))
                         IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, null) }
                     }
@@ -294,7 +295,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (Double, String) -> Unit) {
                             1 -> {
                                 if(cart.isEmpty()) {
                                     Box(modifier = Modifier.fillMaxSize().clickable { step = 2 }, contentAlignment = Alignment.Center) {
-                                        Text("+ AGREGA PRODUCTO", fontWeight = FontWeight.Bold, color = ActionBlue)
+                                        Text("+ AGREGAR PRODUCTO", fontWeight = FontWeight.Bold, color = ActionBlue)
                                     }
                                 } else {
                                     LazyColumn {
@@ -331,7 +332,7 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (Double, String) -> Unit) {
                                     Spacer(Modifier.height(16.dp))
                                     OutlinedTextField(
                                         value = qtyInput,
-                                        onValueChange = { if(it.length <= 9 && it.all { c -> c.isDigit() }) qtyInput = it },
+                                        onValueChange = { qtyInput = it },
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         label = { Text("Cantidad") },
                                         modifier = Modifier.fillMaxWidth()
@@ -339,27 +340,28 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (Double, String) -> Unit) {
                                     Spacer(Modifier.height(24.dp))
                                     Button(onClick = { 
                                         selectedProduct?.let { 
-                                            it.quantity = qtyInput.toIntOrNull() ?: 1
-                                            cart.add(it)
+                                            val newItem = it.copy(quantity = qtyInput.toIntOrNull() ?: 1)
+                                            cart.add(newItem)
                                             step = 1
-                                            qtyInput = ""
+                                            qtyInput = "1"
                                         }
-                                    }, modifier = Modifier.fillMaxWidth()) { Text("AGREGAR") }
+                                    }, modifier = Modifier.fillMaxWidth()) { Text("AGREGAR AL CARRITO") }
                                 }
                             }
                             5 -> {
                                 val total = cart.sumOf { it.price * it.quantity }
                                 Column {
-                                    Text("Total: $$total", fontSize = 32.sp, fontWeight = FontWeight.Black)
-                                    Spacer(Modifier.height(24.dp))
+                                    Text("TOTAL A COBRAR", fontSize = 12.sp, color = Color.Gray)
+                                    Text("$${total}", fontSize = 48.sp, fontWeight = FontWeight.Black, color = PrimaryNavy)
+                                    Spacer(Modifier.height(32.dp))
                                     Row {
                                         MethodBtn("Efectivo", paymentMethod == "Efectivo") { paymentMethod = "Efectivo" }
                                         Spacer(Modifier.width(12.dp))
                                         MethodBtn("Tarjeta", paymentMethod == "Tarjeta") { paymentMethod = "Tarjeta" }
                                     }
-                                    Spacer(Modifier.height(32.dp))
-                                    Button(onClick = { onConfirm(total, paymentMethod) }, modifier = Modifier.fillMaxWidth().height(60.dp)) {
-                                        Text("CONFIRMAR PAGO")
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Button(onClick = { onConfirm(total, paymentMethod, cart.toList()) }, modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(16.dp)) {
+                                        Text("CONFIRMAR PAGO", fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -387,39 +389,24 @@ fun CategoryBtn(name: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun MethodBtn(name: String, selected: Boolean, onClick: () -> Unit) {
+fun RowScope.MethodBtn(name: String, selected: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(containerColor = if(selected) ActionBlue else Color.LightGray),
-        modifier = Modifier.height(60.dp)
-    ) { Text(name) }
+        modifier = Modifier.height(60.dp).weight(1f),
+        shape = RoundedCornerShape(12.dp)
+    ) { Text(name, fontWeight = FontWeight.Bold) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CorteDialog(sales: List<POSSale>, onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    val total = sales.filter { it.status == "Cobrada" }.sumOf { it.amount }
-    val cash = sales.filter { it.status == "Cobrada" && it.method == "Efectivo" }.sumOf { it.amount }
-    val card = sales.filter { it.status == "Cobrada" && it.method == "Tarjeta" }.sumOf { it.amount }
-
+    val total = sales.sumOf { it.amount }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("¿Cerrar Corte?", fontWeight = FontWeight.Black) },
-        text = {
-            Column {
-                Text("Ventas Totales: $$total")
-                Text("Efectivo: $$cash")
-                Text("Tarjeta: $$card")
-                Text("Canceladas: ${sales.count { it.status == "Cancelada" }}")
-                Spacer(Modifier.height(16.dp))
-                Text("Esta acción registrará el corte y reiniciará la caja.", color = Color.Gray, fontSize = 12.sp)
-            }
-        },
-        confirmButton = {
-            Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) { Text("HACER CORTE") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("REGRESAR") }
-        }
+        title = { Text("Cerrar Corte", fontWeight = FontWeight.Black) },
+        text = { Text("Total de ventas hoy: $${total}\n\n¿Estás seguro de cerrar el turno?") },
+        confirmButton = { Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) { Text("CERRAR") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR") } }
     )
 }

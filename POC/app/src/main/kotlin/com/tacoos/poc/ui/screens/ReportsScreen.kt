@@ -44,16 +44,13 @@ fun ReportsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
     
-    // Estados para el selector de fechas
     var showRangeSheet by remember { mutableStateOf(false) }
-    var showCustomRangePicker by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
-    val dateRangePickerState = rememberDateRangePickerState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("REPORTES AVANZADOS", fontWeight = FontWeight.Black, fontSize = 18.sp) },
+                title = { Text("REPORTES", fontWeight = FontWeight.Black, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
@@ -61,7 +58,7 @@ fun ReportsScreen(
                 },
                 actions = {
                     IconButton(onClick = { showRangeSheet = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Rango")
+                        Icon(Icons.Default.DateRange, contentDescription = "Rango", tint = ActionBlue)
                     }
                 }
             )
@@ -71,20 +68,22 @@ fun ReportsScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(20.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(uiState.dateRange, style = MaterialTheme.typography.labelLarge, color = ActionBlue)
+            Text(uiState.dateRange.uppercase(), style = MaterialTheme.typography.labelLarge, color = ActionBlue, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(24.dp))
 
             if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryNavy)
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = ActionBlue)
                 }
             } else if (uiState.sales.isEmpty() && uiState.expenses.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                    Text("No se encontraron datos", color = Color.Gray, fontSize = 14.sp)
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 100.dp)) {
+                    Icon(Icons.Default.BarChart, null, modifier = Modifier.size(64.dp), tint = Color.LightGray)
+                    Spacer(Modifier.height(16.dp))
+                    Text("No hay movimientos en este periodo", color = Color.Gray)
                 }
             } else {
                 // Resumen Financiero
@@ -99,153 +98,81 @@ fun ReportsScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // Estadísticas por Cajero
-                SectionHeader("RENDIMIENTO POR CAJERO", Icons.Default.Groups)
-                Spacer(modifier = Modifier.height(12.dp))
-                uiState.cashierStats.forEach { stat ->
-                    StatItem(
-                        name = stat.name,
-                        value = currencyFormatter.format(stat.totalSales),
-                        subtitle = "${stat.salesCount} ventas realizadas"
-                    )
+                if (uiState.cashierStats.isNotEmpty()) {
+                    SectionHeader("POR CAJERO", Icons.Default.Groups)
+                    uiState.cashierStats.forEach { StatItem(it.name, currencyFormatter.format(it.totalSales), "${it.salesCount} ventas") }
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Estadísticas por Producto
-                SectionHeader("PRODUCTOS MÁS VENDIDOS", Icons.Default.Inventory2)
-                Spacer(modifier = Modifier.height(12.dp))
-                uiState.productStats.take(5).forEach { stat ->
-                    StatItem(
-                        name = stat.name,
-                        value = "${stat.quantitySold} uds",
-                        subtitle = "Total: ${currencyFormatter.format(stat.totalSales)}"
-                    )
+                // Top Productos
+                if (uiState.productStats.isNotEmpty()) {
+                    SectionHeader("TOP PRODUCTOS", Icons.Default.Inventory2)
+                    uiState.productStats.take(10).forEach { StatItem(it.name, "${it.quantitySold} uds", "Total: ${currencyFormatter.format(it.totalSales)}") }
                 }
-                
-                Spacer(modifier = Modifier.height(40.dp))
             }
         }
     }
 
-    // Modal para presets rápidos (Pop-up desde abajo)
     if (showRangeSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showRangeSheet = false },
-            sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface
-        ) {
+        ModalBottomSheet(onDismissRequest = { showRangeSheet = false }, sheetState = sheetState) {
             Column(modifier = Modifier.padding(16.dp).padding(bottom = 32.dp).fillMaxWidth()) {
-                Text("Seleccionar Periodo", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
-                Spacer(Modifier.height(16.dp))
-                
+                Text("Filtrar Periodo", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, modifier = Modifier.padding(16.dp))
                 RangeOption("Hoy", Icons.Default.Today) { viewModel.loadPreset("HOY"); showRangeSheet = false }
                 RangeOption("Ayer", Icons.Default.History) { viewModel.loadPreset("AYER"); showRangeSheet = false }
                 RangeOption("Últimos 7 días", Icons.Default.DateRange) { viewModel.loadPreset("SEMANA"); showRangeSheet = false }
                 RangeOption("Este mes", Icons.Default.CalendarMonth) { viewModel.loadPreset("MES"); showRangeSheet = false }
-                RangeOption("Este año", Icons.Default.CalendarToday) { viewModel.loadPreset("AÑO"); showRangeSheet = false }
-                
-                Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color.LightGray.copy(alpha = 0.3f))
-                
-                RangeOption("Rango personalizado", Icons.Default.EditCalendar) { 
-                    showRangeSheet = false
-                    showCustomRangePicker = true 
-                }
             }
-        }
-    }
-
-    // Pop-up para rango personalizado (Calendario)
-    if (showCustomRangePicker) {
-        DatePickerDialog(
-            onDismissRequest = { showCustomRangePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    val start = dateRangePickerState.selectedStartDateMillis
-                    val end = dateRangePickerState.selectedEndDateMillis
-                    if (start != null && end != null) {
-                        viewModel.loadReport(start, end)
-                    }
-                    showCustomRangePicker = false
-                }) { Text("Aplicar") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCustomRangePicker = false }) { Text("Cancelar") }
-            }
-        ) {
-            DateRangePicker(
-                state = dateRangePickerState,
-                title = { Text("Selecciona el rango", modifier = Modifier.padding(16.dp)) },
-                showModeToggle = false,
-                modifier = Modifier.weight(1f)
-            )
         }
     }
 }
 
 @Composable
 fun RangeOption(label: String, icon: ImageVector, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        color = Color.Transparent
     ) {
-        Icon(icon, contentDescription = null, tint = ActionBlue, modifier = Modifier.size(24.dp))
-        Spacer(Modifier.width(16.dp))
-        Text(label, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, null, tint = ActionBlue, modifier = Modifier.size(24.dp))
+            Spacer(Modifier.width(16.dp))
+            Text(label, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        }
     }
 }
 
 @Composable
 fun SectionHeader(title: String, icon: ImageVector) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(icon, contentDescription = null, tint = ActionBlue, modifier = Modifier.size(20.dp))
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = ActionBlue, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryNavy,
-            letterSpacing = 1.sp
-        )
+        Text(title, fontWeight = FontWeight.Black, color = PrimaryNavy, letterSpacing = 1.sp, fontSize = 12.sp)
     }
+    Spacer(Modifier.height(12.dp))
 }
 
 @Composable
 fun StatItem(name: String, value: String, subtitle: String) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(subtitle, fontSize = 12.sp, color = Color.Gray)
+                Text(name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(subtitle, fontSize = 11.sp, color = Color.Gray)
             }
-            Text(value, fontWeight = FontWeight.Black, color = PrimaryNavy, fontSize = 16.sp)
+            Text(value, fontWeight = FontWeight.Black, color = PrimaryNavy)
         }
     }
 }
 
 @Composable
 fun ReportCardSmall(title: String, amount: String, color: Color, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-    ) {
+    Card(modifier = modifier, shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(title, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+            Text(title, fontSize = 10.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
             Text(amount, fontSize = 18.sp, fontWeight = FontWeight.Black, color = color)
         }
     }
@@ -253,13 +180,9 @@ fun ReportCardSmall(title: String, amount: String, color: Color, modifier: Modif
 
 @Composable
 fun ReportCard(title: String, amount: String, color: Color) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-    ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Text(title, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(title, fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
             Text(amount, fontSize = 28.sp, fontWeight = FontWeight.Black, color = color)
         }
     }
@@ -283,78 +206,49 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
     private val app = application as TacoApp
     private val db = app.database
     private val gson = Gson()
-
     private val _uiState = MutableStateFlow(ReportsState())
     val uiState: StateFlow<ReportsState> = _uiState
 
-    init {
-        loadPreset("HOY")
-    }
+    init { loadPreset("HOY") }
 
     fun loadPreset(preset: String) {
         val calendar = Calendar.getInstance()
         val end = System.currentTimeMillis()
         var start = end
-
         when (preset) {
-            "HOY" -> {
-                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                calendar.set(Calendar.MINUTE, 0)
-                calendar.set(Calendar.SECOND, 0)
-                start = calendar.timeInMillis
+            "HOY" -> { 
+                calendar.set(Calendar.HOUR_OF_DAY, 0); calendar.set(Calendar.MINUTE, 0); 
+                calendar.set(Calendar.SECOND, 0); start = calendar.timeInMillis 
             }
-            "AYER" -> {
+            "AYER" -> { 
                 calendar.add(Calendar.DAY_OF_YEAR, -1)
-                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                calendar.set(Calendar.MINUTE, 0)
-                calendar.set(Calendar.SECOND, 0)
-                start = calendar.timeInMillis
-                
-                val calendarEnd = Calendar.getInstance().apply {
+                calendar.set(Calendar.HOUR_OF_DAY, 0); calendar.set(Calendar.MINUTE, 0); start = calendar.timeInMillis
+                val calEnd = Calendar.getInstance().apply { 
                     add(Calendar.DAY_OF_YEAR, -1)
-                    set(Calendar.HOUR_OF_DAY, 23)
-                    set(Calendar.MINUTE, 59)
-                    set(Calendar.SECOND, 59)
+                    set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59) 
                 }
-                loadReport(start, calendarEnd.timeInMillis)
-                return
+                loadReport(start, calEnd.timeInMillis); return
             }
-            "SEMANA" -> {
-                calendar.add(Calendar.DAY_OF_YEAR, -7)
-                start = calendar.timeInMillis
-            }
-            "MES" -> {
-                calendar.set(Calendar.DAY_OF_MONTH, 1)
-                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                calendar.set(Calendar.MINUTE, 0)
-                calendar.set(Calendar.SECOND, 0)
-                start = calendar.timeInMillis
-            }
-            "AÑO" -> {
-                calendar.set(Calendar.DAY_OF_YEAR, 1)
-                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                calendar.set(Calendar.MINUTE, 0)
-                calendar.set(Calendar.SECOND, 0)
-                start = calendar.timeInMillis
-            }
+            "SEMANA" -> { calendar.add(Calendar.DAY_OF_YEAR, -7); start = calendar.timeInMillis }
+            "MES" -> { calendar.set(Calendar.DAY_OF_MONTH, 1); start = calendar.timeInMillis }
         }
         loadReport(start, end)
     }
 
-    fun loadReport(startDate: Long, endDate: Long) {
+    private fun loadReport(startDate: Long, endDate: Long) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             val user = db.userDao().getCurrentUser()
-            val negocioId = user?.negocioId ?: return@launch
+            val negocioId = user?.negocioId ?: ""
+
+            if (negocioId.isEmpty()) {
+                _uiState.value = _uiState.value.copy(isLoading = false)
+                return@launch
+            }
 
             val sales = db.saleDao().getSalesByRange(negocioId, startDate, endDate).filter { it.status == "ACTIVE" }
             val expenses = db.expenseDao().getExpensesByRange(negocioId, startDate, endDate)
             val cashiers = db.userDao().getCashiers(negocioId)
-
-            val cashierStats = sales.groupBy { it.userId }.map { (userId, userSales) ->
-                val name = cashiers.find { it.id == userId }?.nombre ?: "Cajero Desconocido"
-                CashierStat(name, userSales.sumOf { it.amount }, userSales.size)
-            }.sortedByDescending { it.totalSales }
 
             val productMap = mutableMapOf<String, ProductStat>()
             val type = object : TypeToken<List<Map<String, Any>>>() {}.type
@@ -362,38 +256,39 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
             sales.forEach { sale ->
                 try {
                     val products: List<Map<String, Any>> = gson.fromJson(sale.productsJson, type) ?: emptyList()
-                    if (products.isNotEmpty()) {
-                        products.forEach { p ->
-                            val name = p["name"] as? String ?: "Producto"
-                            val qty = (p["qty"] as? Number)?.toInt() ?: 0
-                            val current = productMap[name] ?: ProductStat(name, 0.0, 0)
-                            productMap[name] = current.copy(
-                                quantitySold = current.quantitySold + qty,
-                                totalSales = current.totalSales + (sale.amount / products.size)
-                            )
-                        }
+                    products.forEach { p ->
+                        val name = p["name"] as? String ?: "Producto"
+                        val qty = (p["quantity"] as? Number)?.toInt() ?: (p["qty"] as? Number)?.toInt() ?: 1
+                        val price = (p["price"] as? Number)?.toDouble() ?: 0.0
+                        
+                        val current = productMap[name] ?: ProductStat(name, 0.0, 0)
+                        productMap[name] = current.copy(
+                            quantitySold = current.quantitySold + qty,
+                            totalSales = current.totalSales + (price * qty)
+                        )
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    val current = productMap["Otros"] ?: ProductStat("Otros", 0.0, 0)
+                    productMap["Otros"] = current.copy(
+                        quantitySold = current.quantitySold + 1,
+                        totalSales = current.totalSales + sale.amount
+                    )
                 }
             }
-            val productStats = productMap.values.sortedByDescending { it.quantitySold }
 
             _uiState.value = ReportsState(
                 sales = sales,
                 expenses = expenses,
                 totalSales = sales.sumOf { it.amount },
                 totalExpenses = expenses.sumOf { it.amount },
-                cashierStats = cashierStats,
-                productStats = productStats,
-                dateRange = "Del ${formatDate(startDate)} al ${formatDate(endDate)}",
+                cashierStats = sales.groupBy { it.userId }.map { (uid, uSales) ->
+                    val name = if (uid == user?.id) user.nombre else cashiers.find { it.id == uid }?.nombre ?: "Cajero"
+                    CashierStat(name, uSales.sumOf { it.amount }, uSales.size)
+                }.sortedByDescending { it.totalSales },
+                productStats = productMap.values.sortedByDescending { it.quantitySold },
+                dateRange = "Del ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(startDate))} al ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(endDate))}",
                 isLoading = false
             )
         }
-    }
-
-    private fun formatDate(ts: Long): String {
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        return sdf.format(Date(ts))
     }
 }

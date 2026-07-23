@@ -1,187 +1,202 @@
-# Taco'Os 🎯
+# Taco'Os — Asistente de Ventas para Micro-Negocios
 
-**Inteligencia financiera simple para negocios independientes.**
-
-Ser independiente es dar el siguiente paso.  
-Tener control es lo que lo hace sostenible.
-
-No competimos contra sistemas contables ni ERPs. Competimos contra la **libreta**.  
-Taco'Os es una app de punto de venta diseñada para la taquería de la esquina, la nevería, la tiendita — negocios reales que mueven la economía todos los días y que ahora pueden crecer con mejores herramientas.
+> **Misión:** Democratizar la inteligencia financiera para micro-negocios informales.
+> **Filosofía:** "Finanzas como el alma del negocio". El sistema es un aliado silencioso: analiza, alerta y sugiere sin abrumar.
 
 ---
 
-## El Problema
+## Ecosistema
 
-- Millones de negocios independientes operan sin herramientas claras para tomar decisiones.
-- El control del dinero se lleva en **libretas** o de memoria — se pierden ventas, hay errores y no siempre se sabe si realmente se está ganando.
-- Las soluciones actuales son caras, complejas o dependen completamente de internet.
-
-## La Solución
-
-Una app simple que te da control desde el primer día:
-
-- **+ Venta** → registra ingresos en segundos
-- **- Gasto** → controla lo que sale
-- **¿Cómo voy?** → entiende tu negocio sin complicarte
-
-Funciona **sin internet**, permite enviar **recibos por WhatsApp**, incluye **programa de lealtad con QR** y un sistema que impulsa el registro de cada venta de forma natural, ayudando a tener mayor control sin fricción.
-
----
-
-## Stack Tecnológico
-
-| Capa | Tecnología |
-|------|-----------|
-| **Frontend** | Flutter (Android + iOS) |
-| **Backend** | Spring Boot (Java) |
-| **Base de Datos** | PostgreSQL (nube) + SQLite/Room (local) |
-| **Sincronización** | Offline-First con Batch Sync cada 5-10 min |
-| **IA** | Batch Processing nocturno (Python/Java) |
-| **Autenticación** | Google Login + JWT 24h |
-| **Mensajería** | WhatsApp Business API |
-| **Pagos** | Stripe |
-| **Notificaciones** | Firebase Cloud Messaging |
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        TACO'OS ECOSISTEMA                           │
+├─────────────────────────┬───────────────────────────────────────────┤
+│   App Flutter (CJK)     │   Control Maestro (Admin Panel)          │
+│   Modo Cajero + Patrón  │   Angular 21 + Material + Tailwind      │
+├─────────────────────────┴───────────────────────────────────────────┤
+│                     Backend API (Java 21)                           │
+│              Spring Boot + Flyway + JWT + WebSocket                 │
+├─────────────────────────────────────────────────────────────────────┤
+│                  ╔═══════════════════════════╗                      │
+│                  ║   BASE DE DATOS           ║                      │
+│                  ║   H2 (dev) / PostgreSQL   ║                      │
+│                  ╚═══════════════════════════╝                      │
+│  negocios | administradores | cajeros | productos | transacciones   │
+│  master_users | master_tickets | master_messages | master_incidents │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Equipo
+## Stack Técnico
 
-| Rol | Nombre | Enfoque |
-|-----|--------|---------|
-| **Arquitecto / Backend** | Jesus Medina | Spring Boot, API REST, DB, Licencias, DevOps |
-| **Flutter + Backend** | Fanner | App Flutter, UI/UX, Sincronización, Batch |
-| **Data Science** | Leandro | Modelos de IA, Predicciones, Insights, Segmentación |
+| Capa | Tecnología | Rol |
+|------|-----------|-----|
+| **App Móvil** | Flutter + SQLite/Room | Base maestra local. 100% operable sin internet. |
+| **Control Maestro** | Angular 21 + Material + Tailwind CSS v4 | Panel admin central para el equipo de Taco'Os |
+| **Backend** | Spring Boot 3.4 + Java 21 | API REST, autenticación JWT, WebSocket, reportes |
+| **DB** | H2 (dev) / PostgreSQL (prod) | Multi-tenant por business_id |
+| **Migraciones** | Flyway | Control de esquema (V1–V20) |
 
 ---
 
-## Roadmap
+## Estructura del Proyecto
 
-| Fase | Enfoque | Entregable |
-|------|---------|------------|
-| **I** | Control Operativo (MVP) | App con 3 botones, offline, sync, reportes básicos |
-| **II** | Lealtad y Anti-Fraude | WhatsApp receipts, programa de lealtad QR, cancelaciones |
-| **III** | IA y Reportes | Insights, proyecciones flujo, alerta quiebra, upgrades |
-| **IV** | QR Digital | Menú interactivo QR en mesa, inventario |
-| **V** | Materias Primas | Reporte sobrantes, predicción IA de pedido diario |
+```
+Taco_Os/
+├── backend/                          # Spring Boot API
+│   ├── src/main/java/com/jmcsoft/taco_os/
+│   │   ├── config/                   # SecurityConfig, JwtFilter, WebSocket, CORS
+│   │   ├── controller/               # Endpoints REST (v1)
+│   │   │   └── master/               # Control Maestro endpoints
+│   │   ├── domain/                   # Entidades + DTOs (records)
+│   │   │   └── master/               # Entidades y DTOs del Control Maestro
+│   │   ├── repository/               # Repositorios JPA
+│   │   │   └── master/               # Repos del Control Maestro
+│   │   └── services/                 # Lógica de negocio
+│   │       └── master/               # Servicios del Control Maestro
+│   └── src/main/resources/
+│       ├── application-dev.yml       # Config dev (H2, JWT)
+│       └── db/migrations/            # V1–V20 Flyway migrations
+├── control-master/                   # Angular 21 Admin Panel
+│   ├── src/app/
+│   │   ├── core/                     # Auth, Interceptor, Guard, API Service
+│   │   ├── layout/                   # Sidebar + Toolbar
+│   │   └── pages/                    # Login, Dashboard, Clients, Tickets, etc.
+│   ├── .postcssrc.json               # Tailwind CSS v4 config
+│   └── angular.json                  # Angular config (polyfills: zone.js)
+├── docs-v0.2/                        # Documentación del proyecto
+│   ├── CONTROL_MAESTRO.md            # Especificaciones del Control Maestro
+│   ├── CONTRATOS_API.md              # Contratos API (28 endpoints)
+│   ├── FLUJO_COMPLETO_SISTEMA.md     # Flujo completo
+│   └── ...
+└── Docs/                             # Documentación adicional
+```
+
+---
+
+## Módulos Implementados
+
+### Fase I — Backend (25+ endpoints)
+
+| Módulo | Endpoints | Estado |
+|--------|-----------|--------|
+| Auth (Google + JWT) | verificar, registrar, login | ✅ |
+| Negocio CRUD | crear, detalle, editar, listar cajeros | ✅ |
+| Enlace | generar invitación, enlazar cajero | ✅ |
+| Producto CRUD | listar, crear, editar, eliminar | ✅ |
+| Sesión Cajero | abrir, estado, cerrar | ✅ |
+| Transacciones | crear, listar, detalle | ✅ |
+| Corte Diario | ejecutar, historial | ✅ |
+| Cancelaciones | crear, listar | ✅ |
+| Notificaciones | listar, marcar leída | ✅ |
+| Licencias | verificar, renovar | ✅ |
+| Sync / Reportes | sync, reportes | ✅ |
+| SuperSu | login, listarAdmins, detalleAdmin, activar/desactivar, estadísticas | ✅ |
+
+### Control Maestro — Backend
+
+| Módulo | Endpoints | Estado |
+|--------|-----------|--------|
+| Auth | login, me | ✅ |
+| Dashboard | stats, charts, activity | ✅ |
+| Clients | list, detail, toggle, plan | ✅ |
+| Tickets | CRUD, assign, messages | ✅ |
+| Operations | force-close, block, adjust-balance | ✅ |
+| Team | CRUD, performance | ✅ |
+| Billing | summary, invoices, plans | ✅ |
+| WebSocket | STOMP over SockJS (/ws/chat) | ✅ |
+
+### Control Maestro — Frontend (Angular 21)
+
+| Componente | Ruta | Estado |
+|------------|------|--------|
+| Login | `/login` | ✅ |
+| Layout (Sidebar + Toolbar) | — | ✅ |
+| Dashboard | `/dashboard` | ✅ |
+| Clientes | `/clients` | ✅ |
+| Detalle Cliente | `/clients/:id` | ✅ |
+| Tickets | `/tickets` | ✅ |
+| Detalle Ticket | `/tickets/:id` | ✅ |
+| Operaciones | `/operations` | ✅ |
+| Equipo | `/team` | ✅ |
+| Facturación | `/billing` | ✅ |
+
+---
+
+## Credenciales de Desarrollo
+
+### Control Maestro
+
+| Usuario | Contraseña | Rol |
+|---------|-----------|-----|
+| `jesus` | `dev123` | DEVELOPER |
+| `fanner` | `dev123` | DEVELOPER |
+| `leandro` | `dev123` | DATA_SCIENTIST |
+| `soporte1` | `sup123` | SOPORTE |
+| `soporte2` | `sup123` | SOPORTE |
+
+---
+
+## Cómo Ejecutar
+
+### Backend
+
+```bash
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# API disponible en http://localhost:8080
+# Swagger: http://localhost:8080/swagger-ui/index.html
+```
+
+### Control Maestro (Frontend)
+
+```bash
+cd control-master
+npm install
+ng serve --port 4200
+# Disponible en http://localhost:4200
+```
+
+---
+
+## Base de Datos
+
+Flyway controla todas las migraciones. En dev usa H2 (en memoria).
+
+| Migración | Tabla | Descripción |
+|-----------|-------|-------------|
+| V1–V13 | Sistema principal | negocios, administradores, cajeros, productos, etc. |
+| V14 | master_users | Usuarios staff del Control Maestro |
+| V15 | master_tickets | Tickets de soporte |
+| V16 | master_messages | Mensajes de chat/tickets |
+| V17 | master_incidents | Incidencias del sistema |
+| V18 | master_audit_log | Log de auditoría de acciones |
+| V19 | master_invoices | Facturas |
+| V20 | Seed data | Datos iniciales (5 usuarios, 3 tickets, etc.) |
 
 ---
 
 ## Documentación
 
-Toda la documentación del proyecto está en la carpeta [`Docs/`](Docs/):
-
-| Documento | Descripción |
-|-----------|-------------|
-| [`TacoOs_Diseno_Tecnico_Consolidado.md`](Docs/TacoOs_Diseno_Tecnico_Consolidado.md) | Diseño técnico completo: misión, arquitectura, UX, datos, monetización |
-| [`TacoOs_Flujo_Desarrollo.md`](Docs/TacoOs_Flujo_Desarrollo.md) | Workflow de desarrollo por fase con tareas asignadas al equipo |
-| [`contratos_api_v1.md`](Docs/contratos_api_v1.md) | Contratos JSON de la API: endpoints, requests y responses |
-| [`tickets_fase1_mvp.csv`](Docs/tickets_fase1_mvp.csv) | Tickets Fase I — MVP (importable a GitHub Projects) |
-| [`tickets_fase2_lealtad.csv`](Docs/tickets_fase2_lealtad.csv) | Tickets Fase II — Lealtad y WhatsApp |
-| [`tickets_fase3_ia_reportes.csv`](Docs/tickets_fase3_ia_reportes.csv) | Tickets Fase III — IA, Reportes y Licencias |
-| [`tickets_fase4_qr.csv`](Docs/tickets_fase4_qr.csv) | Tickets Fase IV — Menú QR Digital |
-| [`tickets_fase5_materias_primas.csv`](Docs/tickets_fase5_materias_primas.csv) | Tickets Fase V — Control de Materias Primas |
-| [`tickets_generales_infra.csv`](Docs/tickets_generales_infra.csv) | Tickets generales: CI/CD, Play Store, Firebase |
+- [Control Maestro — Especificaciones](docs-v0.2/CONTROL_MAESTRO.md)
+- [Contratos API v0.2](docs-v0.2/CONTRATOS_API.md) — 28 endpoints documentados
+- [Flujo Completo del Sistema](docs-v0.2/FLUJO_COMPLETO_SISTEMA.md)
+- [Arquitectura](docs-v0.2/ARQUITECTURA.md)
+- [Modelo de Datos](docs-v0.2/MODELO_DATOS.md)
 
 ---
 
-## Licencias (Multitenant)
+## Equipo
 
-Cada negocio es un **tenant independiente** con su propia licencia:
-
-| Plan | Precio | Negocios | Cajeros | Features |
-|------|--------|----------|---------|----------|
-| **Free** | $0 | 1 | 2 | Ventas, gastos, recibos WhatsApp, lealtad QR, reportes básicos |
-| **Premium** | $199/mes | 2 | 5 | Todo Free + insights IA, reportes detallados, predicción de pedidos |
-| **Business** | Próximamente | Ilimitados | Ilimitados | Todo Premium + multi-sucursal |
-
-- La licencia Free no vence. La Premium tiene fecha de expiración.
-- Si un Premium vence, baja automáticamente a Free sin perder datos.
-- El backend valida límites en cada operación (cajeros, negocios).
+| Nombre | Rol | Stack |
+|--------|-----|-------|
+| Jesús Martínez | Backend + Control Maestro | Java, Spring Boot, Angular |
+| Fanner García | App Móvil | Flutter, Dart |
+| Leandro Reyes | Data Science | Python, ML |
 
 ---
 
-## Arquitectura
+## Licencia
 
-```
-
-
-┌──────────────────────────────────────────────────┐
-│                   Flutter App                    │
-│  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │
-│  │  Venta   │  │  Gasto   │  │  ¿Cómo voy?    │  │
-│  │  (+)     │  │  (-)     │  │  (Dashboard)   │  │
-│  └──────────┘  └──────────┘  └────────────────┘  │
-│        ↓              ↓              ↓           │
-│  ┌──────────────────────────────────────────┐    │
-│  │         SQLite / Room (Local DB)         │    │
-│  └──────────────────────────────────────────┘    │
-│        ↓ (Background Sync cada 5-10 min)         │
-└──────────────────────────────────────────────────┘
-        ↓
-┌──────────────────────────────────────────────────┐
-│            Spring Boot API (Backend)             │
-│  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │
-│  │   Auth   │  │  Sync    │  │  Transactions  │  │
-│  │   JWT    │  │  Batch   │  │  CRUD          │  │
-│  └──────────┘  └──────────┘  └────────────────┘  │
-│  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │
-│  │ License  │  │ Reports  │  │  WhatsApp API  │  │
-│  │Middleware│  │          │  │                │  │
-│  └──────────┘  └──────────┘  └────────────────┘  │
-│        ↓              ↓              ↓           │
-│  ┌──────────────────────────────────────────┐    │
-│  │        PostgreSQL (Consolidated)         │    │
-│  └──────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────┘
-        ↓ (Batch nocturno)
-┌──────────────────────────────────────────────────┐
-│              Motor de IA (Batch)                 │
-│  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │
-│  │ Flujo de │  │  Insight │  │   Predicción   │  │
-│  │ Caja     │  │  Engine  │  │   Pedidos      │  │
-│  └──────────┘  └──────────┘  └────────────────┘  │
-└──────────────────────────────────────────────────┘
-```
-
----
-
-## Cómo Empezar
-
-### Backend (Spring Boot)
-
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-Variables de entorno necesarias:
-- `DATABASE_URL` — PostgreSQL connection string
-- `GOOGLE_CLIENT_ID` — Google OAuth client ID
-- `WHATSAPP_API_KEY` — WhatsApp Business API key
-- `STRIPE_SECRET_KEY` — Stripe secret key
-- `JWT_SECRET` — JWT signing secret
-
-### Frontend (Flutter)
-
-```bash
-cd app
-flutter pub get
-flutter run
-```
-
-Variables de entorno:
-- `API_BASE_URL` — Backend URL
-- `GOOGLE_CLIENT_ID` — Google OAuth client ID (Android/iOS)
-
----
-
-## Convenciones
-
-- **Un endpoint para todo:** Ventas, gastos y deudas entran por `POST /transactions` con `type: sale|expense|debt`.
-- **Offline first:** La app funciona sin internet. La nube es el consolidado.
-- **Logs inmutables:** Nunca se borra nada. Cancelar un registro solo cambia su status.
-- **API simple:** Si el JSON tiene más de 15 campos, es demasiado complejo.
-
----
-
-*Competimos contra la libreta, no contra SAP.*
+Proyecto privado — Taco'Os © 2026

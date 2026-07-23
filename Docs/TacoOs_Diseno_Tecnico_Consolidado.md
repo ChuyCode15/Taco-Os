@@ -74,9 +74,9 @@ Taco'Os (1 app, 1 BD, 1 backend)
 
 | Plan | Negocios | Cajeros/Empleados | IA Características | Precio |
 |------|----------|-------------------|-------------------|--------|
-| **FREE** | 1 | 2 cajeros | ❌ Sin IA | Gratis |
-| **PREMIUM** | 2 | 5 cajeros | ❌ Sin IA | $199/mes |
-| **BUSINESS** | 5 | 25 empleados | ✅ IA completa | $499/mes |
+| **FREE** | 1 | 2 cajeros | 1 consejo semanal gratis | Gratis |
+| **PREMIUM** | 2 | 5 cajeros | IA limitada (insights diarios, proyecciones básicas) | $199/mes |
+| **BUSINESS** | 5 | 25 empleados | IA completa (insights, proyecciones, alertas, predicciones) | $499/mes |
 
 ### 3.3 14 Días de Prueba Gratis (Trial)
 
@@ -275,6 +275,9 @@ Al presionar **"Corte"** en el Footer:
 3. Sistema verifica que no hayan pasado 5 min desde el timestamp de la venta.
 4. Cajero selecciona motivo y toma foto.
 5. Backend registra la cancelación (log inmutable, no se borra la venta original).
+   - **Cancelación Lógica:** `Transaction.status` cambia de `COMPLETED` a `CANCELLED`.
+   - Se crea registro independiente en `Cancellation` con motivo, foto, timestamp y `cashier_id`.
+   - El registro original en `transactions` permanece intacto para auditoría.
 6. 🔔 al Patrón: *"Cancelación en [Negocio] - [Cajero]. Motivo: [razón]. Ver evidencia."*
 
 ---
@@ -483,12 +486,10 @@ tacoos://link?token=INV-550e8400-e29b-a716-999999
 
 *Módulo a desarrollar después de Fase II.*
 
-**Componentes:**
-- Insights personalizados diarios (Premium) y semanales genéricos (Free).
-- Proyecciones de flujo de caja a 7/30 días.
-- Alerta temprana de riesgo de quiebra.
-- Reportes detallados por cajero, producto, hora.
-- Alertas de "No registro" vs promedio histórico.
+**Componentes por plan:**
+- **Free:** 1 consejo semanal de IA (reporte básico de tendencias).
+- **Premium:** IA limitada — insights personalizados diarios, proyecciones de flujo de caja a 7/30 días.
+- **Business:** IA completa — insights, proyecciones, alerta temprana de riesgo, reportes detallados por cajero/producto/hora, alertas de "No registro" vs promedio histórico.
 
 ---
 

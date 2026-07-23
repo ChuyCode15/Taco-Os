@@ -1,0 +1,599 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.jmcsoft.taco-os:sistema-global >-----------------
+[INFO] Building sistema-global 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.15:run (default-cli) > test-compile @ sistema-global >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ sistema-global ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 13 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ sistema-global ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 123 source files with javac [debug parameters release 21] to target\classes
+[WARNING] /D:/12/Taco_Os/backend/src/main/java/com/jmcsoft/taco_os/domain/notificacion/mapper/NotificacionMapper.java:[16,23] Unmapped target properties: "message, data".
+[WARNING] /D:/12/Taco_Os/backend/src/main/java/com/jmcsoft/taco_os/domain/cajero/mapper/CajeroMapper.java:[18,12] Unmapped target property: "fechaEnlace".
+[WARNING] /D:/12/Taco_Os/backend/src/main/java/com/jmcsoft/taco_os/domain/negocio/mapper/NegocioMapper.java:[17,13] Unmapped target property: "dineroBase".
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ sistema-global ---
+[INFO] skip non existing resourceDirectory D:\12\Taco_Os\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ sistema-global ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 12 source files with javac [debug parameters release 21] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.5.15:run (default-cli) < test-compile @ sistema-global <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.15:run (default-cli) @ sistema-global ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.15)
+
+2026-06-21T17:22:23.747-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Starting SistemaGlobalApplication using Java 21.0.9 with PID 13060 (D:\12\Taco_Os\backend\target\classes started by ChuyCode in D:\12\Taco_Os\backend)
+2026-06-21T17:22:23.749-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : The following 1 profile is active: "dev"
+2026-06-21T17:22:23.794-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-06-21T17:22:23.795-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-06-21T17:22:24.559-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-21T17:22:24.638-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 69 ms. Found 12 JPA repository interfaces.
+2026-06-21T17:22:25.143-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-06-21T17:22:25.161-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-21T17:22:25.163-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-06-21T17:22:25.207-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-21T17:22:25.209-06:00  INFO 13060 --- [sistema-global] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1412 ms
+2026-06-21T17:22:25.462-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-21T17:22:25.613-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:tacoosdb user=SA
+2026-06-21T17:22:25.617-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-21T17:22:25.657-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:tacoosdb (H2 2.3)
+2026-06-21T17:22:25.793-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
+2026-06-21T17:22:25.798-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 13 migrations (execution time 00:00.127s)
+2026-06-21T17:22:25.804-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.Flyway                 : All configured schemas are empty; baseline operation skipped. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended.
+2026-06-21T17:22:25.805-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "PUBLIC"."flyway_schema_history" ...
+2026-06-21T17:22:25.844-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": << Empty Schema >>
+2026-06-21T17:22:25.852-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "1 - crear super usuarios"
+2026-06-21T17:22:25.863-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "2 - crear negocios"
+2026-06-21T17:22:25.870-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "3 - crear administradores"
+2026-06-21T17:22:25.882-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "4 - crear cajeros"
+2026-06-21T17:22:25.895-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "5 - crear productos"
+2026-06-21T17:22:25.903-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "6 - crear cashier sessions"
+2026-06-21T17:22:25.912-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "7 - crear transactions"
+2026-06-21T17:22:25.923-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "8 - crear daily cuts"
+2026-06-21T17:22:25.931-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "9 - crear cancellations"
+2026-06-21T17:22:25.940-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "10 - crear notifications"
+2026-06-21T17:22:25.947-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "11 - crear licenses"
+2026-06-21T17:22:25.955-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "12 - crear invitaciones"
+2026-06-21T17:22:25.969-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "13 - seed data"
+2026-06-21T17:22:25.985-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Successfully applied 13 migrations to schema "PUBLIC", now at version v13 (execution time 00:00.062s)
+2026-06-21T17:22:26.084-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-21T17:22:26.141-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.53.Final
+2026-06-21T17:22:26.198-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-21T17:22:26.502-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-21T17:22:26.556-06:00  WARN 13060 --- [sistema-global] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-06-21T17:22:26.571-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-21T17:22:27.671-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-21T17:22:27.676-06:00  INFO 13060 --- [sistema-global] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-21T17:22:28.193-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-21T17:22:28.992-06:00  WARN 13060 --- [sistema-global] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-21T17:22:29.250-06:00  INFO 13060 --- [sistema-global] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-06-21T17:22:29.411-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.v.b.OptionalValidatorFactoryBean     : Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2026-06-21T17:22:29.622-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:tacoosdb'
+2026-06-21T17:22:29.984-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-06-21T17:22:30.021-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-06-21T17:22:30.030-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Started SistemaGlobalApplication in 6.699 seconds (process running for 7.191)
+2026-06-21T17:22:49.655-06:00  INFO 13060 --- [sistema-global] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-21T17:22:49.658-06:00  INFO 13060 --- [sistema-global] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-21T17:22:49.660-06:00  INFO 13060 --- [sistema-global] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+Hibernate: select a1_0.id,a1_0.is_active,a1_0.email,a1_0.plan_status,a1_0.due_date,a1_0.google_id,a1_0.business_id,a1_0.nickname,a1_0.full_name,a1_0.phone,a1_0.created_at,a1_0.plan_type from administradores a1_0 where a1_0.google_id=?
+Hibernate: select n1_0.id,n1_0.is_active,n1_0.base_money,n1_0.address,n1_0.employees,n1_0.category,n1_0.closing_time,n1_0.currency,n1_0.name,n1_0.created_at,n1_0.phone from negocios n1_0 where n1_0.id=?
+Hibernate: select a1_0.id,a1_0.is_active,a1_0.email,a1_0.plan_status,a1_0.due_date,a1_0.google_id,a1_0.business_id,a1_0.nickname,a1_0.full_name,a1_0.phone,a1_0.created_at,a1_0.plan_type from administradores a1_0 where a1_0.google_id=?
+Hibernate: select c1_0.id,c1_0.is_active,c1_0.email,c1_0.linked_at,c1_0.google_id,c1_0.business_id,c1_0.nickname,c1_0.full_name,c1_0.phone,c1_0.permissions,c1_0.created_at from cajeros c1_0 where c1_0.google_id=?
+2026-06-21T17:23:47.445-06:00  INFO 13060 --- [sistema-global] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 134 class path changes (0 additions, 134 deletions, 0 modifications)
+2026-06-21T17:23:47.450-06:00  INFO 13060 --- [sistema-global] [       Thread-5] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-21T17:23:47.458-06:00  INFO 13060 --- [sistema-global] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-06-21T17:23:47.464-06:00  INFO 13060 --- [sistema-global] [       Thread-5] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-21T17:23:47.469-06:00  WARN 13060 --- [sistema-global] [       Thread-5] o.s.b.f.support.DisposableBeanAdapter    : Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-232]
+2026-06-21T17:23:47.471-06:00  INFO 13060 --- [sistema-global] [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-06-21T17:23:47.474-06:00  INFO 13060 --- [sistema-global] [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.15)
+
+2026-06-21T17:23:47.597-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Starting SistemaGlobalApplication using Java 21.0.9 with PID 13060 (D:\12\Taco_Os\backend\target\classes started by ChuyCode in D:\12\Taco_Os\backend)
+2026-06-21T17:23:47.598-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : The following 1 profile is active: "dev"
+2026-06-21T17:23:47.858-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-21T17:23:47.870-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 0 JPA repository interfaces.
+2026-06-21T17:23:48.017-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-06-21T17:23:48.020-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-21T17:23:48.021-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-06-21T17:23:48.047-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-21T17:23:48.048-06:00  INFO 13060 --- [sistema-global] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 447 ms
+2026-06-21T17:23:48.109-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-06-21T17:23:48.113-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:tacoosdb user=SA
+2026-06-21T17:23:48.115-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-06-21T17:23:48.119-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:tacoosdb (H2 2.3)
+2026-06-21T17:23:48.130-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
+2026-06-21T17:23:48.133-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 13 migrations (execution time 00:00.009s)
+2026-06-21T17:23:48.136-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.Flyway                 : All configured schemas are empty; baseline operation skipped. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended.
+2026-06-21T17:23:48.137-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "PUBLIC"."flyway_schema_history" ...
+2026-06-21T17:23:48.149-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": << Empty Schema >>
+2026-06-21T17:23:48.153-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "1 - crear super usuarios"
+2026-06-21T17:23:48.158-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "2 - crear negocios"
+2026-06-21T17:23:48.167-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "3 - crear administradores"
+2026-06-21T17:23:48.176-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "4 - crear cajeros"
+2026-06-21T17:23:48.181-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "5 - crear productos"
+2026-06-21T17:23:48.189-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "6 - crear cashier sessions"
+2026-06-21T17:23:48.200-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "7 - crear transactions"
+2026-06-21T17:23:48.207-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "8 - crear daily cuts"
+2026-06-21T17:23:48.216-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "9 - crear cancellations"
+2026-06-21T17:23:48.223-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "10 - crear notifications"
+2026-06-21T17:23:48.235-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "11 - crear licenses"
+2026-06-21T17:23:48.245-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "12 - crear invitaciones"
+2026-06-21T17:23:48.253-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "13 - seed data"
+2026-06-21T17:23:48.260-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Successfully applied 13 migrations to schema "PUBLIC", now at version v13 (execution time 00:00.048s)
+2026-06-21T17:23:48.293-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-21T17:23:48.300-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-21T17:23:48.309-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-21T17:23:48.312-06:00  WARN 13060 --- [sistema-global] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-06-21T17:23:48.312-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-21T17:23:48.328-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-21T17:23:48.329-06:00  INFO 13060 --- [sistema-global] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-21T17:23:48.374-06:00  WARN 13060 --- [sistema-global] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-21T17:23:48.404-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.v.b.OptionalValidatorFactoryBean     : Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2026-06-21T17:23:48.565-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:tacoosdb'
+2026-06-21T17:23:48.595-06:00  INFO 13060 --- [sistema-global] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-06-21T17:23:48.647-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-06-21T17:23:48.662-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-06-21T17:23:48.668-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Started SistemaGlobalApplication in 1.104 seconds (process running for 85.83)
+2026-06-21T17:23:48.674-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration matched:
+      - AllNestedConditions 2 matched 0 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) did not find any beans; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   SpringBootWebSecurityConfiguration.WebSecurityEnablerConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+      - @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-06-21T17:23:51.939-06:00  INFO 13060 --- [sistema-global] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 134 class path changes (134 additions, 0 deletions, 0 modifications)
+2026-06-21T17:23:51.943-06:00  INFO 13060 --- [sistema-global] [       Thread-7] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-21T17:23:51.947-06:00  INFO 13060 --- [sistema-global] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-06-21T17:23:51.951-06:00  INFO 13060 --- [sistema-global] [       Thread-7] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-21T17:23:51.952-06:00  WARN 13060 --- [sistema-global] [       Thread-7] o.s.b.f.support.DisposableBeanAdapter    : Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-232]
+2026-06-21T17:23:51.953-06:00  INFO 13060 --- [sistema-global] [       Thread-7] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-06-21T17:23:51.954-06:00  INFO 13060 --- [sistema-global] [       Thread-7] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.15)
+
+2026-06-21T17:23:52.058-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Starting SistemaGlobalApplication using Java 21.0.9 with PID 13060 (D:\12\Taco_Os\backend\target\classes started by ChuyCode in D:\12\Taco_Os\backend)
+2026-06-21T17:23:52.059-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : The following 1 profile is active: "dev"
+2026-06-21T17:23:52.269-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-21T17:23:52.317-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 46 ms. Found 12 JPA repository interfaces.
+2026-06-21T17:23:52.406-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-06-21T17:23:52.407-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-21T17:23:52.409-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-06-21T17:23:52.424-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-21T17:23:52.425-06:00  INFO 13060 --- [sistema-global] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 364 ms
+2026-06-21T17:23:52.461-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-06-21T17:23:52.465-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:tacoosdb user=SA
+2026-06-21T17:23:52.465-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-06-21T17:23:52.469-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:tacoosdb (H2 2.3)
+2026-06-21T17:23:52.475-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
+2026-06-21T17:23:52.476-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 13 migrations (execution time 00:00.004s)
+2026-06-21T17:23:52.477-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.Flyway                 : All configured schemas are empty; baseline operation skipped. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended.
+2026-06-21T17:23:52.478-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "PUBLIC"."flyway_schema_history" ...
+2026-06-21T17:23:52.488-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": << Empty Schema >>
+2026-06-21T17:23:52.490-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "1 - crear super usuarios"
+2026-06-21T17:23:52.495-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "2 - crear negocios"
+2026-06-21T17:23:52.499-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "3 - crear administradores"
+2026-06-21T17:23:52.503-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "4 - crear cajeros"
+2026-06-21T17:23:52.510-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "5 - crear productos"
+2026-06-21T17:23:52.514-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "6 - crear cashier sessions"
+2026-06-21T17:23:52.519-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "7 - crear transactions"
+2026-06-21T17:23:52.524-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "8 - crear daily cuts"
+2026-06-21T17:23:52.528-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "9 - crear cancellations"
+2026-06-21T17:23:52.533-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "10 - crear notifications"
+2026-06-21T17:23:52.538-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "11 - crear licenses"
+2026-06-21T17:23:52.542-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "12 - crear invitaciones"
+2026-06-21T17:23:52.549-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "13 - seed data"
+2026-06-21T17:23:52.554-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Successfully applied 13 migrations to schema "PUBLIC", now at version v13 (execution time 00:00.026s)
+2026-06-21T17:23:52.572-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-21T17:23:52.574-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-21T17:23:52.580-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-21T17:23:52.583-06:00  WARN 13060 --- [sistema-global] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-06-21T17:23:52.584-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-3)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-21T17:23:52.729-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-21T17:23:52.731-06:00  INFO 13060 --- [sistema-global] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-21T17:23:52.992-06:00  WARN 13060 --- [sistema-global] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-21T17:23:53.050-06:00  INFO 13060 --- [sistema-global] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-06-21T17:23:53.092-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.v.b.OptionalValidatorFactoryBean     : Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2026-06-21T17:23:53.124-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:tacoosdb'
+2026-06-21T17:23:53.133-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-06-21T17:23:53.152-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-06-21T17:23:53.156-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Started SistemaGlobalApplication in 1.122 seconds (process running for 90.317)
+2026-06-21T17:23:53.158-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration.SecurityFilterChainConfiguration:
+      Did not match:
+         - AllNestedConditions 1 matched 1 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) found beans of type 'org.springframework.security.web.SecurityFilterChain' securityFilterChain, swaggerFilterChain; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   SpringBootWebSecurityConfiguration.WebSecurityEnablerConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) found beans named springSecurityFilterChain (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2026-06-21T18:35:04.847-06:00  INFO 13060 --- [sistema-global] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 141 class path changes (7 additions, 134 deletions, 0 modifications)
+2026-06-21T18:35:04.864-06:00  INFO 13060 --- [sistema-global] [      Thread-12] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-06-21T18:35:04.872-06:00  INFO 13060 --- [sistema-global] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-06-21T18:35:04.877-06:00  INFO 13060 --- [sistema-global] [      Thread-12] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-21T18:35:04.886-06:00  WARN 13060 --- [sistema-global] [      Thread-12] o.s.b.f.support.DisposableBeanAdapter    : Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-232]
+2026-06-21T18:35:04.887-06:00  INFO 13060 --- [sistema-global] [      Thread-12] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-06-21T18:35:04.890-06:00  INFO 13060 --- [sistema-global] [      Thread-12] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.15)
+
+2026-06-21T18:35:05.205-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Starting SistemaGlobalApplication using Java 21.0.9 with PID 13060 (D:\12\Taco_Os\backend\target\classes started by ChuyCode in D:\12\Taco_Os\backend)
+2026-06-21T18:35:05.206-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : The following 1 profile is active: "dev"
+2026-06-21T18:35:05.485-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-21T18:35:05.499-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 10 ms. Found 0 JPA repository interfaces.
+2026-06-21T18:35:05.690-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-06-21T18:35:05.694-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-21T18:35:05.695-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-06-21T18:35:05.731-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-21T18:35:05.733-06:00  INFO 13060 --- [sistema-global] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 523 ms
+2026-06-21T18:35:05.794-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-06-21T18:35:05.796-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection conn50: url=jdbc:h2:mem:tacoosdb user=SA
+2026-06-21T18:35:05.797-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-06-21T18:35:05.801-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:tacoosdb (H2 2.3)
+2026-06-21T18:35:05.903-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
+2026-06-21T18:35:05.905-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 20 migrations (execution time 00:00.100s)
+2026-06-21T18:35:05.907-06:00  INFO 13060 --- [sistema-global] [  restartedMain] org.flywaydb.core.Flyway                 : All configured schemas are empty; baseline operation skipped. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended.
+2026-06-21T18:35:05.908-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "PUBLIC"."flyway_schema_history" ...
+2026-06-21T18:35:05.914-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": << Empty Schema >>
+2026-06-21T18:35:05.916-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "1 - crear super usuarios"
+2026-06-21T18:35:05.923-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "2 - crear negocios"
+2026-06-21T18:35:05.928-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "3 - crear administradores"
+2026-06-21T18:35:05.937-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "4 - crear cajeros"
+2026-06-21T18:35:05.942-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "5 - crear productos"
+2026-06-21T18:35:05.948-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "6 - crear cashier sessions"
+2026-06-21T18:35:05.954-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "7 - crear transactions"
+2026-06-21T18:35:05.963-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "8 - crear daily cuts"
+2026-06-21T18:35:05.967-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "9 - crear cancellations"
+2026-06-21T18:35:05.973-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "10 - crear notifications"
+2026-06-21T18:35:05.980-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "11 - crear licenses"
+2026-06-21T18:35:05.984-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "12 - crear invitaciones"
+2026-06-21T18:35:05.992-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "13 - seed data"
+2026-06-21T18:35:05.998-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "14 - crear master users"
+2026-06-21T18:35:06.004-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "15 - crear master tickets"
+2026-06-21T18:35:06.008-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "16 - crear master messages"
+2026-06-21T18:35:06.013-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "17 - crear master incidents"
+2026-06-21T18:35:06.017-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "18 - crear master audit log"
+2026-06-21T18:35:06.020-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "19 - crear master invoices"
+2026-06-21T18:35:06.025-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "20 - seed master data"
+2026-06-21T18:35:06.048-06:00 ERROR 13060 --- [sistema-global] [  restartedMain] o.f.core.internal.command.DbMigrate      : Migration of schema "PUBLIC" to version "20 - seed master data" failed! Please restore backups and roll back database and code!
+2026-06-21T18:35:06.054-06:00  WARN 13060 --- [sistema-global] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Script V20__seed_master_data.sql failed
+---------------------------------------
+SQL State  : 22018
+Error Code : 22018
+Message    : Data conversion error converting "'SYSTEM' (MASTER_INCIDENTS: ""DETECTED_BY"" UUID)"; SQL statement:
+-- Master Incidents
+INSERT INTO master_incidents (id, client_id, title, description, severity, status, detected_by, assigned_to, action_taken, created_at) VALUES
+('dd000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Error 500 en corte diario', 'El endpoint /cashier/daily-cut retorna 500 cuando el negocio no tiene productos', 'ALTA', 'EN_REPARACION', 'aa000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000001', NULL, CURRENT_TIMESTAMP),
+('dd000000-0000-0000-0000-000000000002', NULL, 'Lentitud en respuesta de login', 'El login tarda más de 5 segundos en responder', 'MEDIA', 'DETECTADA', 'SYSTEM', NULL, NULL [22018-232]
+Location   : db/migrations/V20__seed_master_data.sql (D:\12\Taco_Os\backend\target\classes\db\migrations\V20__seed_master_data.sql)
+Line       : 22
+Statement  : Run Flyway with -X option to see the actual statement causing the problem
+
+2026-06-21T18:35:06.055-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-06-21T18:35:06.086-06:00  INFO 13060 --- [sistema-global] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+2026-06-21T18:35:06.087-06:00  INFO 13060 --- [sistema-global] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-06-21T18:35:06.095-06:00  INFO 13060 --- [sistema-global] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-06-21T18:35:06.128-06:00 ERROR 13060 --- [sistema-global] [  restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Script V20__seed_master_data.sql failed
+---------------------------------------
+SQL State  : 22018
+Error Code : 22018
+Message    : Data conversion error converting "'SYSTEM' (MASTER_INCIDENTS: ""DETECTED_BY"" UUID)"; SQL statement:
+-- Master Incidents
+INSERT INTO master_incidents (id, client_id, title, description, severity, status, detected_by, assigned_to, action_taken, created_at) VALUES
+('dd000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Error 500 en corte diario', 'El endpoint /cashier/daily-cut retorna 500 cuando el negocio no tiene productos', 'ALTA', 'EN_REPARACION', 'aa000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000001', NULL, CURRENT_TIMESTAMP),
+('dd000000-0000-0000-0000-000000000002', NULL, 'Lentitud en respuesta de login', 'El login tarda más de 5 segundos en responder', 'MEDIA', 'DETECTADA', 'SYSTEM', NULL, NULL [22018-232]
+Location   : db/migrations/V20__seed_master_data.sql (D:\12\Taco_Os\backend\target\classes\db\migrations\V20__seed_master_data.sql)
+Line       : 22
+Statement  : Run Flyway with -X option to see the actual statement causing the problem
+
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:328) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:974) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:628) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.15.jar:3.5.15]
+	at com.jmcsoft.taco_os.SistemaGlobalApplication.main(SistemaGlobalApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.5.15.jar:3.5.15]
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Script V20__seed_master_data.sql failed
+---------------------------------------
+SQL State  : 22018
+Error Code : 22018
+Message    : Data conversion error converting "'SYSTEM' (MASTER_INCIDENTS: ""DETECTED_BY"" UUID)"; SQL statement:
+-- Master Incidents
+INSERT INTO master_incidents (id, client_id, title, description, severity, status, detected_by, assigned_to, action_taken, created_at) VALUES
+('dd000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Error 500 en corte diario', 'El endpoint /cashier/daily-cut retorna 500 cuando el negocio no tiene productos', 'ALTA', 'EN_REPARACION', 'aa000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000001', NULL, CURRENT_TIMESTAMP),
+('dd000000-0000-0000-0000-000000000002', NULL, 'Lentitud en respuesta de login', 'El login tarda más de 5 segundos en responder', 'MEDIA', 'DETECTADA', 'SYSTEM', NULL, NULL [22018-232]
+Location   : db/migrations/V20__seed_master_data.sql (D:\12\Taco_Os\backend\target\classes\db\migrations\V20__seed_master_data.sql)
+Line       : 22
+Statement  : Run Flyway with -X option to see the actual statement causing the problem
+
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1824) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:315) ~[spring-beans-6.2.19.jar:6.2.19]
+	... 13 common frames omitted
+Caused by: org.flywaydb.core.internal.exception.FlywayMigrateException: Script V20__seed_master_data.sql failed
+---------------------------------------
+SQL State  : 22018
+Error Code : 22018
+Message    : Data conversion error converting "'SYSTEM' (MASTER_INCIDENTS: ""DETECTED_BY"" UUID)"; SQL statement:
+-- Master Incidents
+INSERT INTO master_incidents (id, client_id, title, description, severity, status, detected_by, assigned_to, action_taken, created_at) VALUES
+('dd000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Error 500 en corte diario', 'El endpoint /cashier/daily-cut retorna 500 cuando el negocio no tiene productos', 'ALTA', 'EN_REPARACION', 'aa000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000001', NULL, CURRENT_TIMESTAMP),
+('dd000000-0000-0000-0000-000000000002', NULL, 'Lentitud en respuesta de login', 'El login tarda más de 5 segundos en responder', 'MEDIA', 'DETECTADA', 'SYSTEM', NULL, NULL [22018-232]
+Location   : db/migrations/V20__seed_master_data.sql (D:\12\Taco_Os\backend\target\classes\db\migrations\V20__seed_master_data.sql)
+Line       : 22
+Statement  : Run Flyway with -X option to see the actual statement causing the problem
+
+	at org.flywaydb.core.internal.command.DbMigrate.doMigrateGroup(DbMigrate.java:399) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbMigrate.lambda$applyMigrations$1(DbMigrate.java:283) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.jdbc.TransactionalExecutionTemplate.execute(TransactionalExecutionTemplate.java:59) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbMigrate.applyMigrations(DbMigrate.java:282) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbMigrate.migrateGroup(DbMigrate.java:255) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbMigrate.lambda$migrateAll$0(DbMigrate.java:153) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.jdbc.TableLockingExecutionTemplate$1.call(TableLockingExecutionTemplate.java:40) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.jdbc.TransactionalExecutionTemplate.execute(TransactionalExecutionTemplate.java:59) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.jdbc.TableLockingExecutionTemplate.execute(TableLockingExecutionTemplate.java:35) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.database.base.Connection.lock(Connection.java:106) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory.lock(JdbcTableSchemaHistory.java:164) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbMigrate.migrateAll(DbMigrate.java:153) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbMigrate.migrate(DbMigrate.java:104) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.Flyway.lambda$migrate$1(Flyway.java:247) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.FlywayExecutor.execute(FlywayExecutor.java:210) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.Flyway.migrate(Flyway.java:188) ~[flyway-core-11.7.2.jar:na]
+	at org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer.afterPropertiesSet(FlywayMigrationInitializer.java:66) ~[spring-boot-autoconfigure-3.5.15.jar:3.5.15]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1871) ~[spring-beans-6.2.19.jar:6.2.19]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.2.19.jar:6.2.19]
+	... 20 common frames omitted
+Caused by: org.flywaydb.core.internal.sqlscript.FlywaySqlScriptException: Script V20__seed_master_data.sql failed
+---------------------------------------
+SQL State  : 22018
+Error Code : 22018
+Message    : Data conversion error converting "'SYSTEM' (MASTER_INCIDENTS: ""DETECTED_BY"" UUID)"; SQL statement:
+-- Master Incidents
+INSERT INTO master_incidents (id, client_id, title, description, severity, status, detected_by, assigned_to, action_taken, created_at) VALUES
+('dd000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Error 500 en corte diario', 'El endpoint /cashier/daily-cut retorna 500 cuando el negocio no tiene productos', 'ALTA', 'EN_REPARACION', 'aa000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000001', NULL, CURRENT_TIMESTAMP),
+('dd000000-0000-0000-0000-000000000002', NULL, 'Lentitud en respuesta de login', 'El login tarda más de 5 segundos en responder', 'MEDIA', 'DETECTADA', 'SYSTEM', NULL, NULL [22018-232]
+Location   : db/migrations/V20__seed_master_data.sql (D:\12\Taco_Os\backend\target\classes\db\migrations\V20__seed_master_data.sql)
+Line       : 22
+Statement  : Run Flyway with -X option to see the actual statement causing the problem
+
+	at org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor.handleException(DefaultSqlScriptExecutor.java:256) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor.executeStatement(DefaultSqlScriptExecutor.java:217) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor.execute(DefaultSqlScriptExecutor.java:137) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.sql.SqlMigrationExecutor.executeOnce(SqlMigrationExecutor.java:75) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.sql.SqlMigrationExecutor.lambda$execute$0(SqlMigrationExecutor.java:66) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.database.DefaultExecutionStrategy.execute(DefaultExecutionStrategy.java:31) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.resolver.sql.SqlMigrationExecutor.execute(SqlMigrationExecutor.java:65) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.command.DbMigrate.doMigrateGroup(DbMigrate.java:391) ~[flyway-core-11.7.2.jar:na]
+	... 38 common frames omitted
+Caused by: org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "'SYSTEM' (MASTER_INCIDENTS: ""DETECTED_BY"" UUID)"; SQL statement:
+-- Master Incidents
+INSERT INTO master_incidents (id, client_id, title, description, severity, status, detected_by, assigned_to, action_taken, created_at) VALUES
+('dd000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Error 500 en corte diario', 'El endpoint /cashier/daily-cut retorna 500 cuando el negocio no tiene productos', 'ALTA', 'EN_REPARACION', 'aa000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000001', NULL, CURRENT_TIMESTAMP),
+('dd000000-0000-0000-0000-000000000002', NULL, 'Lentitud en respuesta de login', 'El login tarda más de 5 segundos en responder', 'MEDIA', 'DETECTADA', 'SYSTEM', NULL, NULL [22018-232]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:518) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.message.DbException.get(DbException.java:212) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.table.Column.getDataConversionError(Column.java:450) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.table.Column.validateConvertUpdateSequence(Column.java:409) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.table.Table.convertInsertRow(Table.java:963) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.command.dml.Insert.insertRows(Insert.java:167) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.command.dml.Insert.update(Insert.java:135) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.command.dml.DataChangeStatement.update(DataChangeStatement.java:74) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.command.CommandContainer.update(CommandContainer.java:139) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.command.Command.executeUpdate(Command.java:304) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.command.Command.executeUpdate(Command.java:248) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:262) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:231) ~[h2-2.3.232.jar:2.3.232]
+	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:95) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java) ~[HikariCP-6.3.3.jar:na]
+	at org.flywaydb.core.internal.jdbc.JdbcTemplate.executeStatement(JdbcTemplate.java:215) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.sqlscript.ParsedSqlStatement.execute(ParsedSqlStatement.java:88) ~[flyway-core-11.7.2.jar:na]
+	at org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor.executeStatement(DefaultSqlScriptExecutor.java:212) ~[flyway-core-11.7.2.jar:na]
+	... 44 common frames omitted
+Caused by: org.h2.message.DbException: Data conversion error converting "SYSTEM" [22018-232]
+	at org.h2.message.DbException.get(DbException.java:223) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.message.DbException.get(DbException.java:199) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.value.ValueUuid.get(ValueUuid.java:134) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.value.Value.convertToUuid(Value.java:2486) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.value.Value.convertTo(Value.java:1206) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.value.Value.convertForAssignTo(Value.java:1118) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.table.Column.validateConvertUpdateSequence(Column.java:406) ~[h2-2.3.232.jar:2.3.232]
+	... 58 common frames omitted
+Caused by: org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "SYSTEM" [22018-232]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:518) ~[h2-2.3.232.jar:2.3.232]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489) ~[h2-2.3.232.jar:2.3.232]
+	... 65 common frames omitted
+
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.15)
+
+2026-06-21T18:35:10.925-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : Starting SistemaGlobalApplication using Java 21.0.9 with PID 13060 (D:\12\Taco_Os\backend\target\classes started by ChuyCode in D:\12\Taco_Os\backend)
+2026-06-21T18:35:10.926-06:00  INFO 13060 --- [sistema-global] [  restartedMain] c.j.taco_os.SistemaGlobalApplication     : The following 1 profile is active: "dev"
+2026-06-21T18:35:10.996-06:00  WARN 13060 --- [sistema-global] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanDefinitionStoreException: I/O failure while processing configuration class [com.jmcsoft.taco_os.config.WebSocketConfig]
+2026-06-21T18:35:10.999-06:00 ERROR 13060 --- [sistema-global] [  restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanDefinitionStoreException: I/O failure while processing configuration class [com.jmcsoft.taco_os.config.WebSocketConfig]
+	at org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClassParser.java:288) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:218) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.doProcessConfigurationClass(ConfigurationClassParser.java:356) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClassParser.java:283) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:204) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.parse(ConfigurationClassParser.java:172) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.processConfigBeanDefinitions(ConfigurationClassPostProcessor.java:418) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(ConfigurationClassPostProcessor.java:290) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanDefinitionRegistryPostProcessors(PostProcessorRegistrationDelegate.java:349) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:118) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:792) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:610) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.15.jar:3.5.15]
+	at com.jmcsoft.taco_os.SistemaGlobalApplication.main(SistemaGlobalApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.5.15.jar:3.5.15]
+Caused by: java.io.FileNotFoundException: class path resource [org/springframework/web/socket/config/annotation/WebSocketMessageBrokerConfigurer.class] cannot be opened because it does not exist
+	at org.springframework.core.io.ClassPathResource.getInputStream(ClassPathResource.java:215) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.core.type.classreading.SimpleMetadataReader.getClassReader(SimpleMetadataReader.java:54) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.core.type.classreading.SimpleMetadataReader.<init>(SimpleMetadataReader.java:48) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.core.type.classreading.SimpleMetadataReaderFactory.getMetadataReader(SimpleMetadataReaderFactory.java:103) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.boot.type.classreading.ConcurrentReferenceCachingMetadataReaderFactory.createMetadataReader(ConcurrentReferenceCachingMetadataReaderFactory.java:98) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.boot.type.classreading.ConcurrentReferenceCachingMetadataReaderFactory.getMetadataReader(ConcurrentReferenceCachingMetadataReaderFactory.java:85) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.core.type.classreading.SimpleMetadataReaderFactory.getMetadataReader(SimpleMetadataReaderFactory.java:81) ~[spring-core-6.2.19.jar:6.2.19]
+	at org.springframework.boot.type.classreading.ConcurrentReferenceCachingMetadataReaderFactory.getMetadataReader(ConcurrentReferenceCachingMetadataReaderFactory.java:75) ~[spring-boot-3.5.15.jar:3.5.15]
+	at org.springframework.context.annotation.ConfigurationClassParser.asSourceClass(ConfigurationClassParser.java:713) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser$SourceClass.getInterfaces(ConfigurationClassParser.java:1062) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.processInterfaces(ConfigurationClassParser.java:443) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.doProcessConfigurationClass(ConfigurationClassParser.java:387) ~[spring-context-6.2.19.jar:6.2.19]
+	at org.springframework.context.annotation.ConfigurationClassParser.processConfigurationClass(ConfigurationClassParser.java:283) ~[spring-context-6.2.19.jar:6.2.19]
+	... 21 common frames omitted
+

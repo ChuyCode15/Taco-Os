@@ -282,6 +282,7 @@ Cierra la sesión de caja y genera un corte con conteo manual.
 > **Ventana de cancelación: 5 minutos** desde el timestamp de la venta.
 > Motivos posibles: `cliente_se_arrepintio`, `producto_equivocado`, `error_cajero`, `otro`.
 > La foto es **obligatoria**. El dueño recibe una notificación 🔔 al instante.
+> **Cancelación Lógica:** La transacción original NO se elimina. Solo cambia su `status` de `COMPLETED` a `CANCELLED`. Se crea un registro independiente en la tabla `cancellations` con motivo, foto y timestamp. Los logs son inmutables.
 
 ---
 
@@ -613,7 +614,7 @@ Marca una notificación como eliminada (soft delete).
     "price": 0,
     "max_businesses": 1,
     "max_cashiers": 2,
-    "features": ["basic_reports", "cashier_management"],
+    "features": ["basic_reports", "cashier_management", "weekly_ai_advice"],
     "has_trial": false
   },
   {
@@ -623,7 +624,7 @@ Marca una notificación como eliminada (soft delete).
     "interval": "month",
     "max_businesses": 2,
     "max_cashiers": 5,
-    "features": ["basic_reports", "detailed_reports", "cashier_management", "multiple_branches"],
+    "features": ["basic_reports", "detailed_reports", "cashier_management", "multiple_branches", "limited_ai"],
     "has_trial": true,
     "trial_days": 14
   },
@@ -712,6 +713,7 @@ Activa el período de prueba de 14 días para un plan.
 | 5.2 | `/business/{id}/products` | POST | Crear producto |
 | 5.2 | `/business/{id}/products/{id}` | PUT | Editar producto |
 | 5.2 | `/business/{id}/products/{id}` | DELETE | Eliminar producto |
+|-|-|-|
 | 5.5 | `/transactions` | POST | Registrar venta/gasto |
 | 5.6 | `/transactions` | POST | Venta con tarjeta (foto baucher) |
 | 6 | `/cashier/close-session` | POST | Corte con conteo manual |

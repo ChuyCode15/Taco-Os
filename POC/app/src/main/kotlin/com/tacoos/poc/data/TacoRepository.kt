@@ -1,20 +1,26 @@
 package com.tacoos.poc.data
 
+import android.graphics.Bitmap
+import android.util.Log
 import com.tacoos.poc.data.local.AppDatabase
 import com.tacoos.poc.data.local.AppMetadata
 import com.tacoos.poc.data.local.User
-import com.tacoos.poc.data.local.Sale as LocalSale
+import com.tacoos.poc.data.local.Sale
+import com.tacoos.poc.data.local.Expense
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
-import com.tacoos.poc.data.remote.SaleRequest
-import android.util.Log
+import java.util.UUID
 
+/**
+ * TacoRepository: Capa de abstracción de datos (Single Source of Truth).
+ */
 class TacoRepository(
     private val api: TacoApi,
     private val db: AppDatabase
 ) {
-    // --- Auth & Session ---
+    // --- Autenticación y Gestión de Sesión ---
+
     suspend fun verifyUser(idGoogle: String) = api.verifyUser(idGoogle)
 
     suspend fun registerUser(
@@ -67,14 +73,50 @@ class TacoRepository(
         return (now - metadata.lastMasterSyncTimestamp) < twentyFourHours && metadata.isLicenseValid
     }
 
-    // --- Sales (Local First) ---
-    suspend fun registerSale(amount: Double, negocioId: String, userId: String, productsJson: String) {
+    // --- Operaciones de Venta (Local First) ---
+
+    /**
+     * registerSale: Inserta una transacción de venta en Room.
+     * Compatible con SalesScreen (auditoría) y SalesViewModel (reportes).
+     */
+    suspend fun registerSale(
+        amount: Double,
+        negocioId: String,
+        method: String = "Efectivo",
+        productsJson: String = "",
+        userId: String = "",
+        voucherPhoto: Bitmap? = null
+    ) {
         db.saleDao().insertSale(
-            LocalSale(
+            Sale(
                 amount = amount,
-                negocioId = negocioId,
                 userId = userId,
                 productsJson = productsJson,
+                method = method,
+                status = "ACTIVE",
+                negocioId = negocioId,
+                voucherPhoto = voucherPhoto,
+                isSynced = false
+            )
+        )
+    }
+
+    suspend fun registerExpense(
+        id: String,
+        detail: String,
+        amount: Double,
+        cashier: String,
+        negocioId: String,
+        photo: Bitmap? = null
+    ) {
+        db.expenseDao().insertExpense(
+            Expense(
+                id = id,
+                detail = detail,
+                amount = amount,
+                cashier = cashier,
+                negocioId = negocioId,
+                receiptPhoto = photo,
                 isSynced = false
             )
         )
@@ -93,17 +135,13 @@ class TacoRepository(
         if (pendingSales.isEmpty()) return
 
         Log.d("TacoRepository", "Sincronizando ${pendingSales.size} ventas...")
-        
+
         pendingSales.forEach { sale ->
             try {
                 // Mapear al modelo de la API y enviar
-                // val response = api.uploadSale(sale.negocioId, SaleRequest(...))
-                // if (response.isSuccessful) {
-                //    db.saleDao().markAsSynced(sale.id)
-                // }
-                
                 // Simulación exitosa para el POC
-                // db.saleDao().markAsSynced(sale.id) 
+                db.saleDao().markAsSynced(sale.id)
+                Log.d("TacoRepository", "Venta ${sale.id} sincronizada virtualmente")
             } catch (e: Exception) {
                 Log.e("TacoRepository", "Error sincronizando venta ${sale.id}", e)
             }

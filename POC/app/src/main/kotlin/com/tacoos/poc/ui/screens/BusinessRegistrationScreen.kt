@@ -19,32 +19,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.tacoos.poc.domain.usecase.FormatTimeUseCase
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
 import java.util.*
 
+/**
+ * BusinessRegistrationScreen: Formulario de configuración inicial del negocio.
+ * Inyección de dependencias: NavController para flujo de éxito, RegistrationViewModel para envío de datos.
+ * Manejo de Formulario: Gestiona estados para nombre, domicilio, giro y una lógica compleja de horarios de servicio.
+ */
 @Composable
 fun BusinessRegistrationScreen(navController: NavController, viewModel: RegistrationViewModel = viewModel()) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
-    var nombre by remember { mutableStateOf("") }
-    var domicilio by remember { mutableStateOf("") }
-    var giro by remember { mutableStateOf("") }
+    // Estados locales del formulario de datos básicos.
+
     
-    // Horarios
+    // Estados para la lógica de Horarios:
+    // mismoHorario define si se aplica una regla general o individual por día de la semana.
     var mismoHorario by remember { mutableStateOf(true) }
     val diasSemana = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
     
-    // Estado para horarios por día (Abierto, Apertura, Cierre)
+    // horariosPorDia: Almacena Triple(Abierto, Apertura, Cierre) para cada día.
     var horariosPorDia by remember { 
         mutableStateOf(diasSemana.associateWith { Triple(true, "09:00 AM", "08:00 PM") }) 
     }
     
-    // Horario general
+    // Variables para el horario consolidado.
     var aperturaGeneral by remember { mutableStateOf("09:00 AM") }
     var cierreGeneral by remember { mutableStateOf("08:00 PM") }
 
+    // Observador de éxito: Redirige al Dashboard una vez que el Backend confirma el registro.
     LaunchedEffect(uiState) {
         if (uiState is RegistrationUiState.Success) {
             navController.navigate("dashboard") {
@@ -78,21 +85,29 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            AppTextField(value = nombre, onValueChange = { nombre = it }, label = "Nombre de tu negocio")
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            AppTextField(value = domicilio, onValueChange = { domicilio = it }, label = "Domicilio")
+            // Inyección de componentes de entrada de texto estilizados.
+            AppTextField(
+                value = viewModel.nombre,
+                onValueChange = { viewModel.onNombreChange(it)},
+                label = "Nombre de tu negocio")
             Spacer(modifier = Modifier.height(16.dp))
             
             AppTextField(
-                value = giro, 
-                onValueChange = { giro = it }, 
+                value = viewModel.domicilio,
+                onValueChange = { viewModel.onDomicilioChange(it) },
+                label = "Domicilio")
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            AppTextField(
+                value = viewModel.giro,
+                onValueChange = { viewModel.onGiroChange(it) },
                 label = "¿Qué vendes? (Giro)",
                 placeholder = "Ej: Hamburguesas, tacos, carnitas..."
             )
             
             Spacer(modifier = Modifier.height(32.dp))
             
+            // Sección de Horarios de Servicio.
             Text(
                 text = "Horario de servicio",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PrimaryNavy)
@@ -107,6 +122,7 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             }
 
             if (mismoHorario) {
+                // Formulario simplificado: Apertura y Cierre únicos.
                 Row(modifier = Modifier.fillMaxWidth()) {
                     TimePickerField(label = "Apertura", value = aperturaGeneral, modifier = Modifier.weight(1f)) {
                         aperturaGeneral = it
@@ -117,6 +133,7 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
                     }
                 }
             } else {
+                // Formulario detallado: Listado de 7 días con selectores independientes.
                 diasSemana.forEach { dia ->
                     val config = horariosPorDia[dia]!!
                     DayScheduleRow(
@@ -139,9 +156,10 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
             
             Spacer(modifier = Modifier.height(48.dp))
             
+            // Botón de Envío: Delega el registro al ViewModel de Registro.
             Button(
                 onClick = { 
-                    if (nombre.isNotBlank()) viewModel.registerUserAndBusiness(nombre, domicilio, giro)
+                    if (viewModel.nombre.isNotBlank()) viewModel.registerUserAndBusiness()
                 },
                 modifier = Modifier.fillMaxWidth().height(60.dp),
                 shape = RoundedCornerShape(20.dp),
@@ -153,6 +171,9 @@ fun BusinessRegistrationScreen(navController: NavController, viewModel: Registra
     }
 }
 
+/**
+ * AppTextField: Campo de texto personalizado con etiquetas superiores.
+ */
 @Composable
 fun AppTextField(value: String, onValueChange: (String) -> Unit, label: String, placeholder: String = "") {
     Column {
@@ -172,6 +193,9 @@ fun AppTextField(value: String, onValueChange: (String) -> Unit, label: String, 
     }
 }
 
+/**
+ * TimePickerField: Selector de hora estilizado que invoca el diálogo nativo de Android.
+ */
 @Composable
 fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier, onTimeSelected: (String) -> Unit) {
     val context = LocalContext.current
@@ -183,14 +207,17 @@ fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier,
                 .fillMaxWidth()
                 .height(56.dp)
                 .background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+
                 .clickable {
+                    // Inyección de lógica nativa: TimePickerDialog.
                     val calendar = Calendar.getInstance()
                     TimePickerDialog(context, { _, h, m ->
-                        val ampm = if (h < 12) "AM" else "PM"
-                        val hour = if (h == 0) 12 else if (h > 12) h - 12 else h
-                        onTimeSelected(String.format("%02d:%02d %s", hour, m, ampm))
+                        val formattedTime = FormatTimeUseCase()(h, m)
+                        onTimeSelected(formattedTime)
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
                 }
+
+
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -199,6 +226,9 @@ fun TimePickerField(label: String, value: String, modifier: Modifier = Modifier,
     }
 }
 
+/**
+ * DayScheduleRow: Fila individual para configurar el horario de un día específico.
+ */
 @Composable
 fun DayScheduleRow(day: String, isOpen: Boolean, apertura: String, cierre: String, onToggle: (Boolean) -> Unit, onTimeClick: (Boolean, String) -> Unit) {
     Row(
@@ -220,6 +250,9 @@ fun DayScheduleRow(day: String, isOpen: Boolean, apertura: String, cierre: Strin
     }
 }
 
+/**
+ * TimeBox: Caja interactiva pequeña para selección de hora en el listado por días.
+ */
 @Composable
 fun TimeBox(value: String, modifier: Modifier, onSelected: (String) -> Unit) {
     val context = LocalContext.current
@@ -230,9 +263,8 @@ fun TimeBox(value: String, modifier: Modifier, onSelected: (String) -> Unit) {
             .clickable {
                 val calendar = Calendar.getInstance()
                 TimePickerDialog(context, { _, h, m ->
-                    val ampm = if (h < 12) "AM" else "PM"
-                    val hour = if (h == 0) 12 else if (h > 12) h - 12 else h
-                    onSelected(String.format("%02d:%02d %s", hour, m, ampm))
+                    val formattedTime = FormatTimeUseCase()(h, m)
+                    onSelected(formattedTime)
                 }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
             },
         contentAlignment = Alignment.Center

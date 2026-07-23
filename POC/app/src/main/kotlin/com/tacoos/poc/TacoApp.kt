@@ -3,6 +3,7 @@ package com.tacoos.poc
 import android.app.Application
 import androidx.room.Room
 import androidx.work.*
+import com.tacoos.poc.data.TacoRepository
 import com.tacoos.poc.data.local.AppDatabase
 import com.tacoos.poc.data.remote.TacoApi
 import com.tacoos.poc.sync.SyncWorker
@@ -12,19 +13,30 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
+/**
+ * TacoApp: Clase base de la aplicación que gestiona el ciclo de vida global y la inyección de dependencias.
+ * Propósito: Inicializar componentes críticos como Room, Retrofit y WorkManager al arrancar el proceso.
+ */
 class TacoApp : Application() {
+
+    // Inyección de dependencias de acceso global (manual).
     lateinit var database: AppDatabase
     lateinit var api: TacoApi
+    lateinit var repository: TacoRepository
 
     override fun onCreate() {
         super.onCreate()
+        
+        // Inicialización de la Base de Datos Local (SQLite vía Room).
         database = Room.databaseBuilder(this, AppDatabase::class.java, "taco-db")
             .fallbackToDestructiveMigration()
             .build()
 
+        // Configuración de OkHttpClient con Interceptor de Seguridad.
         val client = OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
+                // Inyección dinámica del Token JWT en cada petición saliente.
                 if (GoogleSignInState.token.isNotEmpty()) {
                     requestBuilder.addHeader("Authorization", "Bearer ${GoogleSignInState.token}")
                 }
@@ -32,18 +44,26 @@ class TacoApp : Application() {
             }
             .build()
 
+        // Inicialización de la Capa de Red (Retrofit).
         val retrofit = Retrofit.Builder()
-            .baseUrl(TacoApi.BASE_URL) 
+            .baseUrl(TacoApi.BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         api = retrofit.create(TacoApi::class.java)
 
-        // Configuración de Sincronización Offline (Cada 15 min - Mínimo permitido por Android)
+        // Inicialización del Repositorio Único.
+        repository = TacoRepository(api, database)
+
+        // Lanzamiento del motor de sincronización asíncrona.
         setupSyncWorker()
     }
 
+    /**
+     * setupSyncWorker: Configura una tarea de fondo (WorkManager) para subir ventas locales al servidor.
+     * Frecuencia: Cada 15 minutos (mínimo permitido por Android para ahorro de batería).
+     */
     private fun setupSyncWorker() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED) // Solo sincroniza con internet
@@ -51,6 +71,7 @@ class TacoApp : Application() {
 
         val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(15, TimeUnit.MINUTES)
             .setConstraints(constraints)
+            .setInitialDelay(5, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(

@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.tacoos.poc.TacoApp
-import com.tacoos.poc.data.TacoRepository
 import com.tacoos.poc.data.local.AppMetadata
 
 class SyncWorker(
@@ -15,7 +14,7 @@ class SyncWorker(
 
     override suspend fun doWork(): Result {
         val app = applicationContext as TacoApp
-        val repository = TacoRepository(app.api, app.database)
+        val repository = app.repository
 
         Log.d("SyncWorker", "Iniciando ciclo de sincronización offline...")
         

@@ -73,6 +73,20 @@ data class Expense(
     val negocioId: String
 )
 
+/**
+ * Entidad Product: Gestión real del catálogo de productos.
+ */
+@Entity(tableName = "products")
+data class Product(
+    @PrimaryKey val id: String,
+    val name: String,
+    val price: Double,
+    val category: String, // Comidas, Bebidas, Postres
+    val imagePath: String? = null, // Ruta al archivo JPG local
+    val negocioId: String,
+    val isSynced: Boolean = false
+)
+
 @Dao
 interface SaleDao {
     @Query("SELECT * FROM sales ORDER BY timestamp DESC")
@@ -104,6 +118,21 @@ interface ExpenseDao {
 
     @Query("SELECT SUM(amount) FROM expenses WHERE timestamp >= :todayStart")
     suspend fun getTodayTotal(todayStart: Long): Double?
+}
+
+@Dao
+interface ProductDao {
+    @Query("SELECT * FROM products WHERE negocioId = :negocioId ORDER BY name ASC")
+    suspend fun getProducts(negocioId: String): List<Product>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProduct(product: Product)
+
+    @Update
+    suspend fun updateProduct(product: Product)
+
+    @Delete
+    suspend fun deleteProduct(product: Product)
 }
 
 @Dao
@@ -147,11 +176,12 @@ interface MetadataDao {
     suspend fun updateMetadata(metadata: AppMetadata)
 }
 
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class], version = 5, exportSchema = false)
+@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class, Product::class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
     abstract fun expenseDao(): ExpenseDao
+    abstract fun productDao(): ProductDao
     abstract fun userDao(): UserDao
     abstract fun businessDao(): BusinessDao
     abstract fun metadataDao(): MetadataDao

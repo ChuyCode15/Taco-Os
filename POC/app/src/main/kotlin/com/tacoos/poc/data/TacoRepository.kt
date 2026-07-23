@@ -7,6 +7,7 @@ import com.tacoos.poc.data.local.AppMetadata
 import com.tacoos.poc.data.local.User
 import com.tacoos.poc.data.local.Sale
 import com.tacoos.poc.data.local.Expense
+import com.tacoos.poc.data.local.Product
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
@@ -128,6 +129,34 @@ class TacoRepository(
     }
 
     suspend fun getCurrentUser() = db.userDao().getCurrentUser()
+
+    // --- Operaciones de Productos ---
+
+    suspend fun getProducts(negocioId: String) = db.productDao().getProducts(negocioId)
+
+    suspend fun saveProduct(product: Product) = db.productDao().insertProduct(product)
+
+    suspend fun updateProduct(product: Product) = db.productDao().updateProduct(product)
+
+    suspend fun deleteProduct(product: Product) = db.productDao().deleteProduct(product)
+
+    /**
+     * seedInitialProducts: Si el negocio no tiene productos, inserta el catálogo base.
+     */
+    suspend fun seedInitialProducts(negocioId: String) {
+        val current = db.productDao().getProducts(negocioId)
+        if (current.isEmpty()) {
+            val base = listOf(
+                Product(java.util.UUID.randomUUID().toString(), "Taco Pastor", 25.0, "Comidas", null, negocioId),
+                Product(java.util.UUID.randomUUID().toString(), "Taco Bistec", 30.0, "Comidas", null, negocioId),
+                Product(java.util.UUID.randomUUID().toString(), "Gringa", 65.0, "Comidas", null, negocioId),
+                Product(java.util.UUID.randomUUID().toString(), "Coca 600ml", 22.0, "Bebidas", null, negocioId),
+                Product(java.util.UUID.randomUUID().toString(), "Agua Fresca", 20.0, "Bebidas", null, negocioId),
+                Product(java.util.UUID.randomUUID().toString(), "Flan Casero", 45.0, "Postres", null, negocioId)
+            )
+            base.forEach { db.productDao().insertProduct(it) }
+        }
+    }
 
     // --- Sync Logic ---
     suspend fun syncPendingSales() {

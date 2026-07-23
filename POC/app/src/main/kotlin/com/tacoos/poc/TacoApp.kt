@@ -12,6 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.tacoos.poc.data.TacoRepository
 import com.tacoos.poc.sync.SyncWorker
 import java.util.concurrent.TimeUnit
 
@@ -24,6 +25,7 @@ class TacoApp : Application() {
     // Inyección de dependencias de acceso global (manual).
     lateinit var database: AppDatabase
     lateinit var api: TacoApi
+    lateinit var repository: TacoRepository
 
     override fun onCreate() {
         super.onCreate()
@@ -53,6 +55,9 @@ class TacoApp : Application() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(TacoApi::class.java)
+
+        // Inicialización del Repositorio Único.
+        repository = TacoRepository(api, database)
 
         // Lanzamiento del motor de sincronización asíncrona.
         setupPeriodicSync()

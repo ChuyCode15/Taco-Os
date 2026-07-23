@@ -34,6 +34,7 @@ object GoogleSignInState {
     var rol: String = "dueño" // Rol predeterminado para el flujo de registro.
     var userId: String = ""    // ID generado internamente por el sistema tras el registro.
     var token: String = ""     // JWT proporcionado por el Backend para peticiones autenticadas.
+    var negocioId: String? = null // ID del negocio vinculado al usuario.
 }
 
 /**
@@ -67,6 +68,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 val response = repository.verifyUser(idGoogle)
                 if (response.existe && response.usuario != null) {
                     GoogleSignInState.token = response.token ?: ""
+                    GoogleSignInState.negocioId = response.usuario.negocioId
                     val user = User(
                         id = response.usuario.id,
                         idGoogle = idGoogle,

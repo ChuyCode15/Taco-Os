@@ -69,13 +69,15 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
                     )
 
                     // 3. Guardar localmente y finalizar
+                    val businessId = businessResponse.id.toString()
+                    GoogleSignInState.negocioId = businessId
                     val user = User(
                         id = userId,
                         idGoogle = GoogleSignInState.idGoogle,
                         nombre = GoogleSignInState.nombre,
                         email = GoogleSignInState.email,
                         rol = GoogleSignInState.rol,
-                        negocioId = businessResponse.id.toString()
+                        negocioId = businessId
                     )
                     repository.saveUserLocally(user)
                     _uiState.value = RegistrationUiState.Success(user)

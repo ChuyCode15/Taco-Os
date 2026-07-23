@@ -31,7 +31,8 @@ data class POSSale(
     val method: String,
     val status: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val items: List<SaleItemSummary> = emptyList()
+    val items: List<SaleItemSummary> = emptyList(),
+    val voucherPhoto: Bitmap? = null
 )
 
 /**

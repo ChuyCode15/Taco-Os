@@ -62,6 +62,7 @@ fun SalesScreen(
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val context = LocalContext.current
+    val repository = (context.applicationContext as com.tacoos.poc.TacoApp).repository
 
     var selectedSale by remember { mutableStateOf<POSSale?>(null) }
     var showOpeningDialog by remember { mutableStateOf(false) }
@@ -203,12 +204,23 @@ fun SalesScreen(
         NewSaleDialog(
             onDismiss = { showNewSalePopup = false },
             onConfirm = { sale ->
-                try {
-                    ShiftManager.sales.add(0, sale)
-                    transactionSuccessMessage = "Se cobraron $${sale.amount} con éxito"
-                    showNewSalePopup = false
-                } catch (e: Exception) {
-                    transactionErrorMessage = "Fallo el cobro"
+                scope.launch {
+                    try {
+                        // 1. Guardar en Room (Local First)
+                        repository.registerSale(
+                            amount = sale.amount,
+                            method = sale.method,
+                            itemsSummary = sale.items.joinToString { "${it.totalQuantity}x ${it.productName}" },
+                            negocioId = GoogleSignInState.negocioId ?: "N/A",
+                            voucherPhoto = sale.voucherPhoto
+                        )
+                        // 2. Actualizar UI en memoria
+                        ShiftManager.sales.add(0, sale)
+                        transactionSuccessMessage = "Venta guardada y lista para sincronizar"
+                        showNewSalePopup = false
+                    } catch (e: Exception) {
+                        transactionErrorMessage = "Error al persistir venta"
+                    }
                 }
             }
         )
@@ -216,9 +228,19 @@ fun SalesScreen(
 
     if (showExpensePopup) {
         ExpenseDialog(onDismiss = { showExpensePopup = false }) { expense ->
-            ShiftManager.expenses.add(expense)
-            showExpensePopup = false
-            Toast.makeText(context, "Gasto registrado", Toast.LENGTH_SHORT).show()
+            scope.launch {
+                repository.registerExpense(
+                    id = expense.id,
+                    detail = expense.detail,
+                    amount = expense.amount,
+                    cashier = expense.cashier,
+                    negocioId = GoogleSignInState.negocioId ?: "N/A",
+                    photo = expense.receiptPhoto
+                )
+                ShiftManager.expenses.add(expense)
+                showExpensePopup = false
+                Toast.makeText(context, "Gasto persistido localmente", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -441,9 +463,9 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
         CobroForm(
             items = saleDetails,
             onDismiss = { showCobroPopup = false },
-            onConfirm = { amount, method ->
+            onConfirm = { amount, method, photo ->
                 val summaries = saleDetails.map { SaleItemSummary(it.name, it.quantity, it.price * it.quantity) }
-                onConfirm(POSSale(UUID.randomUUID().toString(), amount, method, "Cobrada", items = summaries))
+                onConfirm(POSSale(UUID.randomUUID().toString(), amount, method, "Cobrada", items = summaries, voucherPhoto = photo))
                 showCobroPopup = false
             }
         )
@@ -451,13 +473,18 @@ fun NewSaleDialog(onDismiss: () -> Unit, onConfirm: (POSSale) -> Unit) {
 }
 
 /**
- * CobroForm: Pantalla final de pago.
+ * CobroForm: Pantalla final de pago. Incluye captura de voucher para tarjetas.
  */
 @Composable
-fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, String) -> Unit) {
+fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, String, Bitmap?) -> Unit) {
     val total = items.sumOf { it.price * it.quantity }
     var paymentMethod by remember { mutableStateOf("Efectivo") }
     var amountPaid by remember { mutableStateOf("") }
+    var voucherPhoto by remember { mutableStateOf<Bitmap?>(null) }
+    
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { 
+        voucherPhoto = it 
+    }
 
     TacoDialog(title = "Resumen de venta", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
         LazyColumn(modifier = Modifier.weight(1f)) {
@@ -470,6 +497,9 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
             Spacer(Modifier.width(8.dp))
             Button(onClick = { paymentMethod = "Tarjeta" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (paymentMethod == "Tarjeta") ActionBlue else Color.Gray)) { Text("Tarjeta") }
         }
+        
+        Spacer(Modifier.height(12.dp))
+
         if (paymentMethod == "Efectivo") {
             OutlinedTextField(value = amountPaid, onValueChange = { if (it.all { c -> c.isDigit() }) amountPaid = it }, label = { Text("Paga con") }, modifier = Modifier.fillMaxWidth())
             val p = amountPaid.toDoubleOrNull() ?: 0.0
@@ -479,8 +509,34 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
                     Text("$${p - total}", color = SuccessGreen, fontSize = 36.sp, fontWeight = FontWeight.Black)
                 }
             }
+        } else {
+            // FLUJO TARJETA: Captura de Voucher
+            Button(
+                onClick = { cameraLauncher.launch() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.AddCircle, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (voucherPhoto != null) "VOUCHER CAPTURADO" else "FOTO DEL VOUCHER")
+                }
+            }
         }
-        Button(onClick = { onConfirm(total, paymentMethod) }, modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(20.dp), colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen)) { Text("COBRA", fontWeight = FontWeight.Black, fontSize = 18.sp) }
+
+        Spacer(Modifier.height(16.dp))
+
+        val canConfirm = if (paymentMethod == "Tarjeta") voucherPhoto != null else true
+        
+        Button(
+            onClick = { onConfirm(total, paymentMethod, voucherPhoto) },
+            enabled = canConfirm,
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = if (canConfirm) SuccessGreen else Color.Gray)
+        ) { 
+            Text("COBRA", fontWeight = FontWeight.Black, fontSize = 18.sp) 
+        }
     }
 }
 

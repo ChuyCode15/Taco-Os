@@ -1,8 +1,11 @@
 package com.tacoos.poc.data
 
+import android.graphics.Bitmap
 import com.tacoos.poc.data.local.AppDatabase
 import com.tacoos.poc.data.local.AppMetadata
 import com.tacoos.poc.data.local.User
+import com.tacoos.poc.data.local.Sale
+import com.tacoos.poc.data.local.Expense
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
@@ -95,13 +98,46 @@ class TacoRepository(
 
     /**
      * registerSale: Inserta una transacción de venta en la base de datos local de forma inmediata.
-     * Marca la venta como no sincronizada para que el SyncWorker la procese después.
+     * Soporta auditoría de método de pago y voucher para cobros con tarjeta.
      */
-    suspend fun registerSale(amount: Double, negocioId: String) {
+    suspend fun registerSale(
+        amount: Double,
+        method: String,
+        itemsSummary: String,
+        negocioId: String,
+        voucherPhoto: Bitmap? = null
+    ) {
         db.saleDao().insertSale(
-            com.tacoos.poc.data.local.Sale(
+            Sale(
                 amount = amount,
+                method = method,
+                itemsJson = itemsSummary,
                 negocioId = negocioId,
+                voucherPhoto = voucherPhoto,
+                isSynced = false
+            )
+        )
+    }
+
+    /**
+     * registerExpense: Persiste un gasto operativo en Room.
+     */
+    suspend fun registerExpense(
+        id: String,
+        detail: String,
+        amount: Double,
+        cashier: String,
+        negocioId: String,
+        photo: Bitmap? = null
+    ) {
+        db.expenseDao().insertExpense(
+            Expense(
+                id = id,
+                detail = detail,
+                amount = amount,
+                cashier = cashier,
+                negocioId = negocioId,
+                receiptPhoto = photo,
                 isSynced = false
             )
         )

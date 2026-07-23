@@ -50,10 +50,6 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Modelos de datos
-data class POSSale(val id: String, val amount: Double, val method: String, val status: String, val timestamp: Long = System.currentTimeMillis())
-data class POSItem(val name: String, val price: Double, val category: String, var quantity: Int = 0)
-
 /**
  * SalesScreen: Pantalla principal del Punto de Venta (POS).
  */
@@ -97,27 +93,67 @@ fun SalesScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.width(320.dp).fillMaxHeight(),
                 drawerContainerColor = MaterialTheme.colorScheme.surface,
-                drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
+                drawerShape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp)
             ) {
-                Spacer(Modifier.height(48.dp))
-                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("MENU", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
+                Spacer(Modifier.height(56.dp))
+                
+                // Header: MI PERFIL + Toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "MI PERFIL", 
+                        style = MaterialTheme.typography.titleMedium, 
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
                     AppleToggle(checked = isDarkMode, onCheckedChange = onThemeChange)
                 }
-                Spacer(Modifier.height(16.dp))
+                
+                Spacer(Modifier.height(24.dp))
+                
+                // Opción: Ajustes
                 NavigationDrawerItem(
-                    label = { Text("Ajustes") },
+                    label = { Text("Ajustes", fontWeight = FontWeight.Medium) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
                         navController.navigate("settings")
                     },
-                    icon = { Icon(Icons.Default.Settings, null) }
+                    icon = { Icon(Icons.Default.Settings, null, tint = Color.Gray) },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent)
                 )
+
+                // Opción: Ayuda / Soporte
+                NavigationDrawerItem(
+                    label = { Text("Ayuda / Soporte", fontWeight = FontWeight.Medium) },
+                    selected = false,
+                    onClick = { /* Acción Ayuda */ },
+                    icon = { Icon(Icons.Default.Info, null, tint = Color.Gray) },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent)
+                )
+
                 Spacer(modifier = Modifier.weight(1f))
-                Text("Cerrar Sesión", modifier = Modifier.padding(24.dp).clickable { navController.navigate("login") { popUpTo(0) } }, color = Color.Red, fontWeight = FontWeight.Black)
+                
+                // Footer: Cerrar Sesión
+                Text(
+                    text = "Cerrar Sesión",
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .clickable { 
+                            navController.navigate("login") { popUpTo(0) } 
+                        },
+                    color = Color.Red,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 14.sp
+                )
+                Spacer(Modifier.height(16.dp))
             }
         }
     ) {
@@ -214,9 +250,10 @@ fun SalesScreen(
                         // 1. Guardar en Room (Local First)
                         repository.registerSale(
                             amount = sale.amount,
-                            method = sale.method,
-                            itemsSummary = sale.items.joinToString { "${it.totalQuantity}x ${it.productName}" },
                             negocioId = GoogleSignInState.negocioId ?: "N/A",
+                            userId = GoogleSignInState.userId,
+                            productsJson = sale.items.joinToString { "${it.totalQuantity}x ${it.productName}" },
+                            method = sale.method,
                             voucherPhoto = sale.voucherPhoto
                         )
                         // 2. Actualizar UI en memoria

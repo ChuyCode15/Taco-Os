@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 class SalesViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as TacoApp
-    private val repository = TacoRepository(app.api, app.database)
+    private val repository = app.repository
     private val gson = Gson()
 
     fun saveSale(amount: Double, products: List<POSItem>) {
@@ -28,8 +28,6 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
                 userId = userId,
                 productsJson = productsJson
             )
-            // La venta queda guardada en SQLite con isSynced = false
-            // El SyncWorker la subirá al servidor automáticamente
         }
     }
 }

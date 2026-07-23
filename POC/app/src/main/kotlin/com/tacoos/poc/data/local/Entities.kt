@@ -6,7 +6,7 @@ import androidx.room.*
 import java.io.ByteArrayOutputStream
 
 /**
- * Converters: Clase de utilidad para Room que permite persistir tipos complejos (Bitmap).
+ * Converters: Manejo de Bitmaps para persistencia local.
  */
 class Converters {
     @TypeConverter
@@ -24,9 +24,6 @@ class Converters {
     }
 }
 
-/**
- * Entidad User: Representa el perfil del usuario autenticado en la DB local.
- */
 @Entity(tableName = "users")
 data class User(
     @PrimaryKey val id: String,
@@ -37,9 +34,6 @@ data class User(
     val negocioId: String? = null
 )
 
-/**
- * Entidad Business: Información básica del establecimiento comercial.
- */
 @Entity(tableName = "business")
 data class Business(
     @PrimaryKey val id: String,
@@ -51,25 +45,22 @@ data class Business(
 )
 
 /**
- * Entidad Sale: Registro de transacciones individuales.
- * Se expande para soportar auditoría completa (método de pago, ítems y voucher).
+ * Entidad Sale: Soporta auditoría de tarjeta y datos para Reportes.
  */
 @Entity(tableName = "sales")
 data class Sale(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val amount: Double,
+    val userId: String = "",
+    val productsJson: String = "",
     val method: String = "Efectivo",
-    val status: String = "Cobrada",
-    val itemsJson: String = "", // Resumen de productos en formato String
+    val status: String = "ACTIVE",
     val voucherPhoto: Bitmap? = null,
     val timestamp: Long = System.currentTimeMillis(),
     val isSynced: Boolean = false,
     val negocioId: String
 )
 
-/**
- * Entidad Expense: Registro de gastos operativos asociados al turno.
- */
 @Entity(tableName = "expenses")
 data class Expense(
     @PrimaryKey val id: String,
@@ -79,23 +70,24 @@ data class Expense(
     val timestamp: Long = System.currentTimeMillis(),
     val receiptPhoto: Bitmap? = null,
     val isSynced: Boolean = false,
-    val negocioId: String,
-    val userId: String,
-    val productsJson: String,
-    val status: String = "ACTIVE" // ACTIVE, CANCELLED
+    val negocioId: String
 )
-
-
 
 @Dao
 interface SaleDao {
     @Query("SELECT * FROM sales ORDER BY timestamp DESC")
     suspend fun getAllSales(): List<Sale>
 
+    @Query("SELECT * FROM sales WHERE negocioId = :negocioId AND timestamp BETWEEN :start AND :end")
+    suspend fun getSalesByRange(negocioId: String, start: Long, end: Long): List<Sale>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSale(sale: Sale)
 
-    @Query("SELECT SUM(amount) FROM sales WHERE timestamp >= :todayStart AND status = 'Cobrada'")
+    @Query("UPDATE sales SET isSynced = 1 WHERE id = :id")
+    suspend fun markAsSynced(id: Long)
+
+    @Query("SELECT SUM(amount) FROM sales WHERE timestamp >= :todayStart AND status = 'ACTIVE'")
     suspend fun getTodayTotal(todayStart: Long): Double?
 }
 
@@ -104,17 +96,15 @@ interface ExpenseDao {
     @Query("SELECT * FROM expenses ORDER BY timestamp DESC")
     suspend fun getAllExpenses(): List<Expense>
 
+    @Query("SELECT * FROM expenses WHERE negocioId = :negocioId AND timestamp BETWEEN :start AND :end")
+    suspend fun getExpensesByRange(negocioId: String, start: Long, end: Long): List<Expense>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExpense(expense: Expense)
 
-    @Query("SELECT SUM(amount) FROM expenses WHERE timestamp >= :todayStart AND status = 'ACTIVE'")
+    @Query("SELECT SUM(amount) FROM expenses WHERE timestamp >= :todayStart")
     suspend fun getTodayTotal(todayStart: Long): Double?
-
-    @Query("SELECT * FROM sales WHERE negocioId = :negocioId AND timestamp BETWEEN :startDate AND :endDate")
-    suspend fun getSalesByRange(negocioId: String, startDate: Long, endDate: Long): List<Sale>
 }
-
-
 
 @Dao
 interface UserDao {
@@ -133,7 +123,7 @@ interface UserDao {
 
 @Dao
 interface BusinessDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBusiness(business: Business)
 
     @Query("SELECT * FROM business WHERE id = :id")
@@ -157,10 +147,7 @@ interface MetadataDao {
     suspend fun updateMetadata(metadata: AppMetadata)
 }
 
-/**
- * AppDatabase: Actualizada a versión 4 para incluir fotos y gastos.
- */
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class], version = 4, exportSchema = false)
+@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class], version = 5, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
@@ -169,5 +156,3 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun businessDao(): BusinessDao
     abstract fun metadataDao(): MetadataDao
 }
-
-

@@ -1,6 +1,7 @@
 package com.tacoos.poc.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.tacoos.poc.data.local.AppDatabase
 import com.tacoos.poc.data.local.AppMetadata
 import com.tacoos.poc.data.local.User
@@ -9,13 +10,10 @@ import com.tacoos.poc.data.local.Expense
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
-import com.tacoos.poc.data.remote.SaleRequest
-import android.util.Log
+import java.util.UUID
 
 /**
  * TacoRepository: Capa de abstracción de datos (Single Source of Truth).
- * Inyección de dependencias: Recibe la interfaz de la API (Retrofit) y la base de datos local (Room).
- * Propósito: Orquestar la comunicación entre el almacenamiento local y la sincronización con el servidor.
  */
 class TacoRepository(
     private val api: TacoApi,
@@ -23,14 +21,8 @@ class TacoRepository(
 ) {
     // --- Autenticación y Gestión de Sesión ---
 
-    /**
-     * verifyUser: Consulta al servidor si un Google ID ya está registrado.
-     */
     suspend fun verifyUser(idGoogle: String) = api.verifyUser(idGoogle)
 
-    /**
-     * registerUser: Envía la solicitud de creación de un nuevo perfil de usuario al Backend.
-     */
     suspend fun registerUser(
         idGoogle: String,
         nombre: String,
@@ -45,28 +37,20 @@ class TacoRepository(
         )
     )
 
-    /**
-     * createBusiness: Registra los datos del establecimiento vinculado a un dueño.
-     */
     suspend fun createBusiness(duenoId: String, nombre: String, direccion: String, giro: String) =
         api.createBusiness(
             duenoId = duenoId,
             request = BusinessRequest(
                 nombre = nombre,
                 direccion = direccion,
-                telefono = "N/A", // Valor predeterminado para el alcance del POC.
+                telefono = "N/A",
                 queVende = giro
             )
         )
 
-    /**
-     * saveUserLocally: Persiste la información del usuario en SQLite.
-     * Actualiza la metadata de sesión para el control de inactividad de 12 horas.
-     */
     suspend fun saveUserLocally(user: User) {
         db.userDao().clearUser()
         db.userDao().insertUser(user)
-        // Actualizar marca de tiempo del login.
         db.metadataDao().updateMetadata(
             AppMetadata(
                 lastLoginTimestamp = System.currentTimeMillis(),
@@ -75,9 +59,6 @@ class TacoRepository(
         )
     }
 
-    /**
-     * isSessionValid: Valida si la sesión actual ha expirado (límite de 12 horas).
-     */
     suspend fun isSessionValid(): Boolean {
         val metadata = db.metadataDao().getMetadata() ?: return false
         val now = System.currentTimeMillis()
@@ -85,9 +66,6 @@ class TacoRepository(
         return (now - metadata.lastLoginTimestamp) < twelveHours
     }
 
-    /**
-     * isLicenseValid: Verifica la validez de la licencia localmente contra el tiempo de última sincronización.
-     */
     suspend fun isLicenseValid(): Boolean {
         val metadata = db.metadataDao().getMetadata() ?: return false
         val now = System.currentTimeMillis()
@@ -98,21 +76,24 @@ class TacoRepository(
     // --- Operaciones de Venta (Local First) ---
 
     /**
-     * registerSale: Inserta una transacción de venta en la base de datos local de forma inmediata.
-     * Soporta auditoría de método de pago y voucher para cobros con tarjeta.
+     * registerSale: Inserta una transacción de venta en Room.
+     * Soporta tanto el flujo de Auditoría (fotos) como el de Reportes (userId/products).
      */
     suspend fun registerSale(
         amount: Double,
-        method: String,
-        itemsSummary: String,
         negocioId: String,
+        userId: String = "",
+        productsJson: String = "",
+        method: String = "Efectivo",
         voucherPhoto: Bitmap? = null
     ) {
         db.saleDao().insertSale(
             Sale(
                 amount = amount,
+                userId = userId,
+                productsJson = productsJson,
                 method = method,
-                itemsJson = itemsSummary,
+                status = "ACTIVE",
                 negocioId = negocioId,
                 voucherPhoto = voucherPhoto,
                 isSynced = false
@@ -120,9 +101,6 @@ class TacoRepository(
         )
     }
 
-    /**
-     * registerExpense: Persiste un gasto operativo en Room.
-     */
     suspend fun registerExpense(
         id: String,
         detail: String,
@@ -144,16 +122,26 @@ class TacoRepository(
         )
     }
 
-    /**
-     * getTodayTotal: Recupera la suma total de ventas locales registradas desde el inicio del día actual.
-     */
     suspend fun getTodayTotal(): Double {
         val startOfDay = System.currentTimeMillis() - (System.currentTimeMillis() % (24 * 60 * 60 * 1000L))
         return db.saleDao().getTodayTotal(startOfDay) ?: 0.0
     }
 
-    /**
-     * getCurrentUser: Recupera el perfil del usuario activo almacenado localmente.
-     */
     suspend fun getCurrentUser() = db.userDao().getCurrentUser()
+
+    // --- Sync Logic ---
+    suspend fun syncPendingSales() {
+        val pendingSales = db.saleDao().getAllSales().filter { !it.isSynced && it.status == "ACTIVE" }
+        if (pendingSales.isEmpty()) return
+        Log.d("TacoRepository", "Sincronizando ${pendingSales.size} ventas...")
+        pendingSales.forEach { sale ->
+            try {
+                // Simulación para el POC
+                db.saleDao().markAsSynced(sale.id)
+                Log.d("TacoRepository", "Venta ${sale.id} sincronizada")
+            } catch (e: Exception) {
+                Log.e("TacoRepository", "Error sincronizando venta ${sale.id}", e)
+            }
+        }
+    }
 }

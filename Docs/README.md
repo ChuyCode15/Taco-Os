@@ -29,7 +29,22 @@ El dueño gestiona su negocio con una pantalla limpia:
 | **☰** | Perfil, Dark Mode, Ayuda |
 | **🔔** | Notificaciones: cancelaciones, sobrantes/faltantes, auto-cierres |
 
-### 3. Onboarding Mágico (QR Handshake)
+### 3. Control Maestro (Panel Admin)
+
+Centro de operaciones para el equipo de Taco'Os. Angular 21 + Material + Tailwind.
+
+| Módulo | Función |
+|--------|---------|
+| **Dashboard** | KPIs del sistema, métricas, actividad reciente |
+| **Clientes** | CRUD completo, detalle, planes, sesiones |
+| **Tickets/Chat** | Soporte en tiempo real, asignación, prioridades |
+| **Operaciones** | Forzar acciones, reparar problemas, auditoría |
+| **Equipo** | Gestión del staff interno, rendimiento |
+| **Facturación** | Ingresos, facturas, planes |
+
+Acceso: `http://localhost:4200` (backend en `http://localhost:8080`)
+
+### 4. Onboarding Mágico (QR Handshake)
 - Cajero elige rol → cámara se abre automáticamente
 - Patrón genera QR desde "Equipo"
 - Escaneo → enlace instantáneo con datos de perfil Google
@@ -52,12 +67,15 @@ El dueño gestiona su negocio con una pantalla limpia:
 ## Modelo de Negocio
 
 | Plan | Negocios | Cajeros/Empleados | IA | Trial |
-|------|----------|-------------------|----|-------|
-| **Free** | 1 | 2 cajeros | ❌ | — |
-| **Premium** | 2 | 5 cajeros | ❌ | 14 días |
-| **Business** | 5 | 25 empleados | ✅ | 14 días |
+|------|----------|-------------------|-----|-------|
+| **Free** | 1 | 2 cajeros | 1 consejo semanal gratis | — |
+| **Premium** | 2 | 5 cajeros | IA limitada | 14 días |
+| **Business** | 5 | 25 empleados | IA completa | 14 días |
 
 - Free es perpetuo y funcional. El negocio opera mejor que con libreta desde el día 1.
+- Free incluye 1 consejo semanal de IA (reporte básico de tendencias).
+- Premium tiene IA limitada (insights diarios, proyecciones básicas).
+- Business tiene IA completa (insights, proyecciones, alertas, predicciones).
 - 14 días trial con funciones del plan superior para incentivar la conversión.
 
 ---
@@ -67,6 +85,7 @@ El dueño gestiona su negocio con una pantalla limpia:
 | Capa | Tecnología | Rol |
 |------|-----------|-----|
 | **App** | Flutter + SQLite/Room | Base maestra local. 100% operable sin internet. |
+| **Control Maestro** | Angular 21 + Material + Tailwind CSS v4 | Panel admin central para el equipo de Taco'Os |
 | **Backend** | Spring Boot + PostgreSQL | Consolidación, reportes, licencias, notificaciones. |
 | **Sync** | REST batch cada 5 min | Worker en segundo plano. Servidor es esclavo. |
 | **Auth** | Google Sign-In + JWT | Sesión larga (turno). 12hr en segundo plano requiere re-login. |
@@ -78,7 +97,7 @@ El dueño gestiona su negocio con una pantalla limpia:
 
 | Fase | Enfoque | Estado |
 |------|---------|--------|
-| **I — Control Operativo** | Transacciones, corte, reportes básicos | ✅ En desarrollo |
+| **I — Control Operativo** | Transacciones, corte, reportes básicos | ✅ Completo |
 | **II — Lealtad y WhatsApp CRM** | Recibos, puntos, QR premios | ⏳ Pendiente |
 | **III — IA y Reportes Avanzados** | Insights, proyecciones, alertas | ⏳ Pendiente |
 | **IV — QR Digital y Menú** | Pedidos en mesa, inventario | ⏳ Pendiente |

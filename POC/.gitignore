@@ -1,0 +1,31 @@
+# Built artifacts
+**/build/
+build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.gradle/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aar
+*.jks
+*.keystore
+
+# Gradle
+gradle-app.setting
+!gradle-wrapper.jar
+.navigation/
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Project specific
+# google-services.json # Descomenta si no quieres subir tus llaves de Google

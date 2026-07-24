@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.animation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -17,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,15 +31,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.tacoos.poc.ui.components.ActionButton
 import com.tacoos.poc.ui.components.AppleToggle
@@ -46,6 +48,7 @@ import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
 import com.tacoos.poc.ui.theme.SuccessGreen
 import com.tacoos.poc.ui.theme.WarningAmber
+import com.tacoos.poc.utils.ImageStorage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -66,11 +69,9 @@ fun SalesScreen(
     val context = LocalContext.current
     val repository = (context.applicationContext as com.tacoos.poc.TacoApp).repository
 
-    // Estado para productos reales de la DB
     val products = remember { mutableStateListOf<com.tacoos.poc.data.local.Product>() }
     var selectedSale by remember { mutableStateOf<POSSale?>(null) }
     
-    // Carga inicial y semilla
     LaunchedEffect(Unit) {
         if (GoogleSignInState.negocioId != null) {
             repository.seedInitialProducts(GoogleSignInState.negocioId!!)
@@ -78,6 +79,7 @@ fun SalesScreen(
             products.addAll(repository.getProducts(GoogleSignInState.negocioId!!))
         }
     }
+
     var showOpeningDialog by remember { mutableStateOf(false) }
     var showNewSalePopup by remember { mutableStateOf(false) }
     var showCortePopup by remember { mutableStateOf(false) }
@@ -89,16 +91,10 @@ fun SalesScreen(
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     LaunchedEffect(transactionSuccessMessage) {
-        if (transactionSuccessMessage != null) {
-            delay(1500)
-            transactionSuccessMessage = null
-        }
+        if (transactionSuccessMessage != null) { delay(1500); transactionSuccessMessage = null }
     }
     LaunchedEffect(transactionErrorMessage) {
-        if (transactionErrorMessage != null) {
-            delay(1500)
-            transactionErrorMessage = null
-        }
+        if (transactionErrorMessage != null) { delay(1500); transactionErrorMessage = null }
     }
 
     ModalNavigationDrawer(
@@ -110,73 +106,44 @@ fun SalesScreen(
                 drawerShape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp)
             ) {
                 Spacer(Modifier.height(56.dp))
-                
-                // Header: MI PERFIL + Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        "MI PERFIL", 
-                        style = MaterialTheme.typography.titleMedium, 
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
-                    )
+                    Text("MI PERFIL", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     AppleToggle(checked = isDarkMode, onCheckedChange = onThemeChange)
                 }
-                
                 Spacer(Modifier.height(24.dp))
-                
-                // Opción: Ajustes
                 NavigationDrawerItem(
                     label = { Text("Ajustes", fontWeight = FontWeight.Medium) },
                     selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("settings")
-                    },
+                    onClick = { scope.launch { drawerState.close() }; navController.navigate("settings") },
                     icon = { Icon(Icons.Default.Settings, null, tint = Color.Gray) },
                     modifier = Modifier.padding(horizontal = 12.dp),
                     colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent)
                 )
-
-                // Opción: Ayuda / Soporte
                 NavigationDrawerItem(
                     label = { Text("Ayuda / Soporte", fontWeight = FontWeight.Medium) },
                     selected = false,
-                    onClick = { /* Acción Ayuda */ },
+                    onClick = { },
                     icon = { Icon(Icons.Default.Info, null, tint = Color.Gray) },
                     modifier = Modifier.padding(horizontal = 12.dp),
                     colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent)
                 )
-
                 Spacer(modifier = Modifier.weight(1f))
-                
-                // Footer: Cerrar Sesión
-                Text(
-                    text = "Cerrar Sesión",
-                    modifier = Modifier
-                        .padding(24.dp)
-                        .clickable { 
-                            navController.navigate("login") { popUpTo(0) } 
-                        },
-                    color = Color.Red,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 14.sp
-                )
+                Text(text = "Cerrar Sesión", modifier = Modifier.padding(24.dp).clickable { navController.navigate("login") { popUpTo(0) } }, color = Color.Red, fontWeight = FontWeight.Black, fontSize = 14.sp)
                 Spacer(Modifier.height(16.dp))
             }
         }
     ) {
         Scaffold(
             topBar = {
-                @OptIn(ExperimentalMaterial3Api::class)
                 TopAppBar(
                     title = { Text("VENTAS", fontWeight = FontWeight.Black) },
                     navigationIcon = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, null) }
+                            IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                             IconButton(onClick = { scope.launch { drawerState.open() } }) { Icon(Icons.Default.Menu, null) }
                         }
                     }
@@ -223,9 +190,7 @@ fun SalesScreen(
                                     selectedSale?.let {
                                         if (System.currentTimeMillis() - it.timestamp < 300000) {
                                             val index = ShiftManager.sales.indexOf(it)
-                                            if (index != -1) {
-                                                ShiftManager.sales[index] = it.copy(status = "Cancelada")
-                                            }
+                                            if (index != -1) ShiftManager.sales[index] = it.copy(status = "Cancelada")
                                             selectedSale = null
                                         } else {
                                             Toast.makeText(context, "Registro inmutable (> 5 min)", Toast.LENGTH_SHORT).show()
@@ -249,11 +214,7 @@ fun SalesScreen(
 
     if (showOpeningDialog) {
         OpeningForm(onDismiss = { showOpeningDialog = false }) { fondo ->
-            ShiftManager.fondoCaja = fondo
-            ShiftManager.isShiftOpen = true
-            ShiftManager.openTimestamp = System.currentTimeMillis()
-            ShiftManager.currentCashier = GoogleSignInState.nombre
-            showOpeningDialog = false
+            ShiftManager.fondoCaja = fondo; ShiftManager.isShiftOpen = true; ShiftManager.openTimestamp = System.currentTimeMillis(); ShiftManager.currentCashier = GoogleSignInState.nombre; showOpeningDialog = false
         }
     }
 
@@ -264,22 +225,19 @@ fun SalesScreen(
             onConfirm = { sale ->
                 scope.launch {
                     try {
-                        // 1. Guardar en Room (Local First)
+                        val imgPath = sale.voucherPhoto?.let { ImageStorage.saveImage(context, it, "sale") }
                         repository.registerSale(
                             amount = sale.amount,
                             negocioId = GoogleSignInState.negocioId ?: "N/A",
                             userId = GoogleSignInState.userId,
                             productsJson = sale.items.joinToString { "${it.totalQuantity}x ${it.productName}" },
                             method = sale.method,
-                            voucherPhoto = sale.voucherPhoto
+                            imagePath = imgPath
                         )
-                        // 2. Actualizar UI en memoria
                         ShiftManager.sales.add(0, sale)
                         transactionSuccessMessage = "Venta guardada y lista para sincronizar"
                         showNewSalePopup = false
-                    } catch (e: Exception) {
-                        transactionErrorMessage = "Error al persistir venta"
-                    }
+                    } catch (e: Exception) { transactionErrorMessage = "Error al persistir venta" }
                 }
             },
             onRefreshProducts = {
@@ -294,13 +252,14 @@ fun SalesScreen(
     if (showExpensePopup) {
         ExpenseDialog(onDismiss = { showExpensePopup = false }) { expense ->
             scope.launch {
+                val imgPath = expense.receiptPhoto?.let { ImageStorage.saveImage(context, it, "expense") }
                 repository.registerExpense(
                     id = expense.id,
                     detail = expense.detail,
                     amount = expense.amount,
                     cashier = expense.cashier,
                     negocioId = GoogleSignInState.negocioId ?: "N/A",
-                    photo = expense.receiptPhoto
+                    imagePath = imgPath
                 )
                 ShiftManager.expenses.add(expense)
                 showExpensePopup = false
@@ -311,11 +270,7 @@ fun SalesScreen(
 
     if (showCortePopup) {
         CorteDialog(onDismiss = { showCortePopup = false }) {
-            ShiftManager.isShiftOpen = false
-            ShiftManager.sales.clear()
-            ShiftManager.expenses.clear()
-            showCortePopup = false
-            navController.popBackStack()
+            ShiftManager.isShiftOpen = false; ShiftManager.sales.clear(); ShiftManager.expenses.clear(); showCortePopup = false; navController.popBackStack()
         }
     }
 }
@@ -359,46 +314,34 @@ fun NewSaleDialog(
     onConfirm: (POSSale) -> Unit,
     onRefreshProducts: () -> Unit
 ) {
-    var step by remember { mutableStateOf(1) } // 1: Nota, 2: Productos
+    var step by remember { mutableStateOf(1) }
     val saleDetails = remember { mutableStateListOf<POSItem>() }
     val sessionItems = remember { mutableStateListOf<POSItem>() }
     var selectedCategory by remember { mutableStateOf("Comidas") }
     var showCobroPopup by remember { mutableStateOf(false) }
     var itemToDeleteIndex by remember { mutableStateOf<Int?>(null) }
     
-    // Estados para CRUD de productos
     var showProductForm by remember { mutableStateOf(false) }
     var productToEdit by remember { mutableStateOf<com.tacoos.poc.data.local.Product?>(null) }
     var productOptionsIndex by remember { mutableStateOf<Int?>(null) }
 
     val repository = (LocalContext.current.applicationContext as com.tacoos.poc.TacoApp).repository
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     TacoDialog(
         title = if (step == 1) "Nota de Venta" else "Agregar Producto",
         onDismiss = onDismiss,
         maxHeightFactor = 0.6f,
-        navigationIcon = if (step > 1) Icons.Default.ArrowBack else null,
+        navigationIcon = if (step > 1) Icons.AutoMirrored.Filled.ArrowBack else null,
         onNavigationClick = { step = 1 },
         headerAction = if (step == 2) {
             {
-                Text(
-                    text = "+",
-                    modifier = Modifier
-                        .padding(end = 12.dp)
-                        .clickable { 
-                            productToEdit = null
-                            showProductForm = true 
-                        },
-                    color = ActionBlue,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
-                )
+                Text(text = "+", modifier = Modifier.padding(end = 12.dp).clickable { productToEdit = null; showProductForm = true }, color = ActionBlue, fontWeight = FontWeight.Bold, fontSize = 24.sp)
             }
         } else null
     ) {
         if (step == 1) {
-            // VISTA: NOTA DE VENTA
             Column {
                 Box(modifier = Modifier.weight(1f)) {
                     if (saleDetails.isEmpty()) {
@@ -407,42 +350,17 @@ fun NewSaleDialog(
                         Box {
                             LazyColumn {
                                 itemsIndexed(saleDetails) { index, item ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { itemToDeleteIndex = index }
-                                            .padding(8.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
+                                    Row(modifier = Modifier.fillMaxWidth().clickable { itemToDeleteIndex = index }.padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                                         Text("${item.quantity}x ${item.name}", modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
                                         Text("$${item.price * item.quantity}", fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
-
-                            // BURBUJA DE ELIMINACIÓN ("Nube" con bote de basura)
                             itemToDeleteIndex?.let { index ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clickable { itemToDeleteIndex = null },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Surface(
-                                        modifier = Modifier.shadow(8.dp, RoundedCornerShape(16.dp)),
-                                        shape = RoundedCornerShape(16.dp),
-                                        color = Color.White
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(12.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            IconButton(onClick = {
-                                                saleDetails.removeAt(index)
-                                                itemToDeleteIndex = null
-                                            }) {
-                                                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
-                                            }
+                                Box(modifier = Modifier.fillMaxSize().clickable { itemToDeleteIndex = null }, contentAlignment = Alignment.Center) {
+                                    Surface(modifier = Modifier.shadow(8.dp, RoundedCornerShape(16.dp)), shape = RoundedCornerShape(16.dp), color = Color.White) {
+                                        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            IconButton(onClick = { saleDetails.removeAt(index); itemToDeleteIndex = null }) { Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red) }
                                         }
                                     }
                                 }
@@ -450,120 +368,60 @@ fun NewSaleDialog(
                         }
                     }
                 }
-                TextButton(onClick = { step = 2 }, modifier = Modifier.fillMaxWidth()) {
-                    Text("+ AGREGAR PRODUCTO", color = ActionBlue, fontWeight = FontWeight.Bold)
-                }
+                TextButton(onClick = { step = 2 }, modifier = Modifier.fillMaxWidth()) { Text("+ AGREGAR PRODUCTO", color = ActionBlue, fontWeight = FontWeight.Bold) }
                 if (saleDetails.isNotEmpty()) {
-                    Button(onClick = { showCobroPopup = true }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp)) {
-                        Text("COBRAR", fontWeight = FontWeight.Black)
-                    }
+                    Button(onClick = { showCobroPopup = true }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp)) { Text("COBRAR", fontWeight = FontWeight.Black) }
                 }
             }
         } else {
-            // VISTA: AGREGAR PRODUCTO
             Column {
-                // Selector de pestañas
                 Row(modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f), RoundedCornerShape(12.dp))) {
                     listOf("Comidas", "Bebidas", "Postres").forEach { cat ->
-                        Box(
-                            modifier = Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(12.dp))
-                                .background(if (selectedCategory == cat) ActionBlue else Color.Transparent)
-                                .clickable { selectedCategory = cat },
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(modifier = Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(12.dp)).background(if (selectedCategory == cat) ActionBlue else Color.Transparent).clickable { selectedCategory = cat }, contentAlignment = Alignment.Center) {
                             Text(cat, color = if (selectedCategory == cat) Color.White else Color.Gray, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                         }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
-
-                // Catálogo e Ítems de Sesión
                 Box(modifier = Modifier.weight(1f)) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         val filteredProducts = products.filter { it.category == selectedCategory }
                         itemsIndexed(filteredProducts) { index, prod ->
                             ProductRowInline(
-                                prod = POSItem(prod.name, prod.price, prod.category),
-                                onAdd = { qty -> sessionItems.add(POSItem(prod.name, prod.price, prod.category, qty)) },
-                                onLongClick = {
-                                    // Solo dueños y admins pueden editar
-                                    if (GoogleSignInState.rol == "dueño" || GoogleSignInState.rol == "administrador") {
-                                        productOptionsIndex = index
-                                    }
-                                }
+                                prod = POSItem(prod.name, prod.price, prod.category, imagePath = prod.imagePath),
+                                onAdd = { qty -> sessionItems.add(POSItem(prod.name, prod.price, prod.category, qty, prod.imagePath)) },
+                                onLongClick = { if (GoogleSignInState.rol == "dueño" || GoogleSignInState.rol == "administrador") productOptionsIndex = index }
                             )
                         }
-
-                        // Lista de Previsualización (Session Items)
                         if (sessionItems.isNotEmpty()) {
                             item { HorizontalDivider(Modifier.padding(vertical = 12.dp)) }
                             items(sessionItems) { item ->
                                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-                                    Text(
-                                        text = "${item.quantity} ${item.name}",
-                                        fontSize = 11.sp,
-                                        color = Color.Gray,
-                                        modifier = Modifier.weight(1f)
-                                    )
+                                    Text(text = "${item.quantity} ${item.name}", fontSize = 11.sp, color = Color.Gray, modifier = Modifier.weight(1f))
                                     Text("$${item.price * item.quantity}", fontSize = 11.sp, color = Color.Gray)
                                 }
                             }
                         }
-
                         item {
                             if (sessionItems.isNotEmpty()) {
-                                Button(
-                                    onClick = {
-                                        sessionItems.groupBy { it.name }.forEach { (name, list) ->
-                                            val totalQty = list.sumOf { it.quantity }
-                                            val product = list.first()
-                                            val existing = saleDetails.find { it.name == name }
-                                            if (existing != null) {
-                                                existing.quantity += totalQty
-                                            } else {
-                                                saleDetails.add(product.copy(quantity = totalQty))
-                                            }
-                                        }
-                                        sessionItems.clear()
-                                        step = 1
-                                    },
-                                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy)
-                                ) { Text("Listo", fontWeight = FontWeight.Bold) }
+                                Button(onClick = {
+                                    sessionItems.groupBy { it.name }.forEach { (name, list) ->
+                                        val totalQty = list.sumOf { it.quantity }; val product = list.first(); val existing = saleDetails.find { it.name == name }
+                                        if (existing != null) existing.quantity += totalQty else saleDetails.add(product.copy(quantity = totalQty))
+                                    }
+                                    sessionItems.clear(); step = 1
+                                }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp), colors = ButtonDefaults.buttonColors(containerColor = PrimaryNavy)) { Text("Listo", fontWeight = FontWeight.Bold) }
                             }
                         }
                     }
-
-                    // NUBE DE OPCIONES DE PRODUCTO (Editar/Eliminar)
                     productOptionsIndex?.let { index ->
                         val currentProd = products.filter { it.category == selectedCategory }[index]
-                        Box(
-                            modifier = Modifier.fillMaxSize().clickable { productOptionsIndex = null },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Surface(
-                                modifier = Modifier.shadow(8.dp, RoundedCornerShape(16.dp)),
-                                shape = RoundedCornerShape(16.dp),
-                                color = Color.White
-                            ) {
+                        Box(modifier = Modifier.fillMaxSize().clickable { productOptionsIndex = null }, contentAlignment = Alignment.Center) {
+                            Surface(modifier = Modifier.shadow(8.dp, RoundedCornerShape(16.dp)), shape = RoundedCornerShape(16.dp), color = Color.White) {
                                 Row(modifier = Modifier.padding(12.dp)) {
-                                    IconButton(onClick = {
-                                        productToEdit = currentProd
-                                        showProductForm = true
-                                        productOptionsIndex = null
-                                    }) {
-                                        Icon(Icons.Default.Edit, "Editar", tint = ActionBlue)
-                                    }
+                                    IconButton(onClick = { productToEdit = currentProd; showProductForm = true; productOptionsIndex = null }) { Icon(Icons.Default.Edit, "Editar", tint = ActionBlue) }
                                     Spacer(Modifier.width(8.dp))
-                                    IconButton(onClick = {
-                                        scope.launch {
-                                            repository.deleteProduct(currentProd)
-                                            onRefreshProducts()
-                                            productOptionsIndex = null
-                                        }
-                                    }) {
-                                        Icon(Icons.Default.Delete, "Eliminar", tint = Color.Red)
-                                    }
+                                    IconButton(onClick = { scope.launch { repository.deleteProduct(currentProd); onRefreshProducts(); productOptionsIndex = null } }) { Icon(Icons.Default.Delete, "Eliminar", tint = Color.Red) }
                                 }
                             }
                         }
@@ -579,14 +437,9 @@ fun NewSaleDialog(
             onDismiss = { showProductForm = false },
             onSave = { name, price, cat, photo ->
                 scope.launch {
-                    val p = productToEdit?.copy(name = name, price = price, category = cat)
-                        ?: com.tacoos.poc.data.local.Product(
-                            id = UUID.randomUUID().toString(),
-                            name = name,
-                            price = price,
-                            category = cat,
-                            negocioId = GoogleSignInState.negocioId ?: "N/A"
-                        )
+                    val imgPath = photo?.let { ImageStorage.saveImage(context, it, "prod") } ?: productToEdit?.imagePath
+                    val p = productToEdit?.copy(name = name, price = price, category = cat, imagePath = imgPath)
+                        ?: com.tacoos.poc.data.local.Product(id = UUID.randomUUID().toString(), name = name, price = price, category = cat, imagePath = imgPath, negocioId = GoogleSignInState.negocioId ?: "N/A")
                     if (productToEdit == null) repository.saveProduct(p) else repository.updateProduct(p)
                     onRefreshProducts()
                     showProductForm = false
@@ -608,19 +461,13 @@ fun NewSaleDialog(
     }
 }
 
-/**
- * CobroForm: Pantalla final de pago. Incluye captura de voucher para tarjetas.
- */
 @Composable
 fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, String, Bitmap?) -> Unit) {
     val total = items.sumOf { it.price * it.quantity }
     var paymentMethod by remember { mutableStateOf("Efectivo") }
     var amountPaid by remember { mutableStateOf("") }
     var voucherPhoto by remember { mutableStateOf<Bitmap?>(null) }
-
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-        voucherPhoto = it
-    }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { voucherPhoto = it }
 
     TacoDialog(title = "Resumen de venta", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
         LazyColumn(modifier = Modifier.weight(1f)) {
@@ -633,9 +480,7 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
             Spacer(Modifier.width(8.dp))
             Button(onClick = { paymentMethod = "Tarjeta" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (paymentMethod == "Tarjeta") ActionBlue else Color.Gray)) { Text("Tarjeta") }
         }
-
         Spacer(Modifier.height(12.dp))
-
         if (paymentMethod == "Efectivo") {
             OutlinedTextField(value = amountPaid, onValueChange = { if (it.all { c -> c.isDigit() }) amountPaid = it }, label = { Text("Paga con") }, modifier = Modifier.fillMaxWidth())
             val p = amountPaid.toDoubleOrNull() ?: 0.0
@@ -646,59 +491,38 @@ fun CobroForm(items: List<POSItem>, onDismiss: () -> Unit, onConfirm: (Double, S
                 }
             }
         } else {
-            // FLUJO TARJETA: Captura de Voucher
-            Button(
-                onClick = { cameraLauncher.launch() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
-            ) {
+            Button(onClick = { cameraLauncher.launch() }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.AddCircle, null)
                     Spacer(Modifier.width(8.dp))
                     Text(if (voucherPhoto != null) "VOUCHER CAPTURADO" else "FOTO DEL VOUCHER")
                 }
             }
+            if (voucherPhoto != null) {
+                Image(bitmap = voucherPhoto!!.asImageBitmap(), contentDescription = null, modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp)).align(Alignment.CenterHorizontally), contentScale = ContentScale.Crop)
+            }
         }
-
         Spacer(Modifier.height(16.dp))
-
         val canConfirm = if (paymentMethod == "Tarjeta") voucherPhoto != null else true
-
-        Button(
-            onClick = { onConfirm(total, paymentMethod, voucherPhoto) },
-            enabled = canConfirm,
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = if (canConfirm) SuccessGreen else Color.Gray)
-        ) {
-            Text("COBRA", fontWeight = FontWeight.Black, fontSize = 18.sp)
-        }
+        Button(onClick = { onConfirm(total, paymentMethod, voucherPhoto) }, enabled = canConfirm, modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(20.dp), colors = ButtonDefaults.buttonColors(containerColor = if (canConfirm) SuccessGreen else Color.Gray)) { Text("COBRA", fontWeight = FontWeight.Black, fontSize = 18.sp) }
     }
 }
 
-/**
- * ProductRowInline: Fila de producto con soporte para toque largo.
- */
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit, onLongClick: () -> Unit = {}) {
     var qty by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     var isSelected by remember { mutableStateOf(false) }
+    val image = remember(prod.imagePath) { ImageStorage.loadImage(prod.imagePath) }
     
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .combinedClickable(
-                onClick = { isSelected = true },
-                onLongClick = onLongClick
-            ),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).combinedClickable(onClick = { isSelected = true }, onLongClick = onLongClick), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray.copy(alpha = 0.2f)))
+            if (image != null) {
+                Image(bitmap = image.asImageBitmap(), contentDescription = null, modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Crop)
+            } else {
+                Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray.copy(alpha = 0.2f)))
+            }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) { Text(prod.name, fontWeight = FontWeight.Bold); Text("$${prod.price}", color = ActionBlue, fontSize = 12.sp) }
             if (isSelected) {
@@ -707,103 +531,53 @@ fun ProductRowInline(prod: POSItem, onAdd: (Int) -> Unit, onLongClick: () -> Uni
                     IconButton(onClick = { if (qty.isNotEmpty()) { onAdd(qty.toInt()); qty = "" } }) { Icon(Icons.Default.Add, null, tint = ActionBlue) }
                     LaunchedEffect(Unit) { focusRequester.requestFocus() }
                 }
-            } else { Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.LightGray) }
+            } else { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.LightGray) }
         }
     }
 }
 
-/**
- * ProductForm: Formulario único para Registrar y Editar productos.
- */
 @Composable
-fun ProductForm(
-    product: com.tacoos.poc.data.local.Product? = null,
-    onDismiss: () -> Unit,
-    onSave: (String, Double, String, Bitmap?) -> Unit
-) {
+fun ProductForm(product: com.tacoos.poc.data.local.Product? = null, onDismiss: () -> Unit, onSave: (String, Double, String, Bitmap?) -> Unit) {
     var name by remember { mutableStateOf(product?.name ?: "") }
     var price by remember { mutableStateOf(product?.price?.toString() ?: "") }
     var category by remember { mutableStateOf(product?.category ?: "Comidas") }
     var photo by remember { mutableStateOf<Bitmap?>(null) }
     var expanded by remember { mutableStateOf(false) }
-
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo = it }
+    val existingImage = remember(product?.imagePath) { ImageStorage.loadImage(product?.imagePath) }
 
-    TacoDialog(
-        title = if (product == null) "Nuevo Producto" else "Editar Producto",
-        onDismiss = onDismiss,
-        maxHeightFactor = 0.8f
-    ) {
+    TacoDialog(title = if (product == null) "Nuevo Producto" else "Editar Producto", onDismiss = onDismiss, maxHeightFactor = 0.8f) {
         Column(modifier = Modifier.padding(8.dp)) {
-            // Sección de Foto
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.LightGray.copy(alpha = 0.2f))
-                    .clickable { cameraLauncher.launch() }
-                    .align(Alignment.CenterHorizontally),
-                contentAlignment = Alignment.Center
-            ) {
-                if (photo != null) {
-                    // Aquí se mostraría la miniatura de la foto
-                    Icon(Icons.Default.CheckCircle, "Capturada", tint = SuccessGreen)
+            Box(modifier = Modifier.size(100.dp).clip(RoundedCornerShape(16.dp)).background(Color.LightGray.copy(alpha = 0.2f)).clickable { cameraLauncher.launch() }.align(Alignment.CenterHorizontally), contentAlignment = Alignment.Center) {
+                val displayBitmap = photo ?: existingImage
+                if (displayBitmap != null) {
+                    Image(bitmap = displayBitmap.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) { Icon(Icons.Default.CameraAlt, null, tint = Color.White) }
                 } else {
                     Icon(Icons.Default.AddAPhoto, "Cámara", tint = Color.Gray)
                 }
             }
-            
             Spacer(Modifier.height(16.dp))
-            
             OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(value = price, onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) price = it }, label = { Text("Precio") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth())
-            
             Spacer(Modifier.height(16.dp))
-            
-            // Selector de Categoría (Dropdown)
             Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Categoría") },
-                    trailingIcon = { IconButton(onClick = { expanded = true }) { Icon(Icons.Default.ArrowDropDown, null) } },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                OutlinedTextField(value = category, onValueChange = {}, readOnly = true, label = { Text("Categoría") }, trailingIcon = { IconButton(onClick = { expanded = true }) { Icon(Icons.Default.ArrowDropDown, null) } }, modifier = Modifier.fillMaxWidth())
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    listOf("Comidas", "Bebidas", "Postres").forEach { cat ->
-                        DropdownMenuItem(text = { Text(cat) }, onClick = { category = cat; expanded = false })
-                    }
+                    listOf("Comidas", "Bebidas", "Postres").forEach { cat -> DropdownMenuItem(text = { Text(cat) }, onClick = { category = cat; expanded = false }) }
                 }
             }
-
             Spacer(Modifier.height(24.dp))
-            
-            Button(
-                onClick = { if (name.isNotEmpty() && price.isNotEmpty()) onSave(name, price.toDoubleOrNull() ?: 0.0, category, photo) },
-                modifier = Modifier.fillMaxWidth().height(60.dp),
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ActionBlue)
-            ) {
-                Text("GUARDAR PRODUCTO", fontWeight = FontWeight.Black)
-            }
-            
-            TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                Text("CANCELAR", color = Color.Gray)
-            }
+            Button(onClick = { if (name.isNotEmpty() && price.isNotEmpty()) onSave(name, price.toDoubleOrNull() ?: 0.0, category, photo) }, modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(20.dp), colors = ButtonDefaults.buttonColors(containerColor = ActionBlue)) { Text("GUARDAR PRODUCTO", fontWeight = FontWeight.Black) }
+            TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text("CANCELAR", color = Color.Gray) }
         }
     }
 }
 
-/**
- * ExpenseDialog: Formulario de gastos.
- */
 @Composable
 fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
-    var detalle by remember { mutableStateOf("") }
-    var cantidad by remember { mutableStateOf("") }
-    var capturedPhoto by remember { mutableStateOf<Bitmap?>(null) }
+    var detalle by remember { mutableStateOf("") }; var cantidad by remember { mutableStateOf("") }; var capturedPhoto by remember { mutableStateOf<Bitmap?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { capturedPhoto = it }
 
     TacoDialog(title = "Registrar Gasto", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
@@ -811,38 +585,21 @@ fun ExpenseDialog(onDismiss: () -> Unit, onConfirm: (POSExpense) -> Unit) {
         OutlinedTextField(value = cantidad, onValueChange = { if (it.all { c -> c.isDigit() }) cantidad = it }, label = { Text("Total") }, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
         Button(onClick = { cameraLauncher.launch() }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AddCircle, null)
-                Spacer(Modifier.width(8.dp))
-                Text(if (capturedPhoto != null) "FOTO CAPTURADA" else "TOMAR FOTO TICKET")
-            }
+            Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.AddCircle, null); Spacer(Modifier.width(8.dp)); Text(if (capturedPhoto != null) "FOTO CAPTURADA" else "TOMAR FOTO TICKET") }
+        }
+        if (capturedPhoto != null) {
+            Image(bitmap = capturedPhoto!!.asImageBitmap(), contentDescription = null, modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)).align(Alignment.CenterHorizontally), contentScale = ContentScale.Crop)
         }
         Button(onClick = { onConfirm(POSExpense(detail = detalle, amount = cantidad.toDoubleOrNull() ?: 0.0, cashier = GoogleSignInState.nombre, receiptPhoto = capturedPhoto)) }, modifier = Modifier.fillMaxWidth()) { Text("REGISTRAR GASTO") }
         TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text("CANCELAR") }
     }
 }
 
-/**
- * CorteDialog: Formulario final de arqueo.
- */
 @Composable
 fun CorteDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    val totalSales = ShiftManager.sales.filter { it.status == "Cobrada" }.sumOf { it.amount }
-    val totalCash = ShiftManager.sales.filter { it.status == "Cobrada" && it.method == "Efectivo" }.sumOf { it.amount }
-    val totalCard = ShiftManager.sales.filter { it.status == "Cobrada" && it.method == "Tarjeta" }.sumOf { it.amount }
-    val totalExp = ShiftManager.expenses.sumOf { it.amount }
-    val cashInDrawer = totalCash + ShiftManager.fondoCaja - totalExp
-
+    val totalSales = ShiftManager.sales.filter { it.status == "Cobrada" }.sumOf { it.amount }; val totalCash = ShiftManager.sales.filter { it.status == "Cobrada" && it.method == "Efectivo" }.sumOf { it.amount }; val totalCard = ShiftManager.sales.filter { it.status == "Cobrada" && it.method == "Tarjeta" }.sumOf { it.amount }; val totalExp = ShiftManager.expenses.sumOf { it.amount }; val cashInDrawer = totalCash + ShiftManager.fondoCaja - totalExp
     TacoDialog(title = "¿Cerrar Corte?", onDismiss = onDismiss, maxHeightFactor = 0.6f) {
-        Text("Responsable: ${ShiftManager.currentCashier}", fontWeight = FontWeight.Bold)
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        ReportRow("Total Ventas:", "$$totalSales")
-        ReportRow("Pago con Tarjeta:", "$$totalCard")
-        ReportRow("Pago en Efectivo:", "$$totalCash")
-        ReportRow("Total Gastos:", "$$totalExp")
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        ReportRow("Fondo Inicial:", "$${ShiftManager.fondoCaja}")
-        ReportRow("EFECTIVO EN CAJA:", "$${cashInDrawer}", color = SuccessGreen)
+        Text("Responsable: ${ShiftManager.currentCashier}", fontWeight = FontWeight.Bold); HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)); ReportRow("Total Ventas:", "$$totalSales"); ReportRow("Pago con Tarjeta:", "$$totalCard"); ReportRow("Pago en Efectivo:", "$$totalCash"); ReportRow("Total Gastos:", "$$totalExp"); HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)); ReportRow("Fondo Inicial:", "$${ShiftManager.fondoCaja}"); ReportRow("EFECTIVO EN CAJA:", "$${cashInDrawer}", color = SuccessGreen)
         if (ShiftManager.fondoCaja == 0.0) Text("AVISO: Corte sin fondo", color = Color.Red, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Button(onClick = onConfirm, modifier = Modifier.fillMaxWidth().height(60.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.Red), shape = RoundedCornerShape(20.dp)) { Text("HACER CORTE", fontWeight = FontWeight.Black) }
         TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text("REGRESAR", color = Color.Gray) }

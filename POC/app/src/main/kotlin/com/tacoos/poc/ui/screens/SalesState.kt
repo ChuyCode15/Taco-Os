@@ -51,7 +51,8 @@ data class POSItem(
     val name: String,
     val price: Double,
     val category: String,
-    var quantity: Int = 0
+    var quantity: Int = 0,
+    val imagePath: String? = null
 )
 
 /**

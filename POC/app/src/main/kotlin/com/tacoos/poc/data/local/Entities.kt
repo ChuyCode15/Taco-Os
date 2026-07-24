@@ -1,28 +1,6 @@
 package com.tacoos.poc.data.local
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.room.*
-import java.io.ByteArrayOutputStream
-
-/**
- * Converters: Manejo de Bitmaps para persistencia local.
- */
-class Converters {
-    @TypeConverter
-    fun fromBitmap(bitmap: Bitmap?): ByteArray? {
-        if (bitmap == null) return null
-        val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
-        return outputStream.toByteArray()
-    }
-
-    @TypeConverter
-    fun toBitmap(byteArray: ByteArray?): Bitmap? {
-        if (byteArray == null) return null
-        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-    }
-}
 
 @Entity(tableName = "users")
 data class User(
@@ -45,7 +23,8 @@ data class Business(
 )
 
 /**
- * Entidad Sale: Soporta auditoría de tarjeta y datos para Reportes.
+ * Entidad Sale: Registro de transacciones. 
+ * imagePath: Almacena la ruta local de la foto del voucher (solo tarjetas).
  */
 @Entity(tableName = "sales")
 data class Sale(
@@ -55,12 +34,16 @@ data class Sale(
     val productsJson: String = "",
     val method: String = "Efectivo",
     val status: String = "ACTIVE",
-    val voucherPhoto: Bitmap? = null,
+    val imagePath: String? = null, 
     val timestamp: Long = System.currentTimeMillis(),
     val isSynced: Boolean = false,
     val negocioId: String
 )
 
+/**
+ * Entidad Expense: Registro de gastos.
+ * imagePath: Almacena la ruta local de la foto del ticket.
+ */
 @Entity(tableName = "expenses")
 data class Expense(
     @PrimaryKey val id: String,
@@ -68,21 +51,21 @@ data class Expense(
     val amount: Double,
     val cashier: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val receiptPhoto: Bitmap? = null,
+    val imagePath: String? = null,
     val isSynced: Boolean = false,
     val negocioId: String
 )
 
 /**
- * Entidad Product: Gestión real del catálogo de productos.
+ * Entidad Product: Catálogo de productos con imagen local.
  */
 @Entity(tableName = "products")
 data class Product(
     @PrimaryKey val id: String,
     val name: String,
     val price: Double,
-    val category: String, // Comidas, Bebidas, Postres
-    val imagePath: String? = null, // Ruta al archivo JPG local
+    val category: String,
+    val imagePath: String? = null,
     val negocioId: String,
     val isSynced: Boolean = false
 )
@@ -176,8 +159,11 @@ interface MetadataDao {
     suspend fun updateMetadata(metadata: AppMetadata)
 }
 
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class, Product::class], version = 6, exportSchema = false)
-@TypeConverters(Converters::class)
+/**
+ * AppDatabase: Actualizada a versión 7. 
+ * Se remueve TypeConverters de Bitmap para optimizar rendimiento usando archivos locales.
+ */
+@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class, Product::class], version = 7, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
     abstract fun expenseDao(): ExpenseDao

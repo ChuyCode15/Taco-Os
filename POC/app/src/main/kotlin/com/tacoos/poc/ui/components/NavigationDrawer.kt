@@ -80,6 +80,7 @@ fun AppDrawerContent(
             DrawerItem(Icons.Default.PointOfSale, "Ventas") { onClose(); navController.navigate("sales") }
             DrawerItem(Icons.Default.BarChart, "Reportes") { onClose(); navController.navigate("reports") }
             DrawerItem(Icons.Default.Groups, "Mi Equipo") { onClose(); navController.navigate("cashiers") }
+            DrawerItem(Icons.Default.Fastfood, "Mis Productos") { onClose(); navController.navigate("products") }
             DrawerItem(Icons.Default.Settings, "Ajustes") { onClose(); navController.navigate("settings") }
 
             Divider(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp).alpha(0.3f))

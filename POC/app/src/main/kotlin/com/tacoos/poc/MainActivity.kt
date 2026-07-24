@@ -38,6 +38,9 @@ class MainActivity : ComponentActivity() {
                     composable("sales") { 
                         SalesScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 
                     }
+                    composable("products") {
+                        ProductsScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it })
+                    }
                     composable("settings") { 
                         PlaceholderScreen(navController, "Ajustes") 
                     }

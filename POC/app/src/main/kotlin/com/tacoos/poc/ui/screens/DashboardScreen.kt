@@ -1,19 +1,14 @@
 package com.tacoos.poc.ui.screens
 
-import android.media.RingtoneManager
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,12 +17,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.tacoos.poc.ui.components.AppDrawerContent
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
@@ -43,12 +38,7 @@ fun DashboardScreen(
 ) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val context = LocalContext.current
     
-    var showSupportBubble by remember { mutableStateOf(false) }
-    var hasNewSupportMessage by remember { mutableStateOf(true) }
-
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -99,9 +89,35 @@ fun DashboardScreen(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("VENTAS HOY", color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Bold)
-                        Text("$12,450.00", color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Black)
+                    val imageUrls = remember {
+                        listOf(
+                            "https://picsum.photos/id/10/800/400",
+                            "https://picsum.photos/id/11/800/400",
+                            "https://picsum.photos/id/12/800/400",
+                            "https://picsum.photos/id/13/800/400",
+                            "https://picsum.photos/id/14/800/400"
+                        )
+                    }
+                    val pagerState = rememberPagerState(pageCount = { 10000 }) // Para efecto infinito
+
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            delay(3000)
+                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        }
+                    }
+
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { page ->
+                        val index = page % imageUrls.size
+                        AsyncImage(
+                            model = imageUrls[index],
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
                     }
                 }
 

@@ -40,10 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.tacoos.poc.ui.components.ActionButton
-import com.tacoos.poc.ui.components.AppleToggle
-import com.tacoos.poc.ui.components.ReportRow
-import com.tacoos.poc.ui.components.TacoDialog
+import com.tacoos.poc.ui.components.*
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
 import com.tacoos.poc.ui.theme.SuccessGreen
@@ -100,41 +97,12 @@ fun SalesScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.width(320.dp).fillMaxHeight(),
-                drawerContainerColor = MaterialTheme.colorScheme.surface,
-                drawerShape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp)
-            ) {
-                Spacer(Modifier.height(56.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("MI PERFIL", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    AppleToggle(checked = isDarkMode, onCheckedChange = onThemeChange)
-                }
-                Spacer(Modifier.height(24.dp))
-                NavigationDrawerItem(
-                    label = { Text("Ajustes", fontWeight = FontWeight.Medium) },
-                    selected = false,
-                    onClick = { scope.launch { drawerState.close() }; navController.navigate("settings") },
-                    icon = { Icon(Icons.Default.Settings, null, tint = Color.Gray) },
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent)
-                )
-                NavigationDrawerItem(
-                    label = { Text("Ayuda / Soporte", fontWeight = FontWeight.Medium) },
-                    selected = false,
-                    onClick = { },
-                    icon = { Icon(Icons.Default.Info, null, tint = Color.Gray) },
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent)
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = "Cerrar Sesión", modifier = Modifier.padding(24.dp).clickable { navController.navigate("login") { popUpTo(0) } }, color = Color.Red, fontWeight = FontWeight.Black, fontSize = 14.sp)
-                Spacer(Modifier.height(16.dp))
-            }
+            AppDrawerContent(
+                isDarkMode = isDarkMode,
+                onThemeChange = onThemeChange,
+                navController = navController,
+                onClose = { scope.launch { drawerState.close() } }
+            )
         }
     ) {
         Scaffold(

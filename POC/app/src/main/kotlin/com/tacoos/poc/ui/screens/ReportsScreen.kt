@@ -51,14 +51,15 @@ fun ReportsScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     
     var showRangeSheet by remember { mutableStateOf(false) }
+    var showDateRangePicker by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    val dateRangePickerState = rememberDateRangePickerState()
 
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             AppDrawerContent(
-
                 isDarkMode = isDarkMode,
                 onThemeChange = onThemeChange,
                 navController = navController,
@@ -142,7 +143,42 @@ fun ReportsScreen(
                 RangeOption("Ayer", Icons.Default.History) { viewModel.loadPreset("AYER"); showRangeSheet = false }
                 RangeOption("Últimos 7 días", Icons.Default.DateRange) { viewModel.loadPreset("SEMANA"); showRangeSheet = false }
                 RangeOption("Este mes", Icons.Default.CalendarMonth) { viewModel.loadPreset("MES"); showRangeSheet = false }
+                RangeOption("Fecha manual", Icons.Default.EditCalendar) { 
+                    showDateRangePicker = true 
+                    showRangeSheet = false 
+                }
             }
+        }
+    }
+
+    if (showDateRangePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDateRangePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val start = dateRangePickerState.selectedStartDateMillis
+                    val end = dateRangePickerState.selectedEndDateMillis
+                    if (start != null && end != null) {
+                        val calEnd = Calendar.getInstance().apply {
+                            timeInMillis = end
+                            set(Calendar.HOUR_OF_DAY, 23)
+                            set(Calendar.MINUTE, 59)
+                            set(Calendar.SECOND, 59)
+                        }
+                        viewModel.loadReport(start, calEnd.timeInMillis)
+                        showDateRangePicker = false
+                    }
+                }) { Text("ACEPTAR", fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDateRangePicker = false }) { Text("CANCELAR") }
+            }
+        ) {
+            DateRangePicker(
+                state = dateRangePickerState,
+                title = { Text("Selecciona el rango", modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold) },
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
@@ -255,7 +291,7 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
         loadReport(start, end)
     }
 
-    private fun loadReport(startDate: Long, endDate: Long) {
+    fun loadReport(startDate: Long, endDate: Long) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             val user = db.userDao().getCurrentUser()

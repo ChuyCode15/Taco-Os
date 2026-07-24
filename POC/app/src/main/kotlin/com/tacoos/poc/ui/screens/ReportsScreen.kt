@@ -26,6 +26,7 @@ import com.google.gson.reflect.TypeToken
 import com.tacoos.poc.TacoApp
 import com.tacoos.poc.data.local.Sale
 import com.tacoos.poc.data.local.Expense
+import com.tacoos.poc.ui.components.AppDrawerContent
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,76 +40,95 @@ import java.util.*
 @Composable
 fun ReportsScreen(
     navController: NavController,
+    isDarkMode: Boolean,
+    onThemeChange: (Boolean) -> Unit,
     viewModel: ReportsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
     
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    
     var showRangeSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("REPORTES", fontWeight = FontWeight.Black, fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showRangeSheet = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Rango", tint = ActionBlue)
-                    }
-                }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            AppDrawerContent(
+
+                isDarkMode = isDarkMode,
+                onThemeChange = onThemeChange,
+                navController = navController,
+                onClose = { scope.launch { drawerState.close() } }
             )
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(uiState.dateRange.uppercase(), style = MaterialTheme.typography.labelLarge, color = ActionBlue, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(24.dp))
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("REPORTES", fontWeight = FontWeight.Black, fontSize = 20.sp) },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menú")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { showRangeSheet = true }) {
+                            Icon(Icons.Default.DateRange, contentDescription = "Rango", tint = ActionBlue)
+                        }
+                    }
+                )
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(uiState.dateRange.uppercase(), style = MaterialTheme.typography.labelLarge, color = ActionBlue, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(24.dp))
 
-            if (uiState.isLoading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = ActionBlue)
-                }
-            } else if (uiState.sales.isEmpty() && uiState.expenses.isEmpty()) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 100.dp)) {
-                    Icon(Icons.Default.BarChart, null, modifier = Modifier.size(64.dp), tint = Color.LightGray)
-                    Spacer(Modifier.height(16.dp))
-                    Text("No hay movimientos en este periodo", color = Color.Gray)
-                }
-            } else {
-                // Resumen Financiero
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    ReportCardSmall("INGRESOS", currencyFormatter.format(uiState.totalSales), Color(0xFF4CAF50), Modifier.weight(1f))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    ReportCardSmall("GASTOS", currencyFormatter.format(uiState.totalExpenses), Color(0xFFF44336), Modifier.weight(1f))
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                ReportCard("BALANCE NETO", currencyFormatter.format(uiState.totalSales - uiState.totalExpenses), PrimaryNavy)
-                
-                Spacer(modifier = Modifier.height(32.dp))
+                if (uiState.isLoading) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = ActionBlue)
+                    }
+                } else if (uiState.sales.isEmpty() && uiState.expenses.isEmpty()) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 100.dp)) {
+                        Icon(Icons.Default.BarChart, null, modifier = Modifier.size(64.dp), tint = Color.LightGray)
+                        Spacer(Modifier.height(16.dp))
+                        Text("No hay movimientos en este periodo", color = Color.Gray)
+                    }
+                } else {
+                    // Resumen Financiero
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        ReportCardSmall("INGRESOS", currencyFormatter.format(uiState.totalSales), Color(0xFF4CAF50), Modifier.weight(1f))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        ReportCardSmall("GASTOS", currencyFormatter.format(uiState.totalExpenses), Color(0xFFF44336), Modifier.weight(1f))
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ReportCard("BALANCE NETO", currencyFormatter.format(uiState.totalSales - uiState.totalExpenses), PrimaryNavy)
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
 
-                // Estadísticas por Cajero
-                if (uiState.cashierStats.isNotEmpty()) {
-                    SectionHeader("POR CAJERO", Icons.Default.Groups)
-                    uiState.cashierStats.forEach { StatItem(it.name, currencyFormatter.format(it.totalSales), "${it.salesCount} ventas") }
-                }
+                    // Estadísticas por Cajero
+                    if (uiState.cashierStats.isNotEmpty()) {
+                        SectionHeader("POR CAJERO", Icons.Default.Groups)
+                        uiState.cashierStats.forEach { StatItem(it.name, currencyFormatter.format(it.totalSales), "${it.salesCount} ventas") }
+                    }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
 
-                // Top Productos
-                if (uiState.productStats.isNotEmpty()) {
-                    SectionHeader("TOP PRODUCTOS", Icons.Default.Inventory2)
-                    uiState.productStats.take(10).forEach { StatItem(it.name, "${it.quantitySold} uds", "Total: ${currencyFormatter.format(it.totalSales)}") }
+                    // Top Productos
+                    if (uiState.productStats.isNotEmpty()) {
+                        SectionHeader("TOP PRODUCTOS", Icons.Default.Inventory2)
+                        uiState.productStats.take(10).forEach { StatItem(it.name, "${it.quantitySold} uds", "Total: ${currencyFormatter.format(it.totalSales)}") }
+                    }
                 }
             }
         }

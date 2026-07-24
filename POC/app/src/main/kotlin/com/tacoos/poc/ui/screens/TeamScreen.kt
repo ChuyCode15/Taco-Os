@@ -36,6 +36,7 @@ import androidx.navigation.NavController
 import com.tacoos.poc.TacoApp
 import com.tacoos.poc.data.TacoRepository
 import com.tacoos.poc.data.remote.InvitationRequest
+import com.tacoos.poc.ui.components.AppDrawerContent
 import com.tacoos.poc.ui.theme.PrimaryNavy
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -163,81 +164,99 @@ class InvitationViewModel(application: Application) : AndroidViewModel(applicati
 @Composable
 fun TeamScreen(
     navController: NavController,
+    isDarkMode: Boolean,
+    onThemeChange: (Boolean) -> Unit,
     teamViewModel: TeamViewModel = viewModel(),
     invitationViewModel: InvitationViewModel = viewModel()
 ) {
     val teamState by teamViewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    
     var showInvitationSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("MI EQUIPO", fontWeight = FontWeight.Black, fontSize = 18.sp) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { teamViewModel.loadTeam() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Actualizar")
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    if (teamViewModel.checkCashierLimit()) {
-                        showInvitationSheet = true
-                    }
-                },
-                containerColor = PrimaryNavy,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Cajero")
-            }
-        }
-    ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            if (teamState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (teamState.errorMessage != null) {
-                Text(teamState.errorMessage!!, color = Color.Red, modifier = Modifier.align(Alignment.Center).padding(16.dp))
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(teamState.cashiers) { cashier ->
-                        CashierItem(
-                            cashier = cashier,
-                            onUpdateNickname = { teamViewModel.updateNickname(cashier.id, it) },
-                            onTogglePermission = { teamViewModel.togglePermission(cashier.id, it) }
-                        )
-                    }
-                    item { Spacer(modifier = Modifier.height(80.dp)) }
-                }
-            }
-        }
 
-        if (showInvitationSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showInvitationSheet = false },
-                sheetState = sheetState,
-                containerColor = MaterialTheme.colorScheme.surface,
-                dragHandle = { BottomSheetDefaults.DragHandle() }
-            ) {
-                InvitationFormSheet(
-                    viewModel = invitationViewModel,
-                    onDismiss = { showInvitationSheet = false },
-                    onNotify = { _, msg ->
-                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            AppDrawerContent(
+                isDarkMode = isDarkMode,
+                onThemeChange = onThemeChange,
+                navController = navController,
+                onClose = { scope.launch { drawerState.close() } }
+            )
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("MI EQUIPO", fontWeight = FontWeight.Black, fontSize = 18.sp) },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menú")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { teamViewModel.loadTeam() }) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Actualizar")
+                        }
                     }
                 )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {
+                        if (teamViewModel.checkCashierLimit()) {
+                            showInvitationSheet = true
+                        }
+                    },
+                    containerColor = PrimaryNavy,
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar Cajero")
+                }
+            }
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+                if (teamState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (teamState.errorMessage != null) {
+                    Text(teamState.errorMessage!!, color = Color.Red, modifier = Modifier.align(Alignment.Center).padding(16.dp))
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(teamState.cashiers) { cashier ->
+                            CashierItem(
+                                cashier = cashier,
+                                onUpdateNickname = { teamViewModel.updateNickname(cashier.id, it) },
+                                onTogglePermission = { teamViewModel.togglePermission(cashier.id, it) }
+                            )
+                        }
+                        item { Spacer(modifier = Modifier.height(80.dp)) }
+                    }
+                }
+            }
+
+            if (showInvitationSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showInvitationSheet = false },
+                    sheetState = sheetState,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    dragHandle = { BottomSheetDefaults.DragHandle() }
+                ) {
+                    InvitationFormSheet(
+                        viewModel = invitationViewModel,
+                        onDismiss = { showInvitationSheet = false },
+                        onNotify = { _, msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                        }
+                    )
+                }
             }
         }
     }
@@ -398,7 +417,7 @@ fun CashierItem(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            Divider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray.copy(alpha = 0.3f))
+            HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = Color.LightGray.copy(alpha = 0.3f))
             
             Row(
                 modifier = Modifier.fillMaxWidth().clickable { showPermissions = !showPermissions }.padding(vertical = 8.dp),

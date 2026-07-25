@@ -29,7 +29,7 @@ interface TacoApi {
     suspend fun updateBusiness(@Path("id") id: UUID, @Body request: BusinessRequest): BusinessResponse
 
     @GET("api/v1/business/{id}/cajeros")
-    suspend fun getCashiers(@Path("id") id: UUID): List<AuthResponse>
+    suspend fun getCashiers(@Path("id") id: String): DatosListaCajeros
 
     // --- ENLACE (D) ---
     @POST("api/v1/business/invitation")
@@ -66,7 +66,8 @@ interface TacoApi {
     suspend fun checkHealth(): Map<String, String>
     
     companion object {
-        const val BASE_URL = "http://192.168.1.144:8080/"
-        //const val BASE_URL = "http://10.0.2.2:8080/"
+        //const val BASE_URL = "http://192.168.1.144:8080/"
+        //const val BASE_URL = "http://192.168.1.7:8080/"
+        const val BASE_URL = "http://10.0.2.2:8080/"
     }
 }

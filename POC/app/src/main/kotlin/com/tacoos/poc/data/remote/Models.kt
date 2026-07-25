@@ -49,6 +49,23 @@ data class BusinessResponse(
     val dineroBase: Double = 0.0
 )
 
+// Cajero Models
+data class DatosListaCajeros(
+    val lista: List<CajeroResponse>? = emptyList()
+)
+
+data class CajeroResponse(
+    val id: String,
+    val idGoogle: String,
+    val nombreCompleto: String,
+    val nickname: String?,
+    val correo: String,
+    val numero: String?,
+    val permisos: String?,
+    val fechaEnlace: String?,
+    val activo: Boolean
+)
+
 // Sale Sync Models
 data class SaleRequest(
     val amount: Double,

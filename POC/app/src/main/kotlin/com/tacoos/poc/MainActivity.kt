@@ -38,9 +38,18 @@ class MainActivity : ComponentActivity() {
                     composable("sales") { 
                         SalesScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 
                     }
-                    composable("settings") { PlaceholderScreen(navController, "Ajustes") }
-                    composable("reports") { ReportsScreen(navController) }
-                    composable("cashiers") { TeamScreen(navController) }
+                    composable("products") {
+                        ProductsScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it })
+                    }
+                    composable("settings") { 
+                        SettingsScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 
+                    }
+                    composable("reports") { 
+                        ReportsScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 
+                    }
+                    composable("cashiers") { 
+                        TeamScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 
+                    }
                 }
             }
         }

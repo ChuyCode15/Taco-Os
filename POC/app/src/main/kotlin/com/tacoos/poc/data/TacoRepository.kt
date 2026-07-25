@@ -10,6 +10,7 @@ import com.tacoos.poc.data.local.Product
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
+import java.util.UUID
 
 /**
  * TacoRepository: Capa de abstracción de datos (Single Source of Truth).
@@ -36,6 +37,8 @@ class TacoRepository(
         )
     )
 
+    // --- Operaciones de Negocio ---
+
     suspend fun createBusiness(duenoId: String, nombre: String, direccion: String, giro: String) =
         api.createBusiness(
             duenoId = duenoId,
@@ -46,6 +49,11 @@ class TacoRepository(
                 queVende = giro
             )
         )
+
+    suspend fun getBusinessDetails(id: String) = api.getBusiness(UUID.fromString(id))
+
+    suspend fun updateBusiness(id: String, request: BusinessRequest) = 
+        api.updateBusiness(UUID.fromString(id), request)
 
     suspend fun saveUserLocally(user: User) {
         db.userDao().clearUser()

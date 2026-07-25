@@ -46,10 +46,10 @@ fun ReportsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-    
+
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    
+
     var showRangeSheet by remember { mutableStateOf(false) }
     var showDateRangePicker by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -114,7 +114,7 @@ fun ReportsScreen(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     ReportCard("BALANCE NETO", currencyFormatter.format(uiState.totalSales - uiState.totalExpenses), PrimaryNavy)
-                    
+
                     Spacer(modifier = Modifier.height(32.dp))
 
                     // Estadísticas por Cajero
@@ -143,9 +143,9 @@ fun ReportsScreen(
                 RangeOption("Ayer", Icons.Default.History) { viewModel.loadPreset("AYER"); showRangeSheet = false }
                 RangeOption("Últimos 7 días", Icons.Default.DateRange) { viewModel.loadPreset("SEMANA"); showRangeSheet = false }
                 RangeOption("Este mes", Icons.Default.CalendarMonth) { viewModel.loadPreset("MES"); showRangeSheet = false }
-                RangeOption("Fecha manual", Icons.Default.EditCalendar) { 
-                    showDateRangePicker = true 
-                    showRangeSheet = false 
+                RangeOption("Fecha manual", Icons.Default.EditCalendar) {
+                    showDateRangePicker = true
+                    showRangeSheet = false
                 }
             }
         }
@@ -272,16 +272,16 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
         val end = System.currentTimeMillis()
         var start = end
         when (preset) {
-            "HOY" -> { 
-                calendar.set(Calendar.HOUR_OF_DAY, 0); calendar.set(Calendar.MINUTE, 0); 
-                calendar.set(Calendar.SECOND, 0); start = calendar.timeInMillis 
+            "HOY" -> {
+                calendar.set(Calendar.HOUR_OF_DAY, 0); calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0); start = calendar.timeInMillis
             }
-            "AYER" -> { 
+            "AYER" -> {
                 calendar.add(Calendar.DAY_OF_YEAR, -1)
                 calendar.set(Calendar.HOUR_OF_DAY, 0); calendar.set(Calendar.MINUTE, 0); start = calendar.timeInMillis
-                val calEnd = Calendar.getInstance().apply { 
+                val calEnd = Calendar.getInstance().apply {
                     add(Calendar.DAY_OF_YEAR, -1)
-                    set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59) 
+                    set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59)
                 }
                 loadReport(start, calEnd.timeInMillis); return
             }
@@ -308,7 +308,7 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
 
             val productMap = mutableMapOf<String, ProductStat>()
             val type = object : TypeToken<List<Map<String, Any>>>() {}.type
-            
+
             sales.forEach { sale ->
                 try {
                     val products: List<Map<String, Any>> = gson.fromJson(sale.productsJson, type) ?: emptyList()
@@ -316,7 +316,7 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
                         val name = p["name"] as? String ?: "Producto"
                         val qty = (p["quantity"] as? Number)?.toInt() ?: (p["qty"] as? Number)?.toInt() ?: 1
                         val price = (p["price"] as? Number)?.toDouble() ?: 0.0
-                        
+
                         val current = productMap[name] ?: ProductStat(name, 0.0, 0)
                         productMap[name] = current.copy(
                             quantitySold = current.quantitySold + qty,

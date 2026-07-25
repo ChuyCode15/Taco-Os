@@ -29,7 +29,7 @@ interface TacoApi {
     suspend fun updateBusiness(@Path("id") id: UUID, @Body request: BusinessRequest): BusinessResponse
 
     @GET("api/v1/business/{id}/cajeros")
-    suspend fun getCashiers(@Path("id") id: UUID): List<AuthResponse>
+    suspend fun getCashiers(@Path("id") id: String): DatosListaCajeros
 
     // --- ENLACE (D) ---
     @POST("api/v1/business/invitation")

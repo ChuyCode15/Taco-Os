@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                         ProductsScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it })
                     }
                     composable("settings") { 
-                        PlaceholderScreen(navController, "Ajustes") 
+                        SettingsScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 
                     }
                     composable("reports") { 
                         ReportsScreen(navController, isDarkMode = isDarkMode, onThemeChange = { isDarkMode = it }) 

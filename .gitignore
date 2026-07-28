@@ -33,3 +33,8 @@
 Thumbs.db
 
 test_conexion.py
+
+# Environment variables / Secrets
+.env
+*.env
+.env.*

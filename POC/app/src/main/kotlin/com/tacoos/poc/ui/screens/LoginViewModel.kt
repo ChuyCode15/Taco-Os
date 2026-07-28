@@ -111,6 +111,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 object GoogleSignInConfig {
 
         // Client ID vinculado al proyecto en Google Cloud Console.
-    //const val SERVER_CLIENT_ID = "774869540338-4mjgliv50mtrt6cb8e9kpnju1ims1g2f.apps.googleusercontent.com"
-    const val SERVER_CLIENT_ID = "921503491132-b9pipphh5no9mi4lljc5lr8dus8rf86h.apps.googleusercontent.com"
+    const val SERVER_CLIENT_ID = "774869540338-4mjgliv50mtrt6cb8e9kpnju1ims1g2f.apps.googleusercontent.com"
+    //const val SERVER_CLIENT_ID = "921503491132-b9pipphh5no9mi4lljc5lr8dus8rf86h.apps.googleusercontent.com"
 }

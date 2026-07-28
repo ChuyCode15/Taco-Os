@@ -38,3 +38,7 @@ test_conexion.py
 .env
 *.env
 .env.*
+
+# Python cache
+__pycache__/
+*.pyc

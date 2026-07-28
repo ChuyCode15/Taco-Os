@@ -31,3 +31,5 @@
 # OS files
 .DS_Store
 Thumbs.db
+
+test_conexion.py

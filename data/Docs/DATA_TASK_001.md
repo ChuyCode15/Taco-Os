@@ -1,9 +1,11 @@
-# DATA TASK 001
+# DATA TASK 001 — Estructura del Repositorio Estándar
+### Estado: Finalizado | Desarrollador: Leandro Puebla Martinez
 
 ## Objetivo
+Diseñar e inyectar un histórico comercial omnicanal de más de 12.000 registros para entrenar el motor predictivo de Taco-Os.
 
-Definir qué datos necesita almacenar Taco'Os para poder desarrollar modelos de Inteligencia Artificial en la Fase III.
-
-## Estado
-
-Pendiente.
+## Variables Consolidadas (Features)
+- `invoice_id` (UUID) / `timestamp` (DateTime)
+- `day_of_week` / `hour` (Ventanas críticas de Prime Time)
+- `channel` (Calle vs Delivery) / `zone` (Geolocalización)
+- `product_name` / `total_price` / `is_anulada` (Auditoría)

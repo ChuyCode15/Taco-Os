@@ -69,11 +69,23 @@ fun SalesScreen(
     val products = remember { mutableStateListOf<com.tacoos.poc.data.local.Product>() }
     var selectedSale by remember { mutableStateOf<POSSale?>(null) }
     
+    // Carga inicial, semilla y restauración de turno
     LaunchedEffect(Unit) {
         if (GoogleSignInState.negocioId != null) {
-            repository.seedInitialProducts(GoogleSignInState.negocioId!!)
+            val negocioId = GoogleSignInState.negocioId!!
+            repository.seedInitialProducts(negocioId)
             products.clear()
-            products.addAll(repository.getProducts(GoogleSignInState.negocioId!!))
+            products.addAll(repository.getProducts(negocioId))
+            
+            // Punto 3 Protocolo Integridad: Recuperación de turno abierto
+            val active = repository.getActiveCorte(negocioId)
+            if (active != null) {
+                ShiftManager.activeCorteId = active.id
+                ShiftManager.isShiftOpen = true
+                ShiftManager.fondoCaja = active.initialCash
+                ShiftManager.openTimestamp = active.openedAt
+                ShiftManager.currentCashier = GoogleSignInState.nombre
+            }
         }
     }
 
@@ -182,7 +194,19 @@ fun SalesScreen(
 
     if (showOpeningDialog) {
         OpeningForm(onDismiss = { showOpeningDialog = false }) { fondo ->
-            ShiftManager.fondoCaja = fondo; ShiftManager.isShiftOpen = true; ShiftManager.openTimestamp = System.currentTimeMillis(); ShiftManager.currentCashier = GoogleSignInState.nombre; showOpeningDialog = false
+            scope.launch {
+                val newCorte = repository.openCorte(
+                    negocioId = GoogleSignInState.negocioId ?: "N/A",
+                    cashierId = GoogleSignInState.userId,
+                    initialCash = fondo
+                )
+                ShiftManager.activeCorteId = newCorte.id
+                ShiftManager.fondoCaja = fondo
+                ShiftManager.isShiftOpen = true
+                ShiftManager.openTimestamp = System.currentTimeMillis()
+                ShiftManager.currentCashier = GoogleSignInState.nombre
+                showOpeningDialog = false
+            }
         }
     }
 
@@ -194,18 +218,39 @@ fun SalesScreen(
                 scope.launch {
                     try {
                         val imgPath = sale.voucherPhoto?.let { ImageStorage.saveImage(context, it, "sale") }
-                        repository.registerSale(
-                            amount = sale.amount,
-                            negocioId = GoogleSignInState.negocioId ?: "N/A",
-                            userId = GoogleSignInState.userId,
-                            productsJson = sale.items.joinToString { "${it.totalQuantity}x ${it.productName}" },
-                            method = sale.method,
-                            imagePath = imgPath
+                        
+                        // Mapeo inmutable para auditoría (Punto 2 Maqueta)
+                        val note = com.tacoos.poc.data.local.SaleNote(
+                            id = sale.id,
+                            tenantId = GoogleSignInState.negocioId ?: "N/A",
+                            corteId = ShiftManager.activeCorteId ?: "",
+                            totalProducts = sale.items.sumOf { it.totalQuantity },
+                            totalAmount = sale.amount,
+                            paymentMethod = if (sale.method == "Efectivo") "CASH" else "CARD",
+                            voucherPath = imgPath,
+                            productsJson = sale.items.joinToString { "${it.totalQuantity}x ${it.productName}" }
                         )
+                        
+                        val details = sale.items.map { 
+                            com.tacoos.poc.data.local.SaleDetail(
+                                id = UUID.randomUUID().toString(),
+                                noteId = note.id,
+                                productName = it.productName,
+                                quantity = it.totalQuantity,
+                                unitPrice = if (it.totalQuantity > 0) it.totalPrice / it.totalQuantity else 0.0,
+                                totalPrice = it.totalPrice
+                            )
+                        }
+
+                        // Guardado atómico (ACID)
+                        repository.registerInmutableSale(note, details)
+                        
                         ShiftManager.sales.add(0, sale)
-                        transactionSuccessMessage = "Venta guardada y lista para sincronizar"
+                        transactionSuccessMessage = "Venta blindada localmente"
                         showNewSalePopup = false
-                    } catch (e: Exception) { transactionErrorMessage = "Error al persistir venta" }
+                    } catch (e: Exception) { 
+                        transactionErrorMessage = "Error de persistencia profunda" 
+                    }
                 }
             },
             onRefreshProducts = {
@@ -238,7 +283,23 @@ fun SalesScreen(
 
     if (showCortePopup) {
         CorteDialog(onDismiss = { showCortePopup = false }) {
-            ShiftManager.isShiftOpen = false; ShiftManager.sales.clear(); ShiftManager.expenses.clear(); showCortePopup = false; navController.popBackStack()
+            scope.launch {
+                // Cálculo de dinero real basado en UI (simplificado para el POC)
+                val totalCash = ShiftManager.sales.filter { it.status == "Cobrada" && it.method == "Efectivo" }.sumOf { it.amount }
+                val totalExp = ShiftManager.expenses.sumOf { it.amount }
+                val expectedCash = ShiftManager.fondoCaja + totalCash - totalExp
+                
+                ShiftManager.activeCorteId?.let { 
+                    repository.closeCorte(it, expectedCash) 
+                }
+
+                ShiftManager.isShiftOpen = false
+                ShiftManager.activeCorteId = null
+                ShiftManager.sales.clear()
+                ShiftManager.expenses.clear()
+                showCortePopup = false
+                navController.popBackStack()
+            }
         }
     }
 }

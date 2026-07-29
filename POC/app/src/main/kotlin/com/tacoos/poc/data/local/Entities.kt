@@ -23,8 +23,85 @@ data class Business(
 )
 
 /**
- * Entidad Sale: Registro de transacciones. 
- * imagePath: Almacena la ruta local de la foto del voucher (solo tarjetas).
+ * Entidad Corte: La unidad maestra de auditoría para un turno de caja.
+ * Inmutable tras el cierre.
+ */
+@Entity(tableName = "cortes")
+data class Corte(
+    @PrimaryKey val id: String, // UUID
+    val tenantId: String,
+    val cashierId: String,
+    val openedAt: Long = System.currentTimeMillis(),
+    val closedAt: Long? = null,
+    val initialCash: Double = 0.0,
+    val totalSalesAmount: Double = 0.0,
+    val totalSalesCash: Double = 0.0,
+    val totalSalesCard: Double = 0.0,
+    val totalExpensesAmount: Double = 0.0,
+    val expectedCash: Double = 0.0,
+    val realCashCounted: Double? = null,
+    val difference: Double = 0.0,
+    val status: String = "OPEN", // OPEN, CLOSED
+    val isSynced: Boolean = false
+)
+
+/**
+ * Entidad SaleNote: Representa la cabecera de una nota de venta.
+ */
+@Entity(
+    tableName = "sale_notes",
+    foreignKeys = [
+        ForeignKey(
+            entity = Corte::class,
+            parentColumns = ["id"],
+            childColumns = ["corteId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("corteId")]
+)
+data class SaleNote(
+    @PrimaryKey val id: String, // UUID
+    val folio: Long = 0,
+    val tenantId: String,
+    val corteId: String,
+    val totalProducts: Int = 0,
+    val totalAmount: Double = 0.0,
+    val paymentMethod: String = "CASH", // CASH, CARD
+    val voucherPath: String? = null,
+    val productsJson: String = "", // Snapshot de auditoría
+    val timestamp: Long = System.currentTimeMillis(),
+    val status: String = "ACTIVE", // ACTIVE, CANCELLED
+    val isSynced: Boolean = false
+)
+
+/**
+ * Entidad SaleDetail: Líneas de detalle inmutables de una nota.
+ */
+@Entity(
+    tableName = "sale_details",
+    foreignKeys = [
+        ForeignKey(
+            entity = SaleNote::class,
+            parentColumns = ["id"],
+            childColumns = ["noteId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("noteId")]
+)
+data class SaleDetail(
+    @PrimaryKey val id: String, // UUID
+    val noteId: String,
+    val productName: String,
+    val quantity: Int,
+    val unitPrice: Double,
+    val totalPrice: Double, // Persistido: quantity * unitPrice
+    val status: String = "ACTIVE"
+)
+
+/**
+ * Entidad Sale: Registro legacy (Mantenido por compatibilidad hasta migración total).
  */
 @Entity(tableName = "sales")
 data class Sale(
@@ -41,8 +118,7 @@ data class Sale(
 )
 
 /**
- * Entidad Expense: Registro de gastos.
- * imagePath: Almacena la ruta local de la foto del ticket.
+ * Entidad Expense: Actualizada para vincularse a un Corte.
  */
 @Entity(tableName = "expenses")
 data class Expense(
@@ -53,12 +129,10 @@ data class Expense(
     val timestamp: Long = System.currentTimeMillis(),
     val imagePath: String? = null,
     val isSynced: Boolean = false,
-    val negocioId: String
+    val negocioId: String,
+    val corteId: String? = null // FK opcional para transición
 )
 
-/**
- * Entidad Product: Catálogo de productos con imagen local.
- */
 @Entity(tableName = "products")
 data class Product(
     @PrimaryKey val id: String,
@@ -69,6 +143,33 @@ data class Product(
     val negocioId: String,
     val isSynced: Boolean = false
 )
+
+@Dao
+interface CorteDao {
+    @Query("SELECT * FROM cortes WHERE status = 'OPEN' AND tenantId = :negocioId LIMIT 1")
+    suspend fun getActiveCorte(negocioId: String): Corte?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCorte(corte: Corte)
+
+    @Update
+    suspend fun updateCorte(corte: Corte)
+
+    @Query("SELECT * FROM cortes WHERE id = :id")
+    suspend fun getCorteById(id: String): Corte?
+}
+
+@Dao
+interface SaleNoteDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNote(note: SaleNote)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDetails(details: List<SaleDetail>)
+
+    @Query("SELECT * FROM sale_notes WHERE corteId = :corteId")
+    suspend fun getNotesByCorte(corteId: String): List<SaleNote>
+}
 
 @Dao
 interface SaleDao {
@@ -159,11 +260,14 @@ interface MetadataDao {
     suspend fun updateMetadata(metadata: AppMetadata)
 }
 
-/**
- * AppDatabase: Actualizada a versión 7. 
- * Se remueve TypeConverters de Bitmap para optimizar rendimiento usando archivos locales.
- */
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class, Product::class], version = 7, exportSchema = false)
+@Database(
+    entities = [
+        Sale::class, User::class, Business::class, AppMetadata::class, 
+        Expense::class, Product::class, Corte::class, SaleNote::class, SaleDetail::class
+    ], 
+    version = 8, 
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
     abstract fun expenseDao(): ExpenseDao
@@ -171,4 +275,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun businessDao(): BusinessDao
     abstract fun metadataDao(): MetadataDao
+    abstract fun corteDao(): CorteDao
+    abstract fun saleNoteDao(): SaleNoteDao
 }

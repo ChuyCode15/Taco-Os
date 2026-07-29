@@ -7,6 +7,9 @@ import com.tacoos.poc.data.local.User
 import com.tacoos.poc.data.local.Sale
 import com.tacoos.poc.data.local.Expense
 import com.tacoos.poc.data.local.Product
+import com.tacoos.poc.data.local.Corte
+import com.tacoos.poc.data.local.SaleNote
+import com.tacoos.poc.data.local.SaleDetail
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.data.remote.RegisterRequest
 import com.tacoos.poc.data.remote.TacoApi
@@ -78,6 +81,80 @@ class TacoRepository(
         val now = System.currentTimeMillis()
         val twentyFourHours = 24 * 60 * 60 * 1000L
         return (now - metadata.lastMasterSyncTimestamp) < twentyFourHours && metadata.isLicenseValid
+    }
+
+    // --- Operaciones de Turno (Corte) ---
+
+    /**
+     * openCorte: Inicia un turno físico en Room. Genera el padre para todas las ventas.
+     */
+    suspend fun openCorte(negocioId: String, cashierId: String, initialCash: Double): Corte {
+        val newCorte = Corte(
+            id = UUID.randomUUID().toString(),
+            tenantId = negocioId,
+            cashierId = cashierId,
+            initialCash = initialCash,
+            status = "OPEN"
+        )
+        db.corteDao().insertCorte(newCorte)
+        return newCorte
+    }
+
+    /**
+     * getActiveCorte: Recupera el turno abierto para el negocio.
+     */
+    suspend fun getActiveCorte(negocioId: String) = db.corteDao().getActiveCorte(negocioId)
+
+    /**
+     * closeCorte: Finaliza el turno, calcula totales inmutables y guarda la foto final.
+     */
+    suspend fun closeCorte(corteId: String, realCash: Double): Corte? {
+        val corte = db.corteDao().getCorteById(corteId) ?: return null
+        val notes = db.saleNoteDao().getNotesByCorte(corteId).filter { it.status == "ACTIVE" }
+        
+        val totalCash = notes.filter { it.paymentMethod == "CASH" }.sumOf { it.totalAmount }
+        val totalCard = notes.filter { it.paymentMethod == "CARD" }.sumOf { it.totalAmount }
+        val totalSales = totalCash + totalCard
+        
+        // Aquí se sumarían los gastos vinculados al corte_id cuando se implemente la relación física
+        val totalExpenses = 0.0 // Placeholder para gastos
+        val expected = (corte.initialCash + totalCash) - totalExpenses
+
+        val closedCorte = corte.copy(
+            closedAt = System.currentTimeMillis(),
+            totalSalesAmount = totalSales,
+            totalSalesCash = totalCash,
+            totalSalesCard = totalCard,
+            totalExpensesAmount = totalExpenses,
+            expectedCash = expected,
+            realCashCounted = realCash,
+            difference = realCash - expected,
+            status = "CLOSED"
+        )
+        
+        db.corteDao().updateCorte(closedCorte)
+        return closedCorte
+    }
+
+    // --- Operaciones de Venta Inmutable ---
+
+    /**
+     * registerInmutableSale: Guarda una nota con sus detalles calculando totales fijos.
+     */
+    suspend fun registerInmutableSale(note: SaleNote, details: List<SaleDetail>) {
+        // En un sistema real usaríamos una transacción de DB (Room @Transaction)
+        db.saleNoteDao().insertNote(note)
+        db.saleNoteDao().insertDetails(details)
+        
+        // También guardamos en la tabla legacy para no romper Reportes actuales
+        registerSale(
+            amount = note.totalAmount,
+            negocioId = note.tenantId,
+            userId = note.corteId, // Usamos corteId como referencia temporal
+            productsJson = note.productsJson,
+            method = if (note.paymentMethod == "CASH") "Efectivo" else "Tarjeta",
+            imagePath = note.voucherPath
+        )
     }
 
     // --- Operaciones de Productos ---

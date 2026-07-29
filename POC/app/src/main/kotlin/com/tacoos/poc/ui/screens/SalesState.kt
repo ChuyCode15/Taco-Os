@@ -13,6 +13,7 @@ import java.util.*
  */
 object ShiftManager {
     var isShiftOpen by mutableStateOf(false)
+    var activeCorteId by mutableStateOf<String?>(null) // Relación física con Room
     var openTimestamp by mutableStateOf(0L)
     var fondoCaja by mutableStateOf(0.0)
     var currentCashier by mutableStateOf("Desconocido")

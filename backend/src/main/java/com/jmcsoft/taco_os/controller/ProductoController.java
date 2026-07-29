@@ -68,4 +68,5 @@ public class ProductoController {
         productoService.eliminar(negocioId, productoId);
         return ResponseEntity.noContent().build();
     }
+
 }

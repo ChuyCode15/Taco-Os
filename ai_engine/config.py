@@ -18,7 +18,7 @@ class AIEngineConfig:
     api_key: str = os.environ.get("GEMINI_API_KEY", "")
     
     # El modelo fundacional de Google de alta velocidad y razonamiento estructurado avanzado.
-    model_name: str = "gemini-2.0-flash"
+    model_name: str = "gemini-3.5-flash"
     
     # Hiperparámetros lógicos para el control de la inferencia analítica de datos
     temperature: float = 0.1  # Temperatura ultra baja para forzar respuestas exactas y matemáticas (evita inventos)

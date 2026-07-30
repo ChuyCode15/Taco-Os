@@ -23,7 +23,7 @@ class AIEngineConfig:
     # Hiperparámetros lógicos para el control de la inferencia analítica de datos
     temperature: float = 0.1  # Temperatura ultra baja para forzar respuestas exactas y matemáticas (evita inventos)
     top_p: float = 0.95       # Filtro probabilístico de selección semántica de palabras nucleares
-    max_output_tokens: int = 1024  # Límite máximo del tamaño del paquete de datos de retorno
+    max_output_tokens: int = 2048  # MODIFICADO: Incrementado para soportar el contrato de datos enriquecido
     
     # Configuración de resiliencia y estabilidad frente a microcortes de red
     max_retries: int = 3          # Cantidad de reintentos automáticos si falla el servidor de Google

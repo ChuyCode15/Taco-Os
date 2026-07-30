@@ -4,6 +4,7 @@ from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
 from google.genai import errors
+from ai_engine.schemas import BusinessKnowledgeResponse  # NUEVO: Importación del contrato de datos analítico
 
 # En la ejecución modular se importa de forma relativa el archivo de configuración anterior
 # from ai_engine.config import AIEngineConfig
@@ -50,7 +51,8 @@ class GeminiXPlatClient:
                 max_output_tokens=self.config.max_output_tokens,
                 # ESTA VARIABLE ES MANDATORIA: Bloquea el transformador para hablar solo en JSON.
                 # Evita que el modelo agregue preámbulos, saludos o marcas markdown que rompen Flutter.
-                response_mime_type="application/json"
+                response_mime_type="application/json",
+                response_schema=BusinessKnowledgeResponse  # NUEVO: Restringe las opciones de salida de datos al molde de Pydantic
             )
 
             # Invocación síncrona al endpoint centralizado de Google Cloud

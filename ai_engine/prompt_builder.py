@@ -1,30 +1,24 @@
 # Taco-Os/ai_engine/prompt_builder.py
+import datetime  # Importación necesaria para estampar la frescura del informe
 from typing import Dict, Any, List
 
 class POSPromptBuilder:
     """
     Factoría y formateador encargado de inyectar las métricas limpias de Pandas 
-    dentro de las plantillas fijas y coordinar el empaquetado del feed unificado para Flutter.
+    dentro de las plantillas fijas y coordinar el empaquetado del feed unificado.
     """
     
     @staticmethod
     def build_system_instruction() -> str:
         """
-        Establece el contrato de datos universal exigido por el Front-end de la aplicación móvil.
+        Establece el rol de negocio del sistema enfocado puramente en el dominio analítico.
         """
         return (
             "Actúas como un Consultor Senior de Inteligencia Operativa y Negocios Gastronómicos para Taco'Os.\n"
-            "Tu único objetivo es procesar la información analítica consolidada que te provee el backend y\n"
-            "retornar recomendaciones tácticas empaquetadas exclusivamente en formato JSON estructurado.\n"
-            "No incluyas introducciones, saludos, explicaciones técnicas de algoritmos ni texto plano fuera del bulto JSON.\n"
-            "El formato final debe cumplir estrictamente con el siguiente contrato de datos exigido por Flutter:\n"
-            "{\n"
-            '  "titulo": "Nombre del módulo analítico (String)",\n'
-            '  "prioridad": "verde (buena noticia) | amarilla (prevención) | roja (urgencia)",\n'
-            '  "confianza": Nivel de certeza estadística entre 0 y 100 (Integer),\n'
-            '  "mensaje": "Directiva clara, masticada y resumida en lenguaje simple para el Patrón (String)",\n'
-            '  "accion": "Acción inmediata sugerida para ganar dinero o mitigar pérdidas (String)"\n'
-            "}"
+            "Tu único objetivo es procesar las métricas cuantitativas y la evidencia que te provee el backend\n"
+            "para generar un diagnóstico objetivo del hecho y una directiva de acción comercial clara,\n"
+            "directa, masticada y resumida en lenguaje natural simple para el Patrón de la taquería.\n"
+            "Basa tus conclusiones exclusivamente en el respaldo numérico y la evidencia empírica inyectada."
         )
 
     @staticmethod
@@ -93,10 +87,10 @@ class AIEngineFeedOrchestrator:
                 print(f"⚠️ [MÓDULO ADVERTENCIA] Se omitió un componente debido a un desvío: {str(e)}")
                 continue
 
-        # Retornamos el contrato final maestro unificado exigido por los endpoints de Flutter
+        # MODIFICADO: Retorna las colecciones estructuradas bajo las llaves exactas del contrato maestro
         return {
-            "status": "success",
-            "total_alerts": len(aggregated_feed),
-            "alertas_feed": aggregated_feed
+            "schema_version": "1.0.0",
+            "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+            "hallazgos": [alerta.get("hallazgo") for Alerta in aggregated_feed if "hallazgo" in alerta],
+            "directivas_accion": [alerta.get("directiva") for Alerta in aggregated_feed if "directiva" in alerta]
         }
-

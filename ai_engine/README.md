@@ -1,42 +1,210 @@
 # Motor Core de Inteligencia Artificial (ai_engine) — Taco-Os
-### Área: Ciencia de Datos & ML Engine | Data Scientist: Leandro Puebla Martinez
 
-Este directorio aloja el motor analítico desacoplado de Taco-Os. La arquitectura está diseñada bajo principios de alta cohesión y aislamiento modular por dominios de negocio. El sistema procesa el histórico transaccional mediante Python para alimentar la inferencia estratégica del modelo fundacional.
+### Área: Ciencia de Datos & Machine Learning
+**Responsable:** Leandro Puebla Martínez
 
-## 📊 Pipeline de Procesamiento de Datos
-El flujo de ejecución síncrono consta de 4 etapas de abstracción:
-1. **Ingesta de Datos:** Pandas procesa el histórico transaccional bruto (`.csv`) de forma local en milisegundos.
-2. **Cómputo Cuantitativo:** Se ejecutan operaciones estadísticas agregadas, desvíos paramétricos y promedios móviles fijos.
-3. **Inferencia Semántica:** Los vectores de datos limpios se inyectan en plantillas específicas dirigidas al modelo `gemini-3.5-flash`.
-4. **Capa de Contrato Estricto:** El motor restringe las opciones de muestreo del LLM mediante un esquema rígido de Pydantic.
+---
 
-## 🗂️ Desglose Modular de Agentes Analíticos
-Cada script de Python opera de forma independiente sobre una dimensión específica del negocio:
-*   `config.py`: Administrador inmutable de variables operacionales y carga segura de variables de entorno.
-*   `gemini_client.py`: Cliente Singleton que gestiona el canal activo con Google GenAI y fuerza la validación del esquema.
-*   `prompt_builder.py`: Factoría de instrucciones del sistema y orquestador encargado de compilar el feed unificado.
-*   `ventas_ai.py` (Módulo 2): Series temporales para predicción macro de facturación.
-*   `horarios_ai.py` (Módulo 3): Densidad horaria para aislar ventanas pico de mostrador vs delivery.
-*   `productos_ai.py` (Módulo 4): Ingeniería de menú y optimización de combos de rentabilidad.
-*   `proveedores_ai.py` (Módulo 5): Planificación logística de stock basada en consumo e inercia real.
-*   `clientes_ai.py` (Módulo 6): Métricas de retención y alertas de inactividad de usuarios.
-*   `cajeros_ai.py` (Módulo 7): Auditoría de personal de caja y control de tickets anulados.
-*   `gastos_ai.py` (Módulo 8): Control y variaciones de egresos fijos del establecimiento.
-*   `cierre_caja_ai.py` (Módulo 9): Balance de cierre diario traducido a lenguaje natural simple.
-*   `eventos_ai.py` (Módulo 10): Elasticidad contextual de la demanda por variables climáticas y de calendario.
-*   `geografia_ai.py` (Módulo 11): Inteligencia geográfica por cuadrantes urbanos y densidades de ruteo.
-*   `fraude_ai.py` (Módulo 12): Detección avanzada de anomalías operacionales y caídas imprevistas de ingresos diarios.
+# Descripción General
 
-## 🔄 Contrato de Interfaz de Inferencia (Structured Outputs)
-El motor analítico define su estructura de salida mediante un contrato rígido gestionado por código a través de `schemas.py`. La API de Gemini restringe la capa de decodificación utilizando este esquema de Pydantic, garantizando que todo el pipeline de inferencia entregue variables alineadas estrictamente al dominio de los datos del negocio.
+El directorio `ai_engine` contiene el motor analítico desacoplado de Taco-Os.
 
-### 🔌 Punto de Entrada del Módulo (`main.py`)
-Para centralizar el flujo de procesamiento e ingesta de datos, se expone la siguiente función pública unificada en la raíz del paquete de Python:
-*   **Función:** `ejecutar_orquestador_ia() -> str`
-*   **Retorno:** String JSON serializado (UTF-8) que encapsula el objeto de datos de la clase core `BusinessKnowledgeResponse`.
+Su responsabilidad consiste en transformar el histórico transaccional del negocio en conocimiento accionable para el propietario mediante procesamiento estadístico con Python e inferencia asistida por Gemini.
 
-### 📑 Estructura del Payload de Salida (JSON Contract)
-La recopilación de hallazgos analíticos y acciones sugeridas se estructura bajo las siguientes llaves fijas obligatorias:
+Toda la arquitectura fue diseñada bajo principios de:
+
+- Alta cohesión.
+- Bajo acoplamiento.
+- Responsabilidad única por módulo.
+- Escalabilidad por dominios de negocio.
+- Salida estructurada para consumo del backend.
+
+---
+
+# Pipeline de Procesamiento
+
+El flujo completo del motor sigue cinco etapas bien definidas:
+
+## 1. Ingesta de Datos
+
+Se carga el histórico de ventas desde:
+
+```
+data/ventas_simuladas.csv
+```
+
+utilizando Pandas.
+
+---
+
+## 2. Procesamiento Analítico
+
+Cada módulo calcula únicamente las métricas correspondientes a su dominio:
+
+- agregaciones
+- frecuencias
+- tendencias
+- desviaciones
+- comparaciones históricas
+- indicadores operativos
+
+---
+
+## 3. Inferencia Inteligente
+
+Las métricas procesadas son incorporadas dentro de prompts especializados.
+
+Cada agente consulta el modelo Gemini configurado mediante:
+
+```
+AIEngineConfig
+```
+
+---
+
+## 4. Orquestación
+
+`AIEngineFeedOrchestrator`
+
+ejecuta secuencialmente todos los agentes registrados.
+
+Cada uno devuelve una tarjeta independiente de conocimiento.
+
+---
+
+## 5. Contrato de Salida
+
+El orquestador transforma todas las tarjetas en un único JSON compatible con el backend de Taco-Os.
+
+La salida es serializada por:
+
+```
+ejecutar_orquestador_ia()
+```
+
+---
+
+# Arquitectura Modular
+
+Cada archivo representa un dominio independiente del negocio.
+
+| Archivo | Responsabilidad |
+|---------|-----------------|
+| `config.py` | Configuración general del motor y variables de entorno |
+| `gemini_client.py` | Cliente Singleton para Google Gemini |
+| `prompt_builder.py` | Construcción de prompts y orquestación del feed |
+| `schemas.py` | Contratos estructurados del motor |
+| `main.py` | Punto de entrada oficial |
+
+---
+
+# Agentes Analíticos
+
+## ventas_ai.py
+
+Predicción de ventas.
+
+---
+
+## horarios_ai.py
+
+Predicción de horarios de mayor demanda.
+
+---
+
+## productos_ai.py
+
+Productos con mayor rotación.
+
+Productos con menor salida.
+
+Sugerencias comerciales.
+
+---
+
+## proveedores_ai.py
+
+Proyección automática de compras.
+
+Reposición de stock.
+
+---
+
+## clientes_ai.py
+
+Retención.
+
+Clientes inactivos.
+
+Ticket promedio.
+
+---
+
+## cajeros_ai.py
+
+Auditoría de cajeros.
+
+Cancelaciones.
+
+Comportamientos anómalos.
+
+---
+
+## gastos_ai.py
+
+Control de gastos.
+
+Alertas de incrementos.
+
+---
+
+## cierre_caja_ai.py
+
+Resumen inteligente del cierre diario.
+
+---
+
+## eventos_ai.py
+
+Predicción basada en eventos y calendario.
+
+---
+
+## geografia_ai.py
+
+Comportamiento por zonas.
+
+Productos preferidos por ubicación.
+
+---
+
+## fraude_ai.py
+
+Detección de anomalías operativas.
+
+Caídas inesperadas de ventas.
+
+---
+
+# Punto de Entrada
+
+La ejecución oficial del motor se realiza mediante:
+
+```python
+ejecutar_orquestador_ia()
+```
+
+Retorna:
+
+```python
+str
+```
+
+conteniendo un JSON serializado UTF-8.
+
+---
+
+# Contrato JSON
 
 ```json
 {
@@ -44,31 +212,94 @@ La recopilación de hallazgos analíticos y acciones sugeridas se estructura baj
   "generated_at": "TIMESTAMP_ISO_8601",
   "hallazgos": [
     {
-      "id_hallazgo": "Código identificador de la alerta analítica (String)",
-      "tipo": "ANOMALIA | PREDICCION (Enum)",
-      "descripcion_hecho": "Declaración del comportamiento fuera de patrón detectado en los datos (String)",
+      "id_hallazgo": "HALLAZGO_001",
+      "tipo": "PREDICCION",
+      "descripcion_hecho": "...",
       "evidencia": {
-        "periodo_historico": "Rango de tiempo de la muestra evaluada (String)",
-        "ocurrencias_similares": Cantidad factual de registros del patrón (Integer),
-        "comportamiento_repetido": "Severidad cualitativa del hecho (String)",
-        "fuente_datos": "Origen genérico del dataset analizado: ventas, gastos (String)"
+        "periodo_historico": "...",
+        "ocurrencias_similares": 92,
+        "comportamiento_repetido": "VERDE",
+        "fuente_datos": "ventas_simuladas.csv"
       }
     }
   ],
   "directivas_accion": [
     {
-      "id_directiva": "Identificador único de la acción prescrita (String)",
-      "vinculo_hallazgo": "ID del HallazgoAnalitico de origen para asegurar trazabilidad (String)",
-      "target_scope": "VENTAS | CAJA | LOGISTICA | FINANZAS | INFRAESTRUCTURA (Enum)",
-      "prioridad_sistema": "ALTA | MEDIA | BAJA (Enum)",
-      "orden_operativa": "Directiva clara y accionable en lenguaje natural simple para el usuario (String)"
+      "id_directiva": "ACCION_001",
+      "vinculo_hallazgo": "HALLAZGO_001",
+      "target_scope": "VENTAS",
+      "prioridad_sistema": "VERDE",
+      "orden_operativa": "Incrementar preventivamente el stock..."
     }
   ]
 }
 ```
 
-## 🔄 Historial de Refactorización Técnica
-*   **Sanitización de Dominio:** Se removió el módulo obsoleto de 'Morosidad/Cuentas por Cobrar' heredado por error de plantillas previas de pruebas. Toda la lógica analítica fue migrada hacia el dominio core gastronómico del punto de venta, transformándose en el módulo de **Detección de Anomalías Financieras y Caídas de Facturación (`fraude_ai.py`)**.
+---
 
-> **Estado de la Infraestructura de IA: Saneada, Documentada y 100% Operacional.**
+# Flujo Interno
 
+```
+CSV
+
+↓
+
+Pandas
+
+↓
+
+Agentes Analíticos
+
+↓
+
+Gemini
+
+↓
+
+AIEngineFeedOrchestrator
+
+↓
+
+BusinessKnowledgeResponse
+
+↓
+
+Backend
+
+↓
+
+Flutter
+```
+
+---
+
+# Estado Actual del Motor
+
+- Motor completamente modular.
+- 11 agentes analíticos implementados.
+- Cliente único para Google Gemini.
+- Orquestador funcional.
+- Contrato JSON unificado.
+- Integración con backend preparada.
+- Procesamiento sobre histórico de ventas.
+- Arquitectura desacoplada.
+- Salida compatible con Flutter y Spring Boot.
+
+---
+
+# Historial de Cambios Relevantes
+
+- Eliminación del antiguo módulo de morosidad heredado de pruebas.
+- Migración completa al dominio gastronómico.
+- Incorporación del contrato estructurado `BusinessKnowledgeResponse`.
+- Implementación del orquestador central.
+- Integración con Google Gemini mediante SDK oficial.
+- Unificación de los once módulos analíticos en un único feed de conocimiento.
+
+---
+
+# Estado del Proyecto
+
+**Motor IA completamente operativo.**
+
+El motor procesa el histórico de ventas, ejecuta los once agentes analíticos, consolida el conocimiento generado y produce un contrato JSON único listo para ser consumido por el backend de Taco-Os.

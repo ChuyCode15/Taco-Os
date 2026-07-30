@@ -70,6 +70,8 @@ class AIEngineFeedOrchestrator:
                     card = engine.generate_cashier_audit_card(self.csv_path, self.system_rules)
                 elif hasattr(engine, 'generate_smart_closure_card'):
                     card = engine.generate_smart_closure_card(self.csv_path, self.system_rules)
+                elif hasattr(engine, 'generate_expense_alert_card'):
+                    card = engine.generate_expense_alert_card(self.csv_path, self.system_rules)
                 elif hasattr(engine, 'generate_contextual_prediction_card'):
                     card = engine.generate_contextual_prediction_card(self.csv_path, self.system_rules)
                 elif hasattr(engine, 'generate_geographical_prediction_card'):
@@ -88,9 +90,40 @@ class AIEngineFeedOrchestrator:
                 continue
 
         # MODIFICADO: Retorna las colecciones estructuradas bajo las llaves exactas del contrato maestro
+
+        hallazgos = []
+        directivas_accion = []
+
+        for indice, alerta in enumerate(aggregated_feed, start=1):
+
+            id_hallazgo = f"HALLAZGO_{indice:03d}"
+
+            hallazgo = {
+                "id_hallazgo": id_hallazgo,
+                "tipo": "PREDICCION",
+                "descripcion_hecho": alerta.get("mensaje", "Sin descripción generada"),
+                "evidencia": {
+                    "periodo_historico": "Histórico de ventas analizado",
+                    "ocurrencias_similares": alerta.get("confianza", 0),
+                    "comportamiento_repetido": alerta.get("prioridad", "MEDIA"),
+                    "fuente_datos": "ventas_simuladas.csv"
+                }
+            }
+
+            directiva = {
+                "id_directiva": f"ACCION_{indice:03d}",
+                "vinculo_hallazgo": id_hallazgo,
+                "target_scope": "VENTAS",
+                "prioridad_sistema": alerta.get("prioridad", "MEDIA").upper(),
+                "orden_operativa": alerta.get("accion", "Sin acción recomendada")
+            }
+
+            hallazgos.append(hallazgo)
+            directivas_accion.append(directiva)
+
         return {
             "schema_version": "1.0.0",
             "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
-            "hallazgos": [alerta.get("hallazgo") for Alerta in aggregated_feed if "hallazgo" in alerta],
-            "directivas_accion": [alerta.get("directiva") for Alerta in aggregated_feed if "directiva" in alerta]
+            "hallazgos": hallazgos,
+            "directivas_accion": directivas_accion
         }

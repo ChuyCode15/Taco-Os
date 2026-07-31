@@ -31,3 +31,14 @@
 # OS files
 .DS_Store
 Thumbs.db
+
+test_conexion.py
+
+# Environment variables / Secrets
+.env
+*.env
+.env.*
+
+# Python cache
+__pycache__/
+*.pyc

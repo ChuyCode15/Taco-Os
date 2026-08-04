@@ -1,23 +1,16 @@
 package com.jmcsoft.taco_os.domain.analiticsIA.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 
 public record VentaItemDto(
-        Long invoice_id,
-        LocalDateTime timestamp,
-        String day_of_week,
-        Integer hour,
-        String channel,
-        String zone,
-        String cashier_id,
-        String client_name,
-        String producto_name,
-        Integer quantity,
-        Double total_price,
-        Boolean is_anulada,
-        String insumo_name,
-        Double insumo_qty_used,
-        String context_event,
-        String weather
-) {
-}
+        int transaction_id,
+        String date,
+        int cashier_id,
+        String product_name,
+        String category,
+        int quantity,
+        double total_price
+) { }
+

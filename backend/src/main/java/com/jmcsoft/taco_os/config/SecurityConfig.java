@@ -36,6 +36,7 @@ public class SecurityConfig {
                     "/api/v1/super-su/login",
                     "/api/v1/master/auth/login"
                 ).permitAll()
+                    .requestMatchers("/api/v1/analytics/report").permitAll()
                 .requestMatchers("/api/v1/super-su/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/master/**").hasRole("MASTER")
                 .anyRequest().authenticated()

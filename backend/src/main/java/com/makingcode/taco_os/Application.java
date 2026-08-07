@@ -1,13 +1,13 @@
-package com.jmcsoft.taco_os;
+package com.makingcode.taco_os;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-
 @SpringBootApplication
-public class SistemaGlobalApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SistemaGlobalApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
+
 }

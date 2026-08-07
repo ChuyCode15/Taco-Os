@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.tacoos.poc.ui.components.AiInsightCard
 import com.tacoos.poc.ui.components.AppDrawerContent
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
@@ -39,6 +40,10 @@ fun DashboardScreen(
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     
+    // Estado para el microservicio de IA (Data Science)
+    var aiMessage by remember { mutableStateOf("Tus ventas han subido un 15% hoy comparado con el martes pasado. ¡Buen trabajo!") }
+    var showAiInsight by remember { mutableStateOf(true) }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -80,7 +85,7 @@ fun DashboardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .padding(20.dp)
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
                         .clip(RoundedCornerShape(32.dp))
                         .background(
                             Brush.linearGradient(
@@ -98,7 +103,7 @@ fun DashboardScreen(
                             "https://picsum.photos/id/14/800/400"
                         )
                     }
-                    val pagerState = rememberPagerState(pageCount = { 10000 }) // Para efecto infinito
+                    val pagerState = rememberPagerState(pageCount = { 10000 })
 
                     LaunchedEffect(Unit) {
                         while (true) {
@@ -121,7 +126,14 @@ fun DashboardScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                // Componente de IA (Insights de Data Science)
+                AiInsightCard(
+                    message = aiMessage,
+                    visible = showAiInsight,
+                    onClose = { showAiInsight = false }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 AdminButton(title = "VENTAS", icon = Icons.Default.ShoppingCart, onClick = { navController.navigate("sales") })
                 Spacer(modifier = Modifier.height(16.dp))

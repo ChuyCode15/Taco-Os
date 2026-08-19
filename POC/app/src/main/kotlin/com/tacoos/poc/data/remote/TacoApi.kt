@@ -40,34 +40,39 @@ interface TacoApi {
 
     // --- PRODUCTOS ---
     @POST("api/v1/business/{id}/products")
-    suspend fun createProduct(@Path("id") id: UUID, @Body product: Map<String, Any>): Map<String, Any>
+    suspend fun createProduct(
+        @Path("id") id: UUID, 
+        @Body product: @JvmSuppressWildcards Map<String, Any>
+    ): Map<String, Any>
 
     @GET("api/v1/business/{id}/products")
     suspend fun getProducts(@Path("id") id: UUID): List<Map<String, Any>>
 
+    // --- ANALYTICS AI ---
+    @GET("api/v1/analytics/report/{negocioId}")
+    suspend fun getAiInsight(@Path("negocioId") negocioId: String): AnalyticsReportResponse
+
     // --- CAJA & TRANSACCIONES ---
     @POST("api/v1/cashier/open-session")
-    suspend fun openSession(@Body body: Map<String, Any>): Map<String, Any>
+    suspend fun openSession(@Body body: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
 
     @POST("api/v1/cashier/close-session")
-    suspend fun closeSession(@Body body: Map<String, Any>): Map<String, Any>
+    suspend fun closeSession(@Body body: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
 
     @POST("api/v1/transactions")
-    suspend fun postTransaction(@Body body: Map<String, Any>): Map<String, Any>
+    suspend fun postTransaction(@Body body: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
 
     // --- LICENCIA & REPORTES ---
     @GET("api/v1/business/{negocioId}/license")
     suspend fun getLicenseStatus(@Path("negocioId") negocioId: UUID): Map<String, Any>
 
     @POST("api/v1/sync")
-    suspend fun syncBatch(@Body data: Map<String, Any>): Map<String, Any>
+    suspend fun syncBatch(@Body data: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
 
     @GET("api/v1/health")
     suspend fun checkHealth(): Map<String, String>
     
     companion object {
-        //const val BASE_URL = "http://192.168.1.144:8080/"
-        const val BASE_URL = "http://192.168.1.6:8080/"
-        //const val BASE_URL = "http://10.0.2.2:8080/"
+        const val BASE_URL = "http://10.0.2.2:8080/"
     }
 }

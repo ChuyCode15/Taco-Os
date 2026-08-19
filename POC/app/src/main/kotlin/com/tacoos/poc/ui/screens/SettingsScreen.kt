@@ -26,11 +26,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.tacoos.poc.TacoApp
+import com.tacoos.poc.data.TacoRepository
 import com.tacoos.poc.data.remote.BusinessRequest
 import com.tacoos.poc.ui.components.TacoDialog
 import com.tacoos.poc.ui.theme.ActionBlue
 import com.tacoos.poc.ui.theme.PrimaryNavy
-import com.tacoos.poc.ui.theme.SuccessGreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,6 +48,7 @@ data class SettingsUiState(
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as TacoApp
+    private val repository: TacoRepository = app.repository
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
@@ -65,7 +66,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 // 1. Cargar Datos del Negocio desde el servidor
-                val business = app.repository.getBusinessDetails(negocioId)
+                val business = repository.getBusinessDetails(negocioId)
                 
                 // 2. Cargar Ventas Pendientes (Local)
                 val allSales = app.database.saleDao().getAllSales()
@@ -84,11 +85,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun updateBusiness(nombre: String, direccion: String, telefono: String) {
+    /**
+     * Guarda los cambios del perfil del negocio.
+     * Renombrado para evitar conflictos de nombres con repository.updateBusiness
+     */
+    fun updateBusinessProfile(nombre: String, direccion: String, telefono: String) {
         viewModelScope.launch {
             val negocioId = GoogleSignInState.negocioId ?: return@launch
             try {
-                app.repository.updateBusiness(
+                repository.updateBusiness(
                     negocioId, 
                     BusinessRequest(nombre, direccion, telefono)
                 )
@@ -107,7 +112,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                app.repository.syncPendingSales()
+                repository.syncPendingSales()
                 loadSettingsData() // Refrescar contador tras sincronizar
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Error en sincronización")
@@ -206,7 +211,7 @@ fun SettingsScreen(
             currentPhone = uiState.phone,
             onDismiss = { showEditBusinessDialog = false },
             onSave = { n, d, t ->
-                viewModel.updateBusiness(n, d, t)
+                viewModel.updateBusinessProfile(n, d, t)
                 showEditBusinessDialog = false
             }
         )

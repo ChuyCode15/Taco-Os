@@ -74,6 +74,16 @@ fun SalesScreen(
             repository.seedInitialProducts(GoogleSignInState.negocioId!!)
             products.clear()
             products.addAll(repository.getProducts(GoogleSignInState.negocioId!!))
+            
+            // Recuperar turno activo si existe
+            val active = repository.getActiveShift(GoogleSignInState.negocioId!!)
+            if (active != null) {
+                ShiftManager.currentShiftId = active.id
+                ShiftManager.isShiftOpen = true
+                ShiftManager.fondoCaja = active.initialAmount
+                ShiftManager.openTimestamp = active.openTimestamp
+                ShiftManager.currentCashier = active.cashierName
+            }
         }
     }
 
@@ -182,7 +192,20 @@ fun SalesScreen(
 
     if (showOpeningDialog) {
         OpeningForm(onDismiss = { showOpeningDialog = false }) { fondo ->
-            ShiftManager.fondoCaja = fondo; ShiftManager.isShiftOpen = true; ShiftManager.openTimestamp = System.currentTimeMillis(); ShiftManager.currentCashier = GoogleSignInState.nombre; showOpeningDialog = false
+            scope.launch {
+                val newShift = com.tacoos.poc.data.local.Shift(
+                    initialAmount = fondo,
+                    cashierName = GoogleSignInState.nombre,
+                    negocioId = GoogleSignInState.negocioId ?: "N/A"
+                )
+                val id = repository.openShift(newShift)
+                ShiftManager.currentShiftId = id
+                ShiftManager.fondoCaja = fondo
+                ShiftManager.isShiftOpen = true
+                ShiftManager.openTimestamp = System.currentTimeMillis()
+                ShiftManager.currentCashier = GoogleSignInState.nombre
+                showOpeningDialog = false
+            }
         }
     }
 
@@ -200,7 +223,8 @@ fun SalesScreen(
                             userId = GoogleSignInState.userId,
                             productsJson = sale.items.joinToString { "${it.totalQuantity}x ${it.productName}" },
                             method = sale.method,
-                            imagePath = imgPath
+                            imagePath = imgPath,
+                            shiftId = ShiftManager.currentShiftId
                         )
                         ShiftManager.sales.add(0, sale)
                         transactionSuccessMessage = "Venta guardada y lista para sincronizar"
@@ -227,7 +251,8 @@ fun SalesScreen(
                     amount = expense.amount,
                     cashier = expense.cashier,
                     negocioId = GoogleSignInState.negocioId ?: "N/A",
-                    imagePath = imgPath
+                    imagePath = imgPath,
+                    shiftId = ShiftManager.currentShiftId
                 )
                 ShiftManager.expenses.add(expense)
                 showExpensePopup = false
@@ -238,7 +263,18 @@ fun SalesScreen(
 
     if (showCortePopup) {
         CorteDialog(onDismiss = { showCortePopup = false }) {
-            ShiftManager.isShiftOpen = false; ShiftManager.sales.clear(); ShiftManager.expenses.clear(); showCortePopup = false; navController.popBackStack()
+            scope.launch {
+                // Cerrar turno en BD
+                ShiftManager.currentShiftId?.let { id ->
+                    val shift = repository.getActiveShift(GoogleSignInState.negocioId ?: "")
+                    if (shift != null) {
+                        repository.updateShift(shift.copy(status = "CLOSED", closeTimestamp = System.currentTimeMillis()))
+                    }
+                }
+                ShiftManager.clear()
+                showCortePopup = false
+                navController.popBackStack()
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ import java.util.*
  */
 object ShiftManager {
     var isShiftOpen by mutableStateOf(false)
+    var currentShiftId by mutableStateOf<Long?>(null) // ID local en la DB (Room)
     var openTimestamp by mutableStateOf(0L)
     var fondoCaja by mutableStateOf(0.0)
     var currentCashier by mutableStateOf("Desconocido")
@@ -20,6 +21,16 @@ object ShiftManager {
     // Listas persistentes durante el ciclo de vida del objeto en memoria.
     val sales = mutableStateListOf<POSSale>()
     val expenses = mutableStateListOf<POSExpense>()
+
+    fun clear() {
+        isShiftOpen = false
+        currentShiftId = null
+        openTimestamp = 0L
+        fondoCaja = 0.0
+        currentCashier = "Desconocido"
+        sales.clear()
+        expenses.clear()
+    }
 }
 
 /**

@@ -22,10 +22,6 @@ data class Business(
     val dineroBase: Double
 )
 
-/**
- * Entidad Sale: Registro de transacciones. 
- * imagePath: Almacena la ruta local de la foto del voucher (solo tarjetas).
- */
 @Entity(tableName = "sales")
 data class Sale(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -37,13 +33,10 @@ data class Sale(
     val imagePath: String? = null, 
     val timestamp: Long = System.currentTimeMillis(),
     val isSynced: Boolean = false,
-    val negocioId: String
+    val negocioId: String,
+    val shiftId: Long? = null
 )
 
-/**
- * Entidad Expense: Registro de gastos.
- * imagePath: Almacena la ruta local de la foto del ticket.
- */
 @Entity(tableName = "expenses")
 data class Expense(
     @PrimaryKey val id: String,
@@ -53,12 +46,10 @@ data class Expense(
     val timestamp: Long = System.currentTimeMillis(),
     val imagePath: String? = null,
     val isSynced: Boolean = false,
-    val negocioId: String
+    val negocioId: String,
+    val shiftId: Long? = null
 )
 
-/**
- * Entidad Product: Catálogo de productos con imagen local.
- */
 @Entity(tableName = "products")
 data class Product(
     @PrimaryKey val id: String,
@@ -70,12 +61,25 @@ data class Product(
     val isSynced: Boolean = false
 )
 
+@Entity(tableName = "shifts")
+data class Shift(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val remoteId: String? = null,
+    val openTimestamp: Long = System.currentTimeMillis(),
+    val closeTimestamp: Long? = null,
+    val initialAmount: Double,
+    val finalAmount: Double? = null,
+    val cashierName: String,
+    val negocioId: String,
+    val status: String = "OPEN"
+)
+
 @Dao
 interface SaleDao {
     @Query("SELECT * FROM sales ORDER BY timestamp DESC")
     suspend fun getAllSales(): List<Sale>
 
-    @Query("SELECT * FROM sales WHERE negocioId = :negocioId AND timestamp BETWEEN :start AND :end")
+    @Query("SELECT * FROM sales WHERE negocioId = :negocioId AND timestamp BETWEEN :start AND :end ORDER BY timestamp DESC")
     suspend fun getSalesByRange(negocioId: String, start: Long, end: Long): List<Sale>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -90,17 +94,11 @@ interface SaleDao {
 
 @Dao
 interface ExpenseDao {
-    @Query("SELECT * FROM expenses ORDER BY timestamp DESC")
-    suspend fun getAllExpenses(): List<Expense>
-
-    @Query("SELECT * FROM expenses WHERE negocioId = :negocioId AND timestamp BETWEEN :start AND :end")
+    @Query("SELECT * FROM expenses WHERE negocioId = :negocioId AND timestamp BETWEEN :start AND :end ORDER BY timestamp DESC")
     suspend fun getExpensesByRange(negocioId: String, start: Long, end: Long): List<Expense>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExpense(expense: Expense)
-
-    @Query("SELECT SUM(amount) FROM expenses WHERE timestamp >= :todayStart")
-    suspend fun getTodayTotal(todayStart: Long): Double?
 }
 
 @Dao
@@ -119,6 +117,24 @@ interface ProductDao {
 }
 
 @Dao
+interface ShiftDao {
+    @Query("SELECT * FROM shifts WHERE negocioId = :negocioId AND status = 'OPEN' LIMIT 1")
+    suspend fun getActiveShift(negocioId: String): Shift?
+
+    @Query("SELECT * FROM shifts WHERE id = :id")
+    suspend fun getShiftById(id: Long): Shift?
+
+    @Query("SELECT * FROM shifts WHERE negocioId = :negocioId AND :ts >= openTimestamp AND (:ts <= closeTimestamp OR closeTimestamp IS NULL) ORDER BY openTimestamp DESC LIMIT 1")
+    suspend fun getShiftForTimestamp(negocioId: String, ts: Long): Shift?
+
+    @Insert
+    suspend fun insertShift(shift: Shift): Long
+
+    @Update
+    suspend fun updateShift(shift: Shift)
+}
+
+@Dao
 interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: User)
@@ -131,15 +147,6 @@ interface UserDao {
 
     @Query("DELETE FROM users")
     suspend fun clearUser()
-}
-
-@Dao
-interface BusinessDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBusiness(business: Business)
-
-    @Query("SELECT * FROM business WHERE id = :id")
-    suspend fun getBusiness(id: String): Business?
 }
 
 @Entity(tableName = "app_metadata")
@@ -159,16 +166,12 @@ interface MetadataDao {
     suspend fun updateMetadata(metadata: AppMetadata)
 }
 
-/**
- * AppDatabase: Actualizada a versión 7. 
- * Se remueve TypeConverters de Bitmap para optimizar rendimiento usando archivos locales.
- */
-@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class, Product::class], version = 7, exportSchema = false)
+@Database(entities = [Sale::class, User::class, Business::class, AppMetadata::class, Expense::class, Product::class, Shift::class], version = 14, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun productDao(): ProductDao
     abstract fun userDao(): UserDao
-    abstract fun businessDao(): BusinessDao
+    abstract fun shiftDao(): ShiftDao
     abstract fun metadataDao(): MetadataDao
 }

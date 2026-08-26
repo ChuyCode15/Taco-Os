@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">TacoOs POC Native</string>
     <string name="google_client_id">774869540338-pcbl5uh0fl02bfbj7o11s2f4v4vi3aem.apps.googleusercontent.com</string>
+    <string name="title_activity_auto_image_slider">AutoImageSlider</string>
 </resources>

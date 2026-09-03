@@ -155,7 +155,9 @@ fun HomeScreenContent(
                     Button(
                         onClick = onSignInClick,
                         enabled = !uiState.isLoading,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D47A1))
                     ) {
                         Text(
@@ -170,7 +172,9 @@ fun HomeScreenContent(
                     OutlinedButton(
                         onClick = onRegisterClick,
                         enabled = !uiState.isLoading,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
                         border = BorderStroke(1.dp, Color.Black),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Blue)
                     ) {

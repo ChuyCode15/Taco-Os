@@ -7,6 +7,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.tacoos.poc.BuildConfig
 import org.json.JSONObject
@@ -47,11 +48,18 @@ class GoogleAuthUiClient(private val context: Context) {
         Log.d(TAG, "Iniciando solicitud de token. ClientID: ${BuildConfig.GOOGLE_CLIENT_ID}")
         Log.d(TAG, "Filtro de cuentas autorizadas: $filterByAuthorizedAccounts")
 
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
-            .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
-            .setNonce(generateNonce())
-            .build()
+        val googleIdOption = if (filterByAuthorizedAccounts) {
+            GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(true)
+                .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
+                .setAutoSelectEnabled(true)
+                .setNonce(generateNonce())
+                .build()
+        } else {
+            GetSignInWithGoogleOption.Builder(serverClientId = BuildConfig.GOOGLE_CLIENT_ID)
+                .setNonce(generateNonce())
+                .build()
+        }
 
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)

@@ -46,7 +46,7 @@ fun AppDrawerContent(
     ModalDrawerSheet(modifier = Modifier.width(300.dp)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // HEADER: Foto ovalada y nombre del usuario obtenido de Google
-            Box(modifier = Modifier.fillMaxWidth().background(PrimaryNavy).padding(top = 48.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().background(Color(0xFF0D47A1)).padding(top = 48.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)) {
                 Column {
                     Surface(
                         modifier = Modifier.size(width = 80.dp, height = 65.dp).clip(RoundedCornerShape(30.dp)), // Forma ovalada

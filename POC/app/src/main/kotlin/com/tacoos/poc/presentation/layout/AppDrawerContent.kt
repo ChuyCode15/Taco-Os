@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.tacoos.poc.presentation.navigation.Routes
 import com.tacoos.poc.presentation.theme.PrimaryNavy
 import com.tacoos.poc.presentation.uiState.auth.AuthUiState
 
@@ -137,18 +138,20 @@ fun AppDrawerContent(
 fun DrawerOptions(rol: String, navController: NavController, onClose: () -> Unit) {
     val isOwner = rol.lowercase() == "dueño"
 
-    DrawerItem(Icons.Default.Dashboard, "Dashboard") { onClose(); navController.navigate("dashboard") }
-    DrawerItem(Icons.Default.PointOfSale, "Ventas") { onClose(); navController.navigate("sales") }
+    DrawerItem(Icons.Default.Dashboard, "Dashboard") { onClose(); navController.navigate(Routes.DASHBOARD) }
+    DrawerItem(Icons.Default.PointOfSale, "Ventas") { onClose(); navController.navigate(Routes.SALES) }
     
     if (isOwner) {
-        DrawerItem(Icons.Default.BarChart, "Reportes") { onClose(); navController.navigate("reports") }
-        DrawerItem(Icons.Default.Groups, "Mi Equipo") { onClose(); navController.navigate("cashiers") }
-        DrawerItem(Icons.Default.Fastfood, "Mis Productos") { onClose(); navController.navigate("products") }
+        DrawerItem(Icons.Default.BarChart, "Reportes") { onClose(); navController.navigate(Routes.REPORTS) }
+        DrawerItem(Icons.Default.Groups, "Mi Equipo") { onClose(); navController.navigate(Routes.TEAM) }
+        DrawerItem(Icons.Default.Fastfood, "Mis Productos") { onClose(); navController.navigate(Routes.PRODUCTS) }
+        DrawerItem(Icons.Default.VerifiedUser, "Mi Licencia") { onClose(); navController.navigate(Routes.LICENSE) }
     } else {
-        DrawerItem(Icons.Default.History, "Mis Turnos") { onClose(); navController.navigate("shifts") }
+        DrawerItem(Icons.Default.History, "Mis Turnos") { onClose(); /* navController.navigate("shifts") */ }
     }
     
-    DrawerItem(Icons.Default.Settings, "Ajustes") { onClose(); navController.navigate("settings") }
+    DrawerItem(Icons.Default.Notifications, "Notificaciones") { onClose(); navController.navigate(Routes.NOTIFICATIONS) }
+    DrawerItem(Icons.Default.Settings, "Ajustes") { onClose(); navController.navigate(Routes.SETTINGS) }
 }
 
 /**

@@ -11,23 +11,36 @@ import com.tacoos.poc.presentation.ui.splash.SplashScreen
 import com.tacoos.poc.presentation.ui.negocio.BusinessRegistrationScreen
 import com.tacoos.poc.presentation.ui.Administrador.DashboardScreen
 import com.tacoos.poc.presentation.ui.Administrador.CashierListScreen
+import com.tacoos.poc.presentation.ui.ops.*
+import com.tacoos.poc.presentation.ui.producto.ProductsScreen
+import com.tacoos.poc.presentation.ui.reportes.ReportsScreen
+import com.tacoos.poc.presentation.ui.ventas.SalesScreen
+import com.tacoos.poc.presentation.ui.configuracion.SettingsScreen
+import com.tacoos.poc.presentation.ui.cajero.TeamScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 /**
  * Define las rutas constantes utilizadas para la navegación en la aplicación.
  */
 object Routes {
-    /** Ruta de la pantalla de bienvenida/splash. */
     const val SPLASH = "splash"
-    /** Ruta de la pantalla principal de inicio/login. */
     const val HOME = "home"
-    /** Ruta de la pantalla de selección de rol. */
     const val ROLE_SELECTION = "role_selection"
-    /** Ruta de la pantalla de registro de negocio. */
     const val BUSINESS_REGISTRATION = "business_registration"
-    /** Ruta del tablero principal (Dashboard). */
     const val DASHBOARD = "dashboard"
-    /** Ruta de la lista de cajeros/equipo. */
     const val CASHIERS = "cashiers"
+    
+    const val SALES = "sales"
+    const val REPORTS = "reports"
+    const val PRODUCTS = "products"
+    const val SETTINGS = "settings"
+    const val TEAM = "team"
+    
+    const val DAILY_CUT = "daily_cut/{shiftId}"
+    const val EXPENSES = "expenses/{shiftId}"
+    const val LICENSE = "license"
+    const val NOTIFICATIONS = "notifications"
 }
 
 /**
@@ -102,6 +115,50 @@ fun AppNavGraph(
 
         composable(Routes.CASHIERS) {
             CashierListScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.SALES) {
+            SalesScreen(navController = navController, isDarkMode = isDarkMode, onThemeChange = onThemeChange)
+        }
+
+        composable(Routes.REPORTS) {
+            ReportsScreen(navController = navController, isDarkMode = isDarkMode, onThemeChange = onThemeChange)
+        }
+
+        composable(Routes.PRODUCTS) {
+            ProductsScreen(navController = navController, isDarkMode = isDarkMode, onThemeChange = onThemeChange)
+        }
+
+        composable(Routes.SETTINGS) {
+            SettingsScreen(navController = navController, isDarkMode = isDarkMode, onThemeChange = onThemeChange)
+        }
+
+        composable(Routes.TEAM) {
+            TeamScreen(navController = navController, isDarkMode = isDarkMode, onThemeChange = onThemeChange)
+        }
+
+        composable(
+            route = Routes.DAILY_CUT,
+            arguments = listOf(navArgument("shiftId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val shiftId = backStackEntry.arguments?.getLong("shiftId") ?: 0L
+            DailyCutScreen(navController = navController, shiftId = shiftId)
+        }
+
+        composable(
+            route = Routes.EXPENSES,
+            arguments = listOf(navArgument("shiftId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val shiftId = backStackEntry.arguments?.getLong("shiftId") ?: 0L
+            ExpenseScreen(navController = navController, shiftId = shiftId)
+        }
+
+        composable(Routes.LICENSE) {
+            LicenseScreen(navController = navController)
+        }
+
+        composable(Routes.NOTIFICATIONS) {
+            NotificationScreen(navController = navController)
         }
     }
 }

@@ -13,15 +13,20 @@ interface TacoApi {
     // --- AUTH ---
     /** Verifica la existencia de un usuario mediante Google ID. */
     @GET("api/v1/auth/verificar/{idGoogle}")
-    suspend fun verifyUser(@Path("idGoogle") idGoogle: String): AuthResponse
+    suspend fun verifyUser(@Path("idGoogle") idGoogle: String): DatosVerificarAuth
 
     /** Registra un nuevo usuario en el sistema. */
     @POST("api/v1/auth/registrar")
-    suspend fun registerUser(@Body request: RegisterRequest): AuthResponse
+    suspend fun registerUser(@Body request: DatosRegistroAuth): DatosRespuestaAuth
 
-    /** Renueva el token de acceso utilizando un token de refresco. */
-    @POST("api/v1/auth/refresh")
-    suspend fun refreshToken(@Body body: Map<String, String>): Map<String, String>
+    // --- SESIONES Y CORTE ---
+    /** Abre una sesión de caja. */
+    @POST("api/v1/cashier/open-session")
+    suspend fun openSession(@Body request: DatosAperturaSesion): Map<String, String>
+
+    /** Cierra la sesión de caja y genera el corte. */
+    @POST("api/v1/cashier/close-session")
+    suspend fun closeSession(@Body request: DatosCierreSesion): DatosRespuestaCorte
 
     // --- NEGOCIO ---
     /** Crea un nuevo negocio para el dueño especificado. */
@@ -31,66 +36,29 @@ interface TacoApi {
         @Body request: BusinessRequest
     ): BusinessResponse
 
-    /** Obtiene los detalles de un negocio por su ID. */
-    @GET("api/v1/business/{id}")
-    suspend fun getBusiness(@Path("id") id: UUID): BusinessResponse
-
-    /** Actualiza la información de un negocio existente. */
-    @PUT("api/v1/business/{id}")
-    suspend fun updateBusiness(@Path("id") id: UUID, @Body request: BusinessRequest): BusinessResponse
-
-    /** Lista los cajeros de un negocio determinado. */
-    @GET("api/v1/business/{id}/cajeros")
-    suspend fun getCashiers(@Path("id") id: String): DatosListaCajeros
-
-    // --- ENLACE ---
-    /** Genera un código de invitación para un nuevo cajero. */
-    @POST("api/v1/business/invitation")
-    suspend fun generateInvitation(@Body request: InvitationRequest): InvitationResponse
-
-    /** Enlaza a un cajero con un negocio mediante invitación. */
-    @POST("api/v1/business/link")
-    suspend fun linkCashier(@Body request: LinkRequest): LinkResponse
+    // --- TRANSACCIONES (VENTAS Y GASTOS) ---
+    /** Registra una nueva transacción (Venta o Gasto). */
+    @POST("api/v1/transactions")
+    suspend fun postTransaction(@Body request: DatosRegistroTransaccion): DatosRespuestaTransaccion
 
     // --- PRODUCTOS ---
     /** Crea un nuevo producto dentro de un negocio. */
     @POST("api/v1/business/{id}/products")
     suspend fun createProduct(
         @Path("id") id: UUID, 
-        @Body product: @JvmSuppressWildcards Map<String, Any>
+        @Body product: DatosRegistroProducto
     ): Map<String, Any>
 
-    /** Obtiene la lista de productos de un negocio. */
-    @GET("api/v1/business/{id}/products")
-    suspend fun getProducts(@Path("id") id: UUID): List<Map<String, Any>>
-
-    // --- ANALYTICS AI ---
+    // --- ANALYTICS & LICENCIA ---
     /** Genera un reporte de inteligencia artificial para el negocio. */
     @GET("api/v1/analytics/report/{negocioId}")
     suspend fun getAiInsight(@Path("negocioId") negocioId: String): AnalyticsReportResponse
 
-    // --- CAJA & TRANSACCIONES ---
-    /** Abre una sesión de caja para empezar a vender. */
-    @POST("api/v1/cashier/open-session")
-    suspend fun openSession(@Body body: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
-
-    /** Cierra la sesión de caja actual. */
-    @POST("api/v1/cashier/close-session")
-    suspend fun closeSession(@Body body: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
-
-    /** Registra una nueva transacción de venta. */
-    @POST("api/v1/transactions")
-    suspend fun postTransaction(@Body body: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
-
-    // --- LICENCIA & REPORTES ---
     /** Consulta el estado de la licencia del negocio. */
     @GET("api/v1/business/{negocioId}/license")
-    suspend fun getLicenseStatus(@Path("negocioId") negocioId: UUID): Map<String, Any>
+    suspend fun getLicenseStatus(@Path("negocioId") negocioId: String): DatosLicencia
 
-    /** Sincroniza un lote de datos locales con el servidor. */
-    @POST("api/v1/sync")
-    suspend fun syncBatch(@Body data: @JvmSuppressWildcards Map<String, Any>): Map<String, Any>
-
+    // --- OTROS ---
     /** Comprueba la disponibilidad del servidor. */
     @GET("api/v1/health")
     suspend fun checkHealth(): Map<String, String>
@@ -100,3 +68,4 @@ interface TacoApi {
         const val BASE_URL = "http://10.0.2.2:8080/"
     }
 }
+

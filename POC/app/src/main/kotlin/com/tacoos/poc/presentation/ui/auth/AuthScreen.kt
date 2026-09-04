@@ -224,3 +224,14 @@ fun HomeScreenPreview() {
         onSignInClick = {}
     )
 }
+
+@Preview(showBackground = true, showSystemUi = true, name = "Cargando")
+@Composable
+fun HomeScreenLoadingPreview() {
+    HomeScreenContent(
+        uiState = AuthUiState(isLoading = true),
+        onRegisterClick = {},
+        onSignInClick = {}
+    )
+}
+

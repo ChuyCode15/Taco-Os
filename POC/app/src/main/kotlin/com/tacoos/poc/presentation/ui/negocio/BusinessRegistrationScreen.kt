@@ -251,3 +251,19 @@ fun BusinessRegistrationPreview() {
         onRegisterClick = {}
     )
 }
+
+@Preview(showBackground = true, showSystemUi = true, name = "Cargando")
+@Composable
+fun BusinessRegistrationLoadingPreview() {
+    BusinessRegistrationContent(
+        uiState = BusinessUiState(isLoading = true),
+        onNombreChange = {},
+        onDomicilioChange = {},
+        onTelefonoChange = {},
+        onGiroChange = {},
+        onEmpleadosChange = {},
+        onHorarioChange = {},
+        onRegisterClick = {}
+    )
+}
+

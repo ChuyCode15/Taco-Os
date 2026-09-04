@@ -232,7 +232,7 @@ fun AdminButton(title: String, icon: ImageVector, onClick: () -> Unit) {
 /**
  * Previsualización del Dashboard.
  */
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Administrador")
 @Composable
 fun DashboardScreenPreview() {
     DashboardContent(
@@ -242,3 +242,15 @@ fun DashboardScreenPreview() {
         onThemeChange = {}
     )
 }
+
+@Preview(showBackground = true, showSystemUi = true, name = "Cajero")
+@Composable
+fun DashboardCajeroPreview() {
+    DashboardContent(
+        uiState = AuthUiState(rol = "cajero", nickname = "Jesus"),
+        navController = rememberNavController(),
+        isDarkMode = false,
+        onThemeChange = {}
+    )
+}
+

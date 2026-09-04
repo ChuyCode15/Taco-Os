@@ -5,6 +5,7 @@ import com.tacoos.poc.BuildConfig
 import com.tacoos.poc.data.remote.AuthApiService
 import com.tacoos.poc.data.remote.AuthInterceptor
 import com.tacoos.poc.data.remote.BusinessApiService
+import com.tacoos.poc.data.remote.TacoApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -87,5 +88,12 @@ object NetworkModule {
     @Singleton
     fun provideBusinessApiService(retrofit: Retrofit): BusinessApiService {
         return retrofit.create(BusinessApiService::class.java)
+    }
+
+    /** Proporciona la interfaz unificada de TacoApi. */
+    @Provides
+    @Singleton
+    fun provideTacoApi(retrofit: Retrofit): TacoApi {
+        return retrofit.create(TacoApi::class.java)
     }
 }
